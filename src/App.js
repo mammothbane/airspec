@@ -29,20 +29,10 @@ import Presentation from "layouts/pages/presentation";
 // Material Kit 2 React routes
 import routes from "routes";
 
-import { useAirSpecInterface } from "hooks/useAirSpecInterface";
+
 
 export default function App() {
   const { pathname } = useLocation();
-
-  const {
-    connect,
-    toggle,
-    isConnected,
-    setRedLight,
-    setGreenLight,
-    setBlueLight,
-    setColor,
-  } = useAirSpecInterface();
 
   // Setting page scroll to 0 when changing the route
   useEffect(() => {
