@@ -39,8 +39,10 @@ function ButtonsBluetooth() {
     connect,
     toggle,
     isConnected,
-    setRedLight,
+    setSpecialMode,
     setBlueGreenMode,
+    setRedFlashMode,
+    setDFUMode,
     setGreenLight,
     setBlueLight,
     setColor,
@@ -49,6 +51,13 @@ function ButtonsBluetooth() {
   const [dropdown, setDropdown] = useState(null);
   const openDropdown = ({ currentTarget }) => setDropdown(currentTarget);
   const closeDropdown = () => setDropdown(null);
+
+  const [faceTemperatureEn, setFaceTemperatureEn] = useState(null);
+  const [blinkEn, setBlinkEn] = useState(null);
+  const [gasEn, setGasEn] = useState(null);
+  const [lightLevelEn, setLightLevelEn] = useState(null);
+  const [lightColorEn, setLightColorEn] = useState(null);
+  const [humidityEn, setHumidityEn] = useState(null);
 
   const [checked, setChecked] = useState(false);
 
@@ -76,163 +85,169 @@ function ButtonsBluetooth() {
   return (
     // <MKBox component="section" py={12}>
 
+    <Container>
+      <Grid
+        container
+        xs={12}
+        xm={12}
+        lg={12}
+        sx={{ textAlign: "left", my: 1, mx: "auto", px: 0.75 }}
+      />
+      {isConnected ? (
+        // {true ? (
+        // <Grid container justifyContent="left">
+        // <Grid
+        // container
+        // item
+        // xs={12}
+        // lg={12}
+        // flexDirection="column"
+        // alignItems="left"
+        // justifyContent="left"
+        // sx={{ textAlign: "left", my: 6, mx: "auto", px: 0.75 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} xm={3} lg={3}>
+            <Stack direction="column" alignItems="left" spacing={1}>
+              <MKInput
+                type="text"
+                label="System ID"
+                value="N/A"
+                disabled="true"
+              />
+              <MKInput
+                type="search"
+                label="Firmware Version"
+                value="N/A"
+                disabled="true"
+              />
 
-      <Container>
-          <Grid container xs={12} xm={12} lg={12} 
-    sx={{ textAlign: "left", my: 1, mx: "auto", px: 0.75 }}/>
-        {isConnected ? (
-        // {true ? ( 
-          // <Grid container justifyContent="left">
-          // <Grid
-          // container
-          // item
-          // xs={12}
-          // lg={12}
-          // flexDirection="column"
-          // alignItems="left"
-          // justifyContent="left"
-          // sx={{ textAlign: "left", my: 6, mx: "auto", px: 0.75 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} xm={3} lg={3} >
-              <Stack direction="column" alignItems="left" spacing={1}>
-                <MKInput
-                  type="text"
-                  label="System ID"
-                  value="N/A"
-                  disabled="true"
-                />
-                <MKInput
-                  type="search"
-                  label="Firmware Version"
-                  value="N/A"
-                  disabled="true"
-                />
+              <MKTypography
+                // variant="button"
+                color="dark"
+                fontWeight="regular"
+                ml={1}
+                sx={{ cursor: "pointer", userSelect: "none" }}
+                onClick={toggleSwitch}
+              >
+                Sensor Activation
+              </MKTypography>
 
+              {/* <Grid container item xs={4} justifyContent="center" mx="auto"> */}
+              <MKBox display="flex" alignItems="center">
+                <Switch
+                  checked={faceTemperatureEn}
+                  onChange={() => setFaceTemperatureEn(!faceTemperatureEn)}
+                />
                 <MKTypography
-                  // variant="button"
-                  color="dark"
+                  variant="button"
+                  color="text"
                   fontWeight="regular"
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={toggleSwitch}
+                  onClick={() => setFaceTemperatureEn(!faceTemperatureEn)}
                 >
-                  Sensor Activation
+                  Face Temperature
                 </MKTypography>
-
-                {/* <Grid container item xs={4} justifyContent="center" mx="auto"> */}
-                <MKBox display="flex" alignItems="center">
-                  <Switch checked={checked} onChange={toggleSwitch} />
-                  <MKTypography
-                    variant="button"
-                    color="text"
-                    fontWeight="regular"
-                    ml={1}
-                    sx={{ cursor: "pointer", userSelect: "none" }}
-                    onClick={toggleSwitch}
-                  >
-                    Face Temperature
-                  </MKTypography>
-                </MKBox>
-                {/* <Divider>CENTER</Divider> */}
-                <MKBox display="flex" alignItems="center">
-                  <Switch checked={checked} onChange={toggleSwitch} />
-                  <MKTypography
-                    variant="button"
-                    color="text"
-                    fontWeight="regular"
-                    ml={1}
-                    sx={{ cursor: "pointer", userSelect: "none" }}
-                    onClick={toggleSwitch}
-                  >
-                    Blink Sensor
-                  </MKTypography>
-                </MKBox>
-                <MKBox display="flex" alignItems="center">
-                  <Switch checked={checked} onChange={toggleSwitch} />
-                  <MKTypography
-                    variant="button"
-                    color="text"
-                    fontWeight="regular"
-                    ml={1}
-                    sx={{ cursor: "pointer", userSelect: "none" }}
-                    onClick={toggleSwitch}
-                  >
-                    Gas Sensing
-                  </MKTypography>
-                </MKBox>
-                <MKBox display="flex" alignItems="center">
-                  <Switch checked={checked} onChange={toggleSwitch} />
-                  <MKTypography
-                    variant="button"
-                    color="text"
-                    fontWeight="regular"
-                    ml={1}
-                    sx={{ cursor: "pointer", userSelect: "none" }}
-                    onClick={toggleSwitch}
-                  >
-                    Light Level Sensing
-                  </MKTypography>
-                </MKBox>
-                <MKBox display="flex" alignItems="center">
-                  <Switch checked={checked} onChange={toggleSwitch} />
-                  <MKTypography
-                    variant="button"
-                    color="text"
-                    fontWeight="regular"
-                    ml={1}
-                    sx={{ cursor: "pointer", userSelect: "none" }}
-                    onClick={toggleSwitch}
-                  >
-                    Light Color Sensing
-                  </MKTypography>
-                </MKBox>
-                <MKBox display="flex" alignItems="center">
-                  <Switch checked={checked} onChange={toggleSwitch} />
-                  <MKTypography
-                    variant="button"
-                    color="text"
-                    fontWeight="regular"
-                    ml={1}
-                    sx={{ cursor: "pointer", userSelect: "none" }}
-                    onClick={toggleSwitch}
-                  >
-                    Humidity
-                  </MKTypography>
-                </MKBox>
-                {/* </Grid> */}
-
-                <MKButton
-                  onClick={() =>
-                    setBlueGreenMode(
-                      start_bit,
-                      blue_min_intensity,
-                      blue_max_intensity,
-                      green_max_intensity,
-                      step_size,
-                      step_duration
-                    )
-                  }
-                  variant="gradient"
-                  color="success"
+              </MKBox>
+              {/* <Divider>CENTER</Divider> */}
+              <MKBox display="flex" alignItems="center">
+                <Switch checked={blinkEn} 
+                onChange={() => setBlinkEn(!blinkEn)}/>
+                <MKTypography
+                  variant="button"
+                  color="text"
+                  fontWeight="regular"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => setBlinkEn(!blinkEn)}
                 >
-                  Start Streaming to Server
-                </MKButton>
-              </Stack>
-            </Grid>
-            <Grid item xs={12} xm={9} lg={9} spacing={2}>
-              <AirSpecControl />
-            </Grid>
-          </Grid>
-        ) : (
-          <Grid container justifyContent="center">
-            <Stack direction="row" alignItems="flex-end" spacing={1}>
-              <MKButton onClick={connect} variant="gradient" color="dark">
-                Connect
+                  Blink Sensor
+                </MKTypography>
+              </MKBox>
+              <MKBox display="flex" alignItems="center">
+                <Switch checked={gasEn} 
+                onChange={() => setGasEn(!gasEn)}/>
+                <MKTypography
+                  variant="button"
+                  color="text"
+                  fontWeight="regular"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => setGasEn(!gasEn)}
+                >
+                  Gas Sensing
+                </MKTypography>
+              </MKBox>
+              <MKBox display="flex" alignItems="center">
+                <Switch checked={lightLevelEn} 
+                onChange={() => setLightLevelEn(!lightLevelEn)} />
+                <MKTypography
+                  variant="button"
+                  color="text"
+                  fontWeight="regular"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => setLightLevelEn(!lightLevelEn)}
+                >
+                  Light Level Sensing
+                </MKTypography>
+              </MKBox>
+              <MKBox display="flex" alignItems="center">
+                <Switch checked={lightColorEn} 
+                onChange={() => setLightColorEn(!lightColorEn)} />
+                <MKTypography
+                  variant="button"
+                  color="text"
+                  fontWeight="regular"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => setLightColorEn(!lightColorEn)}
+                >
+                  Light Color Sensing
+                </MKTypography>
+              </MKBox>
+              <MKBox display="flex" alignItems="center">
+                <Switch checked={humidityEn} 
+                onChange={() => setHumidityEn(!humidityEn)} />
+                <MKTypography
+                  variant="button"
+                  color="text"
+                  fontWeight="regular"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => setHumidityEn(!humidityEn)}
+                >
+                  Humidity
+                </MKTypography>
+              </MKBox>
+              {/* </Grid> */}
+
+              <MKButton variant="gradient" color="success">
+                Start Streaming to Server
               </MKButton>
             </Stack>
           </Grid>
-        )}
-      </Container>
+          <Grid item xs={12} xm={9} lg={9} spacing={2}>
+            {/* <AirSpecControl connect isConnected setBlueGreenMode/> */}
+            <AirSpecControl
+              connect={connect}
+              isConnected={isConnected}
+              setBlueGreenMode={setBlueGreenMode}
+              setRedFlashMode={setRedFlashMode}
+              setDFUMode={setDFUMode}
+            />
+          </Grid>
+        </Grid>
+      ) : (
+        <Grid container justifyContent="center">
+          <Stack direction="row" alignItems="flex-end" spacing={1}>
+            <MKButton onClick={connect} variant="gradient" color="dark">
+              Connect
+            </MKButton>
+          </Stack>
+        </Grid>
+      )}
+    </Container>
     // </MKBox>
   );
 }

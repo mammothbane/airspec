@@ -14,6 +14,7 @@ Coded by www.creative-tim.com
 */
 
 import { useState } from "react";
+import props from "prop-types";
 
 // @mui material components
 import Container from "@mui/material/Container";
@@ -32,29 +33,64 @@ import MKTypography from "components/MKTypography";
 
 // import { useAirSpecInterface } from "hooks/useAirSpecInterface";
 
-import { useAirSpecInterface } from "hooks/useAirSpecInterface";
+// import { useAirSpecInterface } from "hooks/useAirSpecInterface";
 
-function AirSpecControl() {
+function AirSpecControl(props) {
+  // function AirSpecControl = ({ connect }, isConnected, {setBlueGreenMode}) => {
   const [dropdown, setDropdown] = useState(null);
   const [specialFuncDropDown, setSpecialFuncDropDown] = useState(null);
   const [specialFuncDropDownAct, setSpecialFuncDropDownAct] = useState(null);
+
+  const [sensorConfigDropDown, setSensorConfigDropDown] = useState(null);
+  const [sensorConfigDropDownAct, setSensorConfigDropDownAct] = useState(null);
+
   const [specialBlueGreenFuncDropDownAct, setSpecialBlueGreenFuncDropDownAct] =
+    useState(null);
+  const [specialDFUFuncDropDownAct, setSpecialDFUFuncDropDownAct] =
+    useState(null);
+  const [specialRedFlashFuncDropDownAct, setSpecialRedFlashFuncDropDownAct] =
     useState(null);
 
   const openDropdown = ({ currentTarget }) => setDropdown(currentTarget);
 
   const openSpecialFuncDropDown = ({ currentTarget }) =>
     setSpecialFuncDropDown(currentTarget);
+
+  const openSensorConfigDropDown = ({ currentTarget }) =>
+    setSensorConfigDropDown(currentTarget);
+
   const closeSpecialFuncDropDown = ({ currentTarget }) => {
+    setSpecialDFUFuncDropDownAct(false);
+    setSpecialRedFlashFuncDropDownAct(false);
     setSpecialBlueGreenFuncDropDownAct(false);
     setSpecialFuncDropDown(null);
   };
   const specialFunctionDropdownAct = () => {
     setSpecialFuncDropDownAct(!specialFuncDropDown);
+    setSensorConfigDropDownAct(false);
+    closeDropdown();
+  };
+  const sensorConfigurationDropdownAct = () => {
+    setSensorConfigDropDownAct(!sensorConfigDropDown);
+    setSpecialFuncDropDownAct(false);
     closeDropdown();
   };
   const specialBlueGreenFunctionDropdownAct = () => {
+    setSpecialDFUFuncDropDownAct(false);
+    setSpecialRedFlashFuncDropDownAct(false);
     setSpecialBlueGreenFuncDropDownAct(true);
+    setSpecialFuncDropDown(null);
+  };
+  const specialDFUFunctionDropdownAct = () => {
+    setSpecialDFUFuncDropDownAct(true);
+    setSpecialRedFlashFuncDropDownAct(false);
+    setSpecialBlueGreenFuncDropDownAct(false);
+    setSpecialFuncDropDown(null);
+  };
+  const specialRedFlashFunctionDropdownAct = () => {
+    setSpecialRedFlashFuncDropDownAct(true);
+    setSpecialDFUFuncDropDownAct(false);
+    setSpecialBlueGreenFuncDropDownAct(false);
     setSpecialFuncDropDown(null);
   };
   const specialFunctionDropdown = () => {
@@ -62,8 +98,12 @@ function AirSpecControl() {
     closeDropdown();
   };
   const closeDropdown = () => setDropdown(null);
+  const closeSpecialFuncDropdown = () => setSpecialFuncDropDown(null);
+  const closeSensorConfigDropdown = () => setSensorConfigDropDown(null);
 
-  const [enableBlueGreenMode, setEnableBlueGreenMode] = useState(false);
+  const [enableBlueGreenMode, setEnableBlueGreenMode] = useState(true);
+  const [enableDFUMode, setEnableDFUMode] = useState(true);
+  const [enableRedFlashMode, setEnableRedFlashMode] = useState(true);
 
   // Styles
   const iconStyles = {
@@ -77,26 +117,36 @@ function AirSpecControl() {
     ...iconStyles,
   };
 
-  const {
-    connect,
-    toggle,
-    isConnected,
-    setRedLight,
-    setBlueGreenMode,
-    setGreenLight,
-    setBlueLight,
-    setColor,
-  } = useAirSpecInterface();
+  // const {
+  //   connect,
+  //   toggle,
+  //   isConnected,
+  //   setRedLight,
+  //   setBlueGreenMode,
+  //   setGreenLight,
+  //   setBlueLight,
+  //   setColor,
+  // } = useAirSpecInterface();
 
-  var [stepSize, setStepSize] = useState(false);
-  var [stepMs, setStepMs] = useState(false);
-  var [greenMaxIntensity, setGreenMaxIntensity] = useState(false);
-  var [blueMaxIntensity, setBlueMaxIntensity] = useState(false);
-  var [blueMinIntensity, setBlueMinIntensity] = useState(false);
+  var [stepSize, setStepSize] = useState(10);
+  var [stepMs, setStepMs] = useState(100);
+  var [greenMaxIntensity, setGreenMaxIntensity] = useState(200);
+  var [blueMaxIntensity, setBlueMaxIntensity] = useState(200);
+  var [blueMinIntensity, setBlueMinIntensity] = useState(0);
+
+  var [redMaxIntensity, setRedMaxIntensity] = useState(200);
+  var [redFlashPeriod, setRedFlashPeriod] = useState(50);
+  var [redFlashDuration, setRedFlashDuration] = useState(10000);
 
   const toggleSwitch = (event) => {
     setEnableBlueGreenMode(!enableBlueGreenMode);
-  }
+  };
+  const toggleRedFlashModeSwitch = (event) => {
+    setEnableRedFlashMode(!enableRedFlashMode);
+  };
+  const toggleDFUSwitch = (event) => {
+    setEnableDFUMode(!enableDFUMode);
+  };
 
   return (
     // <MKBox component="section" py={12}>
@@ -108,7 +158,11 @@ function AirSpecControl() {
           <Grid item justifyContent="left" xs={12} xm={2} lg={2} />
           <Grid item xs={12} xm={3} lg={3}>
             <Stack direction="column" alignItems="left" spacing={1}>
-              <MKButton variant="gradient" color="info" onClick={openDropdown}>
+              <MKButton
+                variant="gradient"
+                color="primary"
+                onClick={openDropdown}
+              >
                 System Options <Icon sx={dropdownIconStyles}>expand_more</Icon>
               </MKButton>
               <Menu
@@ -116,17 +170,10 @@ function AirSpecControl() {
                 open={Boolean(dropdown)}
                 onClose={closeDropdown}
               >
-                <MenuItem onClick={closeDropdown}>
+                <MenuItem onClick={sensorConfigurationDropdownAct}>
                   Configure Sensors Subsystems
                 </MenuItem>
-                <MenuItem onClick={closeDropdown}>Face Temperature</MenuItem>
-                <MenuItem onClick={closeDropdown}>Blink Sensing</MenuItem>
-                <MenuItem onClick={closeDropdown}>Inertial System</MenuItem>
-                <MenuItem onClick={closeDropdown}>Gas Sensing</MenuItem>
-                <MenuItem onClick={closeDropdown}>
-                  Light Intensity Sensor
-                </MenuItem>
-                <MenuItem onClick={closeDropdown}>Light Color Sensor</MenuItem>
+
                 <MenuItem onClick={closeDropdown}>Light Control</MenuItem>
                 <MenuItem onClick={specialFunctionDropdownAct}>
                   Special Functions
@@ -142,7 +189,7 @@ function AirSpecControl() {
                 <Stack direction="column" alignItems="left" spacing={1}>
                   <MKButton
                     variant="gradient"
-                    color="info"
+                    color="secondary"
                     onClick={openSpecialFuncDropDown}
                   >
                     Special Functions{" "}
@@ -151,16 +198,46 @@ function AirSpecControl() {
                   <Menu
                     anchorEl={specialFuncDropDown}
                     open={Boolean(specialFuncDropDown)}
-                    onClose={closeDropdown}
+                    onClose={closeSpecialFuncDropdown}
                   >
-                    <MenuItem onClick={closeSpecialFuncDropDown}>
+                    <MenuItem onClick={specialDFUFunctionDropdownAct}>
                       DFU Mode
                     </MenuItem>
                     <MenuItem onClick={specialBlueGreenFunctionDropdownAct}>
                       Blue-Green Transition
                     </MenuItem>
-                    <MenuItem onClick={closeSpecialFuncDropDown}>
+                    <MenuItem onClick={specialRedFlashFunctionDropdownAct}>
                       Red Flash
+                    </MenuItem>
+                  </Menu>
+                </Stack>
+              ) : null}
+              {sensorConfigDropDownAct ? (
+                <Stack direction="column" alignItems="left" spacing={1}>
+                  <MKButton
+                    variant="gradient"
+                    color="secondary"
+                    onClick={openSensorConfigDropDown}
+                  >
+                    Sensor Selection{" "}
+                    <Icon sx={dropdownIconStyles}>expand_more</Icon>
+                  </MKButton>
+                  <Menu
+                    anchorEl={sensorConfigDropDown}
+                    open={Boolean(sensorConfigDropDown)}
+                    // onClose={closeSpecialFuncDropdown}
+                  >
+                    <MenuItem onClick={closeSensorConfigDropdown}>
+                      Face Temperature
+                    </MenuItem>
+                    <MenuItem onClick={closeSensorConfigDropdown}>Blink Sensing</MenuItem>
+                    <MenuItem onClick={closeSensorConfigDropdown}>Inertial System</MenuItem>
+                    <MenuItem onClick={closeSensorConfigDropdown}>Gas Sensing</MenuItem>
+                    <MenuItem onClick={closeSensorConfigDropdown}>
+                      Light Intensity Sensor
+                    </MenuItem>
+                    <MenuItem onClick={closeSensorConfigDropdown}>
+                      Light Color Sensor
                     </MenuItem>
                   </Menu>
                 </Stack>
@@ -183,7 +260,10 @@ function AirSpecControl() {
                   Special Function: Blue-Green Transition
                 </MKTypography>
                 <MKBox display="flex" alignItems="center">
-                  <Switch checked={enableBlueGreenMode} onChange={toggleSwitch} />
+                  <Switch
+                    checked={enableBlueGreenMode}
+                    onChange={toggleSwitch}
+                  />
                   <MKTypography
                     variant="button"
                     color="text"
@@ -200,8 +280,7 @@ function AirSpecControl() {
                   label="Blue Min Intensity"
                   fullWidth
                   value={blueMinIntensity}
-                  onChange = {(event) => 
-                    setBlueMinIntensity(event.target.value)}
+                  onChange={(event) => setBlueMinIntensity(event.target.value)}
                   InputProps={{
                     inputProps: { min: 0, max: 255 },
                   }}
@@ -211,8 +290,7 @@ function AirSpecControl() {
                   label="Blue Max Intensity"
                   fullWidth
                   value={blueMaxIntensity}
-                  onChange = {(event) => 
-                    setBlueMaxIntensity(event.target.value)}
+                  onChange={(event) => setBlueMaxIntensity(event.target.value)}
                   InputProps={{
                     inputProps: { min: 0, max: 255 },
                   }}
@@ -222,8 +300,7 @@ function AirSpecControl() {
                   label="Green Max Intensity"
                   fullWidth
                   value={greenMaxIntensity}
-                  onChange = {(event) => 
-                    setGreenMaxIntensity(event.target.value)}
+                  onChange={(event) => setGreenMaxIntensity(event.target.value)}
                   InputProps={{
                     inputProps: { min: 0, max: 255 },
                   }}
@@ -233,8 +310,7 @@ function AirSpecControl() {
                   label="Step Size"
                   fullWidth
                   value={stepSize}
-                  onChange = {(event) => 
-                    setStepSize(event.target.value)}
+                  onChange={(event) => setStepSize(event.target.value)}
                   InputProps={{
                     inputProps: { min: 1, max: 50 },
                   }}
@@ -244,15 +320,156 @@ function AirSpecControl() {
                   label="Step Duration (ms)"
                   fullWidth
                   value={stepMs}
-                  onChange = {(event) => 
-                    setStepMs(event.target.value)}
+                  onChange={(event) => setStepMs(event.target.value)}
                   InputProps={{
                     inputProps: { min: 10, max: 10000, step: 5 },
                   }}
                 />
-                <MKButton onClick={() => setBlueGreenMode(enableBlueGreenMode, blueMinIntensity, blueMaxIntensity, greenMaxIntensity, stepSize,stepMs)} variant="gradient" color="dark">
+                <MKButton
+                  onClick={() =>
+                    props.setBlueGreenMode(
+                      enableBlueGreenMode,
+                      blueMinIntensity,
+                      blueMaxIntensity,
+                      greenMaxIntensity,
+                      stepSize,
+                      stepMs
+                    )
+                  }
+                  variant="gradient"
+                  color="dark"
+                >
                   Send Configuraton
                 </MKButton>
+              </Stack>
+            ) : null}
+            {specialRedFlashFuncDropDownAct ? (
+              <Stack direction="column" alignItems="left" spacing={2}>
+                <MKTypography
+                  // variant="button"
+                  color="dark"
+                  fontWeight="regular"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={toggleRedFlashModeSwitch}
+                >
+                  Special Function: Red Flash
+                </MKTypography>
+                <MKBox display="flex" alignItems="center">
+                  <Switch
+                    checked={enableRedFlashMode}
+                    onChange={toggleRedFlashModeSwitch}
+                  />
+                  <MKTypography
+                    variant="button"
+                    color="text"
+                    fontWeight="regular"
+                    ml={1}
+                    sx={{ cursor: "pointer", userSelect: "none" }}
+                    onClick={toggleRedFlashModeSwitch}
+                  >
+                    Enable
+                  </MKTypography>
+                </MKBox>
+                <MKInput
+                  type="number"
+                  label="Red Intensity"
+                  fullWidth
+                  value={redMaxIntensity}
+                  onChange={(event) => setRedMaxIntensity(event.target.value)}
+                  InputProps={{
+                    inputProps: { min: 0, max: 255 },
+                  }}
+                />
+                <MKInput
+                  type="number"
+                  label="Period (ms)"
+                  fullWidth
+                  value={redFlashPeriod}
+                  onChange={(event) => setRedFlashPeriod(event.target.value)}
+                  InputProps={{
+                    inputProps: { min: 0, max: 255 },
+                  }}
+                />
+                <MKInput
+                  type="number"
+                  label="Total Duration (ms) (0 = endless)"
+                  fullWidth
+                  value={redFlashDuration}
+                  onChange={(event) => setRedFlashDuration(event.target.value)}
+                  InputProps={{
+                    inputProps: { min: 0, max: 255 },
+                  }}
+                />
+                <MKButton
+                  onClick={() =>
+                    props.setRedFlashMode(
+                      enableRedFlashMode,
+                      redMaxIntensity,
+                      redFlashPeriod,
+                      redFlashDuration
+                    )
+                  }
+                  variant="gradient"
+                  color="dark"
+                >
+                  Send Configuraton
+                </MKButton>
+              </Stack>
+            ) : null}
+            {specialDFUFuncDropDownAct ? (
+              <Stack direction="column" alignItems="left" spacing={2}>
+                <MKTypography
+                  // variant="button"
+                  color="dark"
+                  fontWeight="regular"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={toggleDFUSwitch}
+                >
+                  Special Function: DFU Mode
+                </MKTypography>
+                {/* <MKBox display="flex" alignItems="center">
+                  <Switch
+                    checked={enableDFUMode}
+                    onChange={toggleDFUSwitch}
+                  />
+                  <MKTypography
+                    variant="button"
+                    color="text"
+                    fontWeight="regular"
+                    ml={1}
+                    sx={{ cursor: "pointer", userSelect: "none" }}
+                    onClick={toggleDFUSwitch}
+                  >
+                    Enable
+                  </MKTypography>
+                </MKBox> */}
+
+                <MKButton
+                  onClick={() => props.setDFUMode()}
+                  variant="gradient"
+                  color="dark"
+                >
+                  Put System in DFU Mode
+                </MKButton>
+                <MKTypography
+                  // variant="button"
+                  variant="subtitle2"
+                  color="info"
+                  fontWeight="light"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={toggleDFUSwitch}
+                >
+                  When placed in DFU Mode, Bluetooth will be interrupted but
+                  system will be able to be programmed from a USB connection
+                  using{" "}
+                  <a href="https://www.st.com/en/development-tools/stm32cubeprog.html">
+                    STM32CubeProgrammer
+                  </a>{" "}
+                  Software
+                </MKTypography>
               </Stack>
             ) : null}
           </Grid>

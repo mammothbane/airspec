@@ -3,9 +3,13 @@ export interface AirSpec {
   connect: () => void;
   isConnected: boolean;
   toggle: () => void;
+  getSysInfo: () => void;
   setSpecialMode: () => void;
   setBlueGreenMode: (start_bit:number, blue_min_intensity:number, blue_max_intensity:number,
     green_max_intensity:number, step_size:number, step_duration:number) => void;
+  setRedFlashMode: (start_bit:number, red_max_intensity:number, red_flash_period:number,
+    red_flash_duration:number) => void;
+  setDFUMode: () => void;
   setGreenLight: () => void;
   setBlueLight: () => void;
   setColor: (color: string) => string;
@@ -97,13 +101,34 @@ function blueGreenModePayload(start_bit:number,
   }
 
 
+function redFlashModePayload(start_bit:number, 
+  red_max_intensity:number, 
+  red_flash_period:number,
+  red_flash_duration:number) {
+
+    var payload = new Uint8Array([
+      3,
+      (start_bit) & 0xFF, 
+      (red_max_intensity) & 0xFF,
+      (red_flash_period) & 0xFF,
+      0x00,
+      (red_flash_duration) & 0xFF,
+      (red_flash_duration>>8) & 0xFF,
+      (red_flash_duration>>16) & 0xFF,
+      (red_flash_duration>>24) & 0xFF]);
+    return payload;
+  }
+
+
 export const useAirSpecInterface = (): AirSpec => {
   const [isConnected, setIsConnected] = React.useState(false);
   const [rxCharacteristic, setRxCharacteristic] =
     React.useState<BluetoothRemoteGATTCharacteristic | null>(null);
   const [txCharacteristic, setTxCharacteristic] =
     React.useState<BluetoothRemoteGATTCharacteristic | null>(null);
-
+  const [sysInfoCharacteristic, setSysInfoCharacteristic] =
+    React.useState<BluetoothRemoteGATTCharacteristic | null>(null);
+    
   const connect = async () => {
     const device = await navigator.bluetooth.requestDevice({
       // acceptAllDevices: true
@@ -137,26 +162,34 @@ export const useAirSpecInterface = (): AirSpec => {
     }
 
     const rxChar = await service.getCharacteristic(
-      // "932c32bd-0002-47a2-835a-a8d455b859dd" // Philips Hue Light On/Off Toggle
       0xfe82
       );
 
     if (!rxChar) {
-      console.error("Failed to get toggle characteristic.");
+      console.error("Failed to rx characteristic.");
       return;
     }
     setRxCharacteristic(rxChar);
 
     const txChar = await service.getCharacteristic(
-      0xfe82
-      // "932c32bd-0005-47a2-835a-a8d455b859dd" // Philips Hue Light On/Off Toggle
+      0xfe81
     );
 
     if (!txChar) {
-      console.error("Failed to get color characteristic.");
+      console.error("Failed to tx characteristic.");
       return;
     }
     setTxCharacteristic(txChar);
+
+    const sysInfoChar = await service.getCharacteristic(
+      0xfe83
+    );
+
+    if (!sysInfoChar) {
+      console.error("Failed to get sys info characteristic.");
+      return;
+    }
+    setSysInfoCharacteristic(sysInfoChar);
 
     setIsConnected(true);
   };
@@ -169,6 +202,10 @@ export const useAirSpecInterface = (): AirSpec => {
       new Uint8Array([lightIsCurrentlyOn ? 0x0 : 0x1])
     );
   };
+
+  const getSysInfo = () => {
+    const sysInfoArray = sysInfoCharacteristic?.readValue();
+  }
 
   const setSpecialMode = () => {
     // txCharacteristic?.writeValue(new Uint8Array([0x01, 0xfe, 0x01, 0x00]));
@@ -191,6 +228,43 @@ export const useAirSpecInterface = (): AirSpec => {
     var payload = blueGreenModePayload(start_bit, 
       blue_min_intensity, blue_max_intensity,
       green_max_intensity, step_size, step_duration);
+    var header = getHeader(5, payload.length);
+    var packet = new Uint8Array(header.length + payload.length);
+    packet.set(header);
+    packet.set(payload, header.length);
+    txCharacteristic?.writeValue(packet);
+  };
+
+  const setRedFlashMode = (start_bit:number, red_max_intensity:number, red_flash_period:number,
+    red_flash_duration:number) => {
+    // txCharacteristic?.writeValue(new Uint8Array([0x01, 0xfe, 0x01, 0x00]));
+    // var header_timestamp = getUnixTimestampArray();
+    // var start_bit = 1;
+    // var blue_min_intensity = 10;
+    // var blue_max_intensity = 255;
+    // var green_max_intensity = 255;
+    // var step_size = 1;
+    // var step_duration = 10;
+    var payload = redFlashModePayload(start_bit, 
+      red_max_intensity, red_flash_period,
+      red_flash_duration);
+    var header = getHeader(5, payload.length);
+    var packet = new Uint8Array(header.length + payload.length);
+    packet.set(header);
+    packet.set(payload, header.length);
+    txCharacteristic?.writeValue(packet);
+  };
+
+  const setDFUMode = () => {
+    // txCharacteristic?.writeValue(new Uint8Array([0x01, 0xfe, 0x01, 0x00]));
+    // var header_timestamp = getUnixTimestampArray();
+    // var start_bit = 1;
+    // var blue_min_intensity = 10;
+    // var blue_max_intensity = 255;
+    // var green_max_intensity = 255;
+    // var step_size = 1;
+    // var step_duration = 10;
+    var payload = new Uint8Array([0x02]);
     var header = getHeader(5, payload.length);
     var packet = new Uint8Array(header.length + payload.length);
     packet.set(header);
@@ -229,10 +303,13 @@ export const useAirSpecInterface = (): AirSpec => {
 
   return {
     connect,
-    toggle,
     isConnected,
+    toggle,
+    getSysInfo,
     setSpecialMode,
     setBlueGreenMode,
+    setRedFlashMode,
+    setDFUMode,
     setGreenLight,
     setBlueLight,
     setColor,
