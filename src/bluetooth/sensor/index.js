@@ -63,7 +63,7 @@ function AirSpecControl() {
   };
   const closeDropdown = () => setDropdown(null);
 
-  const [checked, setChecked] = useState(false);
+  const [enableBlueGreenMode, setEnableBlueGreenMode] = useState(false);
 
   // Styles
   const iconStyles = {
@@ -77,8 +77,6 @@ function AirSpecControl() {
     ...iconStyles,
   };
 
-  const toggleSwitch = () => setChecked(!checked);
-
   const {
     connect,
     toggle,
@@ -89,6 +87,16 @@ function AirSpecControl() {
     setBlueLight,
     setColor,
   } = useAirSpecInterface();
+
+  var [stepSize, setStepSize] = useState(false);
+  var [stepMs, setStepMs] = useState(false);
+  var [greenMaxIntensity, setGreenMaxIntensity] = useState(false);
+  var [blueMaxIntensity, setBlueMaxIntensity] = useState(false);
+  var [blueMinIntensity, setBlueMinIntensity] = useState(false);
+
+  const toggleSwitch = (event) => {
+    setEnableBlueGreenMode(!enableBlueGreenMode);
+  }
 
   return (
     // <MKBox component="section" py={12}>
@@ -175,7 +183,7 @@ function AirSpecControl() {
                   Special Function: Blue-Green Transition
                 </MKTypography>
                 <MKBox display="flex" alignItems="center">
-                  <Switch checked={checked} onChange={toggleSwitch} />
+                  <Switch checked={enableBlueGreenMode} onChange={toggleSwitch} />
                   <MKTypography
                     variant="button"
                     color="text"
@@ -191,6 +199,9 @@ function AirSpecControl() {
                   type="number"
                   label="Blue Min Intensity"
                   fullWidth
+                  value={blueMinIntensity}
+                  onChange = {(event) => 
+                    setBlueMinIntensity(event.target.value)}
                   InputProps={{
                     inputProps: { min: 0, max: 255 },
                   }}
@@ -199,6 +210,9 @@ function AirSpecControl() {
                   type="number"
                   label="Blue Max Intensity"
                   fullWidth
+                  value={blueMaxIntensity}
+                  onChange = {(event) => 
+                    setBlueMaxIntensity(event.target.value)}
                   InputProps={{
                     inputProps: { min: 0, max: 255 },
                   }}
@@ -207,6 +221,9 @@ function AirSpecControl() {
                   type="number"
                   label="Green Max Intensity"
                   fullWidth
+                  value={greenMaxIntensity}
+                  onChange = {(event) => 
+                    setGreenMaxIntensity(event.target.value)}
                   InputProps={{
                     inputProps: { min: 0, max: 255 },
                   }}
@@ -215,6 +232,9 @@ function AirSpecControl() {
                   type="number"
                   label="Step Size"
                   fullWidth
+                  value={stepSize}
+                  onChange = {(event) => 
+                    setStepSize(event.target.value)}
                   InputProps={{
                     inputProps: { min: 1, max: 50 },
                   }}
@@ -223,12 +243,15 @@ function AirSpecControl() {
                   type="number"
                   label="Step Duration (ms)"
                   fullWidth
+                  value={stepMs}
+                  onChange = {(event) => 
+                    setStepMs(event.target.value)}
                   InputProps={{
                     inputProps: { min: 10, max: 10000, step: 5 },
                   }}
                 />
-                <MKButton onClick={connect} variant="gradient" color="dark">
-                  Send Configuration
+                <MKButton onClick={() => setBlueGreenMode(enableBlueGreenMode, blueMinIntensity, blueMaxIntensity, greenMaxIntensity, stepSize,stepMs)} variant="gradient" color="dark">
+                  Send Configuraton
                 </MKButton>
               </Stack>
             ) : null}
