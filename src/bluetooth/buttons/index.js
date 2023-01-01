@@ -80,8 +80,8 @@ function ButtonsBluetooth() {
       <Container>
           <Grid container xs={12} xm={12} lg={12} 
     sx={{ textAlign: "left", my: 1, mx: "auto", px: 0.75 }}/>
-        {/* {isConnected ? ( */}
-        {true ? (
+        {isConnected ? (
+        // {true ? ( 
           // <Grid container justifyContent="left">
           // <Grid
           // container

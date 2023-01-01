@@ -196,7 +196,7 @@ export const useAirSpecInterface = (): AirSpec => {
     packet.set(header);
     packet.set(payload, header.length);
     console.log(packet);
-    // txCharacteristic?.writeValue(packet);
+    txCharacteristic?.writeValue(packet);
   };
 
   const setBlueLight = () => {
