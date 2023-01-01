@@ -4,8 +4,8 @@ export interface AirSpec {
   isConnected: boolean;
   toggle: () => void;
   setSpecialMode: () => void;
-  setBlueGreenMode: (start_bit, blue_min_intensity, blue_max_intensity,
-    green_max_intensity, step_size, step_duration) => void;
+  setBlueGreenMode: (start_bit:number, blue_min_intensity:number, blue_max_intensity:number,
+    green_max_intensity:number, step_size:number, step_duration:number) => void;
   setGreenLight: () => void;
   setBlueLight: () => void;
   setColor: (color: string) => string;
@@ -58,14 +58,14 @@ function getUnixTimestampArray() {
   return timestampArray;
 }
 
-function getPayloadSizeArray(value) {
+function getPayloadSizeArray(value:number) {
   var payloadSizeArray = new Uint8Array([
     (value) & 0xFF, 
     (value>>8) & 0xFF]);
   return payloadSizeArray;
 }
 
-function getHeader(packet_type, payload_size) {
+function getHeader(packet_type:number, payload_size:number) {
   var timestamp = getUnixTimestampArray();
   var payloadSize = getPayloadSizeArray(payload_size);
   var packetType = new Uint8Array([
@@ -78,12 +78,12 @@ function getHeader(packet_type, payload_size) {
   return header;
 }
 
-function blueGreenModePayload(start_bit, 
-  blue_min_intensity, 
-  blue_max_intensity,
-  green_max_intensity,
-  step_size,
-  step_duration) {
+function blueGreenModePayload(start_bit:number, 
+  blue_min_intensity:number, 
+  blue_max_intensity:number,
+  green_max_intensity:number,
+  step_size:number,
+  step_duration:number) {
 
     var payload = new Uint8Array([
       2,
@@ -178,8 +178,8 @@ export const useAirSpecInterface = (): AirSpec => {
     console.log(header);
   };
 
-  const setBlueGreenMode = (start_bit, blue_min_intensity, blue_max_intensity,
-    green_max_intensity, step_size, step_duration) => {
+  const setBlueGreenMode = (start_bit:number, blue_min_intensity:number, blue_max_intensity:number,
+    green_max_intensity:number, step_size:number, step_duration:number) => {
     // txCharacteristic?.writeValue(new Uint8Array([0x01, 0xfe, 0x01, 0x00]));
     // var header_timestamp = getUnixTimestampArray();
     // var start_bit = 1;
