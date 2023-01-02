@@ -403,8 +403,8 @@ function ButtonsBluetooth() {
                 >
                   When system is started, the system will continously stream data with the current configuration, even after a reboot or reconnection.
                 </MKTypography>
-              <MKButton variant="gradient" color="success">
-                Start Streaming to Server
+              <MKButton variant="gradient" color="success" disabled="true">
+                Start Streaming to Server (Not Implemented)
               </MKButton>
               <MKTypography
                   variant="subtitle2"

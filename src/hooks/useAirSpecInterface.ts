@@ -368,14 +368,6 @@ export const useAirSpecInterface = (): AirSpec => {
     red_flash_period: number,
     red_flash_duration: number
   ) => {
-    // txCharacteristic?.writeValue(new Uint8Array([0x01, 0xfe, 0x01, 0x00]));
-    // var header_timestamp = getUnixTimestampArray();
-    // var start_bit = 1;
-    // var blue_min_intensity = 10;
-    // var blue_max_intensity = 255;
-    // var green_max_intensity = 255;
-    // var step_size = 1;
-    // var step_duration = 10;
     var payload = redFlashModePayload(
       start_bit,
       red_max_intensity,
@@ -390,15 +382,7 @@ export const useAirSpecInterface = (): AirSpec => {
   };
 
   const setDFUMode = () => {
-    // txCharacteristic?.writeValue(new Uint8Array([0x01, 0xfe, 0x01, 0x00]));
-    // var header_timestamp = getUnixTimestampArray();
-    // var start_bit = 1;
-    // var blue_min_intensity = 10;
-    // var blue_max_intensity = 255;
-    // var green_max_intensity = 255;
-    // var step_size = 1;
-    // var step_duration = 10;
-    var payload = new Uint8Array([0x02]);
+    var payload = new Uint8Array([0x01]);
     var header = getHeader(5, payload.length);
     var packet = new Uint8Array(header.length + payload.length);
     packet.set(header);
