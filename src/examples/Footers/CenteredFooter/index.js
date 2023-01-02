@@ -114,22 +114,22 @@ CenteredFooter.defaultProps = {
     { href: "https://www.creative-tim.com/blog", name: "Blog" },
     { href: "https://www.creative-tim.com/license", name: "License" },
   ],
-  socials: [
-    { icon: <FacebookIcon fontSize="small" />, link: "https://www.facebook.com/CreativeTim/" },
-    {
-      icon: <TwitterIcon fontSize="small" />,
-      link: "https://twitter.com/creativetim",
-    },
-    {
-      icon: <InstagramIcon fontSize="small" />,
-      link: "https://www.instagram.com/creativetimofficial/",
-    },
-    {
-      icon: <PinterestIcon fontSize="small" />,
-      link: "https://ro.pinterest.com/thecreativetim/",
-    },
-    { icon: <GitHubIcon fontSize="small" />, link: "https://github.com/creativetimofficial" },
-  ],
+  // socials: [
+  //   { icon: <FacebookIcon fontSize="small" />, link: "https://www.facebook.com/CreativeTim/" },
+  //   {
+  //     icon: <TwitterIcon fontSize="small" />,
+  //     link: "https://twitter.com/creativetim",
+  //   },
+  //   {
+  //     icon: <InstagramIcon fontSize="small" />,
+  //     link: "https://www.instagram.com/creativetimofficial/",
+  //   },
+  //   {
+  //     icon: <PinterestIcon fontSize="small" />,
+  //     link: "https://ro.pinterest.com/thecreativetim/",
+  //   },
+  //   { icon: <GitHubIcon fontSize="small" />, link: "https://github.com/creativetimofficial" },
+  // ],
   light: false,
 };
 
