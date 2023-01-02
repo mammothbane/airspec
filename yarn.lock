@@ -1116,6 +1116,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@binary-files/structjs@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@binary-files/structjs/-/structjs-1.2.3.tgz#66b191e4d55050c60201c80914a5a30cd19643d0"
+  integrity sha512-JAmVPUk0HzTwml88WO5Z/MTCMhS43OMoT6lZuhbaeZKRPG4T2OYZfrXhHIDvWGEuIPZNcQDKRkeeniKGrMy6Ew==
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"
@@ -3381,6 +3386,11 @@ bytes@3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.1.2.tgz#8b0beeb98605adf1b128fa4386403c009e0221a5"
   integrity sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==
+
+c-struct@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/c-struct/-/c-struct-0.0.5.tgz#f27f1e6fe871b54b4a730f99d400e4b2e5dbb76f"
+  integrity sha512-yNX0IULnOnk7ha5+8EjK22xCoAqYlky2ts1YdDpK7w9tJf1uVCVRlPvINgcgz4GyBaNeCKeECYhr0AWw61/NbQ==
 
 cacache@^12.0.2:
   version "12.0.4"
@@ -11256,6 +11266,11 @@ strip-json-comments@^3.1.0, strip-json-comments@^3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-3.1.1.tgz#31f1281b3832630434831c310c01cccda8cbe006"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
+
+structjs@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/structjs/-/structjs-0.2.2.tgz#9a1b9e5943a2ac14ecfc5d33135019db70d84571"
+  integrity sha512-P9uA63PrnVaJLY0zaI8Yc5en7EugRTfJhNd+0yYrvrLOAqCb/rwqQtsfaTQT7Sg/bOSmCDCI1FZ1s425bFmAhQ==
 
 style-loader@1.3.0:
   version "1.3.0"
