@@ -6,10 +6,11 @@ import { Struct } from '@binary-files/structjs';
 export interface AirSpec {
   connect: () => void;
   isConnected: boolean;
-  sysInfo: Uint8Array;
+  sysInfo: any;
+  setSysInfo: () => void;
   toggle: () => void;
   requestSysInfo: () => void;
-  getSysInfo: () => void;
+  updateSysInfo: () => void;
   setSpecialMode: () => void;
   setBlueGreenMode: (
     start_bit: number,
@@ -142,7 +143,7 @@ function redFlashModePayload (
 
 export const useAirSpecInterface = (): AirSpec => {
   const [isConnected, setIsConnected] = React.useState(false);
-  const [sysInfo, setSysInfo] = React.useState<Uint8Array>(new Uint8Array());
+  const [sysInfo, setSysInfo] = React.useState<any>();
   const [
     rxCharacteristic,
     setRxCharacteristic
@@ -156,54 +157,52 @@ export const useAirSpecInterface = (): AirSpec => {
     setSysInfoCharacteristic
   ] = React.useState<BluetoothRemoteGATTCharacteristic | null>(null);
 
-  // const thermopileSensorConfigStruct = new Struct(
-  //   Struct.Uint8('thermopileSensorEn'),
-  //   Struct.Uint16('thermopileSensorPeriod')
-  // )
 
-  // const blinkSensorConfigStruct = new Struct(
-  //   Struct.Uint8('blinkSensorEn'),
-  //   Struct.Uint16('blinkSampleRate')
-  // )
-
-  // const inertialSensorConfigStruct = new Struct(
-  //   Struct.Uint8('inertialSensorEn'),
-  //   Struct.Uint16('inertialSampleRate')
-  // )
-
-  // const gasSensorConfigStruct = new Struct(
-  //   Struct.Uint8('gasSensorEn'),
-  //   Struct.Uint16('gasSamplePeriod')
-  // )
-
-  // const humiditySensorConfigStruct = new Struct(
-  //   Struct.Uint8('humiditySensorEn'),
-  //   Struct.Uint16('humiditySamplePeriod')
-  // )
-
-  // const luxSensorConfigStruct = new Struct(
-  //   Struct.Uint8('luxSensorEn'),
-  //   Struct.Uint16('luxSamplePeriod')
-  // )
-
-  // const colorSensorConfigStruct = new Struct(
-  //   Struct.Uint8('colorSensorEn'),
-  //   Struct.Uint16('colorSamplePeriod')
-  // )
-
-  // const micSensorConfigStruct = new Struct(
-  //   Struct.Uint8('micSensorEn'),
-  //   Struct.Uint16('micSampleRate')
-  // )
 
   // https://www.npmjs.com/package/@binary-files/structjs#installation
   const airspecSensorConfigHeaderStruct = new Struct(
     Struct.Uint8('systemRunState'),
+    Struct.Skip(3),
     Struct.Uint32('uuid'),
     Struct.Uint32('firmware_version'),
-    Struct.Uint32('epoch')
-  );
+    Struct.Uint32('epoch'),
 
+
+      Struct.Uint8('thermopileSensorEn'),
+      Struct.Skip(1),
+      Struct.Uint16('thermopileSensorPeriod'),
+      
+
+      Struct.Uint8('blinkSensorEn'),
+      Struct.Skip(1),
+      Struct.Uint16('blinkSampleRate'),
+      
+  
+      Struct.Uint8('inertialSensorEn'),
+      Struct.Skip(1),
+      Struct.Uint16('inertialSampleRate'),
+  
+      Struct.Uint8('gasSensorEn'),
+      Struct.Skip(1),
+      Struct.Uint16('gasSamplePeriod'),
+  
+      Struct.Uint8('humiditySensorEn'),
+      Struct.Skip(1),
+      Struct.Uint16('humiditySamplePeriod'),
+  
+      Struct.Uint8('luxSensorEn'),
+      Struct.Skip(1),
+      Struct.Uint16('luxSamplePeriod'),
+  
+      Struct.Uint8('colorSensorEn'),
+      Struct.Skip(1),
+      Struct.Uint16('colorSamplePeriod'),
+  
+      Struct.Uint8('micSensorEn'),
+      Struct.Skip(1),
+      Struct.Uint16('micSampleRate')
+  );
+  
   const connect = async () => {
     const device = await navigator.bluetooth.requestDevice({
       // acceptAllDevices: true
@@ -236,7 +235,7 @@ export const useAirSpecInterface = (): AirSpec => {
       return;
     }
 
-    const rxChar = await service.getCharacteristic(0xfe82);
+    const rxChar = await service.getCharacteristic(0xfe81);
 
     if (!rxChar) {
       console.error('Failed to rx characteristic.');
@@ -244,7 +243,7 @@ export const useAirSpecInterface = (): AirSpec => {
     }
     setRxCharacteristic(rxChar);
 
-    const txChar = await service.getCharacteristic(0xfe81);
+    const txChar = await service.getCharacteristic(0xfe82);
 
     if (!txChar) {
       console.error('Failed to tx characteristic.');
@@ -259,8 +258,9 @@ export const useAirSpecInterface = (): AirSpec => {
       return;
     }
     setSysInfoCharacteristic(sysInfoChar);
-
-    requestSysInfo();
+    
+    const sysInfoArray = await sysInfoChar.readValue();
+    setSysInfo(airspecSensorConfigHeaderStruct.createObject(sysInfoArray.buffer, 0, true));
 
     setIsConnected(true);
   }
@@ -273,22 +273,49 @@ export const useAirSpecInterface = (): AirSpec => {
       new Uint8Array([lightIsCurrentlyOn ? 0x0 : 0x1])
     );
   };
-
-  const requestSysInfo = () => {
+  
+  const requestSysInfo = async () => {
     console.log('getting sys info');
-    const sysInfoArray = sysInfoCharacteristic?.readValue();
+    const sysInfoArray = await sysInfoCharacteristic?.readValue();
 
-    sysInfoArray?.then(value => {
-      setSysInfo(new Uint8Array(value.buffer));
-    })
+    if(!sysInfoCharacteristic) {
+      console.log("null sysInfoCharacteristic");
+      return;
+    }
+    if (!sysInfoArray) {
+      console.log("sys no exist");
+      return;
+    }
+    // sysInfoArray?.then(value => {
+      // setSysInfo(new Uint8Array(value.buffer));
+    setSysInfo(airspecSensorConfigHeaderStruct.createObject(sysInfoArray.buffer, 0, true));
+    const infoHeader = airspecSensorConfigHeaderStruct.createObject(sysInfoArray.buffer, 0, true);
 
+    // console.log("sysInfo");
+    console.log("requestSysInfo called");
+    console.log(infoHeader);
+    // console.log(infoHeader.systemRunState);
+    // console.log(infoHeader.uuid);
+    // console.log(infoHeader.firmware_version);
+    // console.log(infoHeader.epoch);
+    // console.log(infoHeader.thermopileSensorEn);
+    // console.log(infoHeader.thermopileSensorPeriod);
+    // console.log(infoHeader.blinkSensorEn);
+    // console.log(infoHeader.blinkSampleRate);
+
+    // })
     console.log(airspecSensorConfigHeaderStruct); // This is your struct definition)
   };
 
-  const getSysInfo = () => {
-    if (sysInfo.length < 1) {
-      return 0;
-    }
+  const updateSysInfo = () => {
+    // console.log("update sys info");
+    // console.log(sysInfo);
+    var data = new Uint8Array(sysInfo.dataView.buffer);
+    // console.log(data);
+    sysInfoCharacteristic?.writeValue(data);
+    // if (sysInfo.length < 1) {
+    //   return 0;
+    // }
     // var faceTemperatureEn, blinkEn, gasEn, lightLevelEn, lightColorEn, humidityEn, micEn;
 
     // sysInfo;
@@ -318,6 +345,7 @@ export const useAirSpecInterface = (): AirSpec => {
     // var green_max_intensity = 255;
     // var step_size = 1;
     // var step_duration = 10;
+    console.log("setBlueGreenMode");
     var payload = blueGreenModePayload(
       start_bit,
       blue_min_intensity,
@@ -330,6 +358,7 @@ export const useAirSpecInterface = (): AirSpec => {
     var packet = new Uint8Array(header.length + payload.length);
     packet.set(header);
     packet.set(payload, header.length);
+    console.log(packet);
     txCharacteristic?.writeValue(packet);
   };
 
@@ -407,9 +436,10 @@ export const useAirSpecInterface = (): AirSpec => {
     connect,
     isConnected,
     sysInfo,
+    setSysInfo,
     toggle,
     requestSysInfo,
-    getSysInfo,
+    updateSysInfo,
     setSpecialMode,
     setBlueGreenMode,
     setRedFlashMode,
