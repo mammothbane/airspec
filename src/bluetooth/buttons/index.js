@@ -39,9 +39,10 @@ function ButtonsBluetooth() {
     connect,
     isConnected,
     sysInfo,
+    setSysInfo,
     toggle,
     requestSysInfo,
-    getSysInfo,
+    updateSysInfo,
     setSpecialMode,
     setBlueGreenMode,
     setRedFlashMode,
@@ -57,13 +58,14 @@ function ButtonsBluetooth() {
   const openDropdown = ({ currentTarget }) => setDropdown(currentTarget);
   const closeDropdown = () => setDropdown(null);
 
-  const [faceTemperatureEn, setFaceTemperatureEn] = useState(null);
-  const [blinkEn, setBlinkEn] = useState(null);
-  const [gasEn, setGasEn] = useState(null);
-  const [lightLevelEn, setLightLevelEn] = useState(null);
-  const [lightColorEn, setLightColorEn] = useState(null);
-  const [humidityEn, setHumidityEn] = useState(null);
-  const [micEn, setMicEn] = useState(null);
+  const [faceTemperatureEn, setFaceTemperatureEn] = useState(false);
+  const [blinkEn, setBlinkEn] = useState(false);
+  const [gasEn, setGasEn] = useState(false);
+  const [lightLevelEn, setLightLevelEn] = useState(false);
+  const [lightColorEn, setLightColorEn] = useState(false);
+  const [humidityEn, setHumidityEn] = useState(false);
+  const [micEn, setMicEn] = useState(false);
+  const [inertialEn, setInertialEn] = useState(false);
 
   const [checked, setChecked] = useState(false);
 
@@ -87,6 +89,74 @@ function ButtonsBluetooth() {
   var green_max_intensity = 255;
   var step_size = 1;
   var step_duration = 100;
+
+  function changeThermopileState() {
+    sysInfo.thermopileSensorEn = !sysInfo?.thermopileSensorEn;
+    setSysInfo(sysInfo);
+    setFaceTemperatureEn(!faceTemperatureEn);
+    updateSysInfo();
+  }
+
+  function changeInertialState() {
+    sysInfo.inertialSensorEn = !sysInfo?.inertialSensorEn;
+    setSysInfo(sysInfo);
+    setInertialEn(!inertialEn);
+    updateSysInfo();
+  }
+
+  function changeMicState() {
+    sysInfo.micSensorEn = !sysInfo?.micSensorEn;
+    setSysInfo(sysInfo);
+    setMicEn(!micEn);
+    updateSysInfo();
+  }
+
+  function changeColorState() {
+    sysInfo.colorSensorEn = !sysInfo?.colorSensorEn;
+    setSysInfo(sysInfo);
+    setLightColorEn(!lightColorEn);
+    updateSysInfo();
+  }
+
+  function changeLuxState() {
+    sysInfo.luxSensorEn = !sysInfo?.luxSensorEn;
+    setSysInfo(sysInfo);
+    setLightLevelEn(!lightLevelEn);
+    updateSysInfo();
+  }
+
+  function changeGasState() {
+    sysInfo.gasSensorEn = !sysInfo?.gasSensorEn;
+    setSysInfo(sysInfo);
+    setGasEn(!gasEn);
+    updateSysInfo();
+  }
+
+  function changeHumidityState() {
+    sysInfo.humiditySensorEn = !sysInfo?.humiditySensorEn;
+    setSysInfo(sysInfo);
+    setHumidityEn(!humidityEn);
+    updateSysInfo();
+  }
+
+  function changeBlinkState() {
+    sysInfo.blinkSensorEn = !sysInfo?.blinkSensorEn;
+    setSysInfo(sysInfo);
+    setBlinkEn(!blinkEn);
+    updateSysInfo();
+  }
+
+ function connectToAirSpec(){
+    connect();
+  }
+
+  function changeSystemState(){
+    sysInfo.systemRunState = !sysInfo?.systemRunState;
+    setSysInfo(sysInfo);
+    setSysRun(!sysRun);
+    console.log(sysInfo.systemRunState)
+    updateSysInfo();
+  }
 
   return (
     // <MKBox component="section" py={12}>
@@ -114,18 +184,38 @@ function ButtonsBluetooth() {
         <Grid container spacing={2}>
           <Grid item xs={12} xm={3} lg={3}>
             <Stack direction="column" alignItems="left" spacing={1}>
+              
+              { sysInfo? (
+                <Stack direction="column" alignItems="left" spacing={1}>
+                <MKInput
+                type="text"
+                label="System ID"
+                value={sysInfo?.uuid.toString(16)}
+                disabled="true"
+              />
               <MKInput
+                type="number"
+                label="Firmware Version"
+                value={sysInfo.firmware_version}
+                disabled="true"
+              />
+              </Stack>
+      ):(
+        <Stack direction="column" alignItems="left" spacing={1}>
+        <MKInput
                 type="text"
                 label="System ID"
                 value="N/A"
                 disabled="true"
               />
-              <MKInput
-                type="search"
+        <MKInput
+                type="text"
                 label="Firmware Version"
                 value="N/A"
                 disabled="true"
               />
+              </Stack>
+        )} 
 
               <MKTypography
                 // variant="button"
@@ -141,159 +231,196 @@ function ButtonsBluetooth() {
               {/* <Grid container item xs={4} justifyContent="center" mx="auto"> */}
               <MKBox display="flex" alignItems="center">
                 <Switch
-                  checked={faceTemperatureEn}
-                  disabled={!sysRun}
-                  onChange={() => setFaceTemperatureEn(!faceTemperatureEn)}
+                  checked={sysInfo?.thermopileSensorEn}
+                  disabled={sysInfo?.systemRunState}
+                  onChange={() => changeThermopileState()}
                 />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
-                  disabled={!sysRun}
+                  disabled={sysInfo?.systemRunState}
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={() => setFaceTemperatureEn(!faceTemperatureEn)}
+                  onClick={() => changeThermopileState()}
                 >
                   Face Temperature
+                </MKTypography>
+              </MKBox>
+              <MKBox display="flex" alignItems="center">
+                <Switch
+                  checked={sysInfo?.inertialSensorEn}
+                  disabled={sysInfo?.systemRunState}
+                  onChange={() => changeInertialState()}
+                />
+                <MKTypography
+                  variant="button"
+                  color="text"
+                  fontWeight="regular"
+                  disabled={sysInfo?.systemRunState}
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => changeInertialState()}
+                >
+                  Inertial Measurements
                 </MKTypography>
               </MKBox>
               {/* <Divider>CENTER</Divider> */}
               <MKBox display="flex" alignItems="center">
                 <Switch
-                  checked={blinkEn}
-                  disabled={!sysRun}
-                  onChange={() => setBlinkEn(!blinkEn)}
+                  checked={sysInfo?.blinkSensorEn}
+                  disabled={sysInfo?.systemRunState}
+                  onChange={() => changeBlinkState()}
                 />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
-                  disabled={!sysRun}
+                  disabled={sysInfo?.systemRunState}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={() => setBlinkEn(!blinkEn)}
+                  onClick={() => changeBlinkState()}
                 >
                   Blink Sensor
                 </MKTypography>
               </MKBox>
               <MKBox display="flex" alignItems="center">
                 <Switch
-                  checked={gasEn}
-                  disabled={!sysRun}
-                  onChange={() => setGasEn(!gasEn)}
+                  checked={sysInfo?.gasSensorEn}
+                  disabled={sysInfo?.systemRunState}
+                  onChange={() => changeGasState()}
                 />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
-                  disabled={!sysRun}
+                  disabled={sysInfo?.systemRunState}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={() => setGasEn(!gasEn)}
+                  onClick={() => changeGasState()}
                 >
                   Gas Sensing
                 </MKTypography>
               </MKBox>
               <MKBox display="flex" alignItems="center">
                 <Switch
-                  checked={lightLevelEn}
-                  disabled={!sysRun}
-                  onChange={() => setLightLevelEn(!lightLevelEn)}
+                  checked={sysInfo?.luxSensorEn}
+                  disabled={sysInfo?.systemRunState}
+                  onChange={() => changeLuxState()}
                 />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
-                  disabled={!sysRun}
+                  disabled={sysInfo?.systemRunState}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={() => setLightLevelEn(!lightLevelEn)}
+                  onClick={() => changeLuxState()}
                 >
                   Light Level Sensing
                 </MKTypography>
               </MKBox>
               <MKBox display="flex" alignItems="center">
                 <Switch
-                  checked={lightColorEn}
-                  disabled={!sysRun}
-                  onChange={() => setLightColorEn(!lightColorEn)}
+                  checked={sysInfo?.colorSensorEn}
+                  disabled={sysInfo?.systemRunState}
+                  onChange={() => changeColorState()}
                 />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
-                  disabled={!sysRun}
+                  disabled={!sysInfo?.systemRunState}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={() => setLightColorEn(!lightColorEn)}
+                  onClick={() => changeColorState()}
                 >
                   Light Color Sensing
                 </MKTypography>
               </MKBox>
               <MKBox display="flex" alignItems="center">
                 <Switch
-                  checked={humidityEn}
-                  disabled={!sysRun}
-                  onChange={() => setHumidityEn(!humidityEn)}
+                  checked={sysInfo?.humiditySensorEn}
+                  disabled={sysInfo?.systemRunState}
+                  onChange={() => changeHumidityState()}
                 />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
-                  disabled={!sysRun}
+                  disabled={sysInfo?.systemRunState}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={() => setHumidityEn(!humidityEn)}
+                  onClick={() => changeHumidityState()}
                 >
                   Humidity
                 </MKTypography>
               </MKBox>
               <MKBox display="flex" alignItems="center">
                 <Switch
-                  checked={micEn}
-                  disabled={!sysRun}
-                  onChange={() => setMicEn(!micEn)}
+                  checked={sysInfo?.micSensorEn}
+                  disabled={sysInfo?.systemRunState}
+                  onChange={() => changeMicState()}
                 />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
-                  disabled={!sysRun}
+                  disabled={sysInfo?.systemRunState}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={() => setMicEn(!micEn)}
+                  onClick={() => changeMicState()}
                 >
                   Microphone
                 </MKTypography>
               </MKBox>
               {/* </Grid> */}
 
-              {sysRun ? (
+              {sysInfo?.systemRunState ? (
                 <MKButton
-                  variant="gradient"
-                  color="success"
-                  onClick={(event) => setSysRun(!sysRun)}
-                >
-                  Start System
-                </MKButton>
+                variant="gradient"
+                color="warning"
+                onClick={(event) => changeSystemState()}
+              >
+                Stop System
+              </MKButton>
               ) : (
                 <MKButton
                   variant="gradient"
-                  color="warning"
-                  onClick={(event) => setSysRun(!sysRun)}
+                  color="success"
+                  onClick={(event) => changeSystemState()}
                 >
-                  Stop System
+                  Start System
                 </MKButton>
+                
               )}
-              <MKButton variant="gradient" color="success" onClick={requestSysInfo}>
+              <MKTypography
+                  variant="subtitle2"
+                  color="info"
+                  fontWeight="light"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  When system is started, the system will continously stream data with the current configuration, even after a reboot or reconnection.
+                </MKTypography>
+              <MKButton variant="gradient" color="success">
                 Start Streaming to Server
               </MKButton>
+              <MKTypography
+                  variant="subtitle2"
+                  color="info"
+                  fontWeight="light"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Activating server streaming will forward all received packages through this web browser to the InfluxDB database.
+                </MKTypography>
             </Stack>
           </Grid>
           <Grid item xs={12} xm={9} lg={9} spacing={2}>
             {/* <AirSpecControl connect isConnected setBlueGreenMode/> */}
             <AirSpecControl
-              connect={connect}
+              connect={connectToAirSpec}
               isConnected={isConnected}
               setBlueGreenMode={setBlueGreenMode}
               setRedFlashMode={setRedFlashMode}
@@ -314,5 +441,7 @@ function ButtonsBluetooth() {
     // </MKBox>
   );
 }
+
+
 
 export default ButtonsBluetooth;
