@@ -1,14 +1,11 @@
 {
-  "name": "material-kit-2-react",
-  "version": "2.0.0",
+  "name": "AirSpec",
+  "version": "1.0.0",
   "private": true,
   "author": "Creative Tim",
   "license": "See license in https://www.creative-tim.com/license",
-  "description": "React version of Material Kit 2 by Creative Tim",
+  "description": "AirSpec",
   "homepage": ".",
-  "bugs": {
-    "url": "https://github.com/creativetimofficial/ct-material-kit-react/issues"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/creativetimofficial/ct-material-kit-react.git"
