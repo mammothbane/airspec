@@ -387,7 +387,6 @@ export const useAirSpecInterface = (): AirSpec => {
     var packet = new Uint8Array(header.length + payload.length);
     packet.set(header);
     packet.set(payload, header.length);
-    console.log(packet);
     txCharacteristic?.writeValue(packet);
   };
 
