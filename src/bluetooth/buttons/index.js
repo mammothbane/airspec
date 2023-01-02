@@ -37,8 +37,11 @@ import AirSpecControl from "../../bluetooth/sensor";
 function ButtonsBluetooth() {
   const {
     connect,
-    toggle,
     isConnected,
+    sysInfo,
+    toggle,
+    requestSysInfo,
+    getSysInfo,
     setSpecialMode,
     setBlueGreenMode,
     setRedFlashMode,
@@ -47,6 +50,8 @@ function ButtonsBluetooth() {
     setBlueLight,
     setColor,
   } = useAirSpecInterface();
+
+  const [sysRun, setSysRun] = useState(true);
 
   const [dropdown, setDropdown] = useState(null);
   const openDropdown = ({ currentTarget }) => setDropdown(currentTarget);
@@ -58,6 +63,7 @@ function ButtonsBluetooth() {
   const [lightLevelEn, setLightLevelEn] = useState(null);
   const [lightColorEn, setLightColorEn] = useState(null);
   const [humidityEn, setHumidityEn] = useState(null);
+  const [micEn, setMicEn] = useState(null);
 
   const [checked, setChecked] = useState(false);
 
@@ -136,12 +142,14 @@ function ButtonsBluetooth() {
               <MKBox display="flex" alignItems="center">
                 <Switch
                   checked={faceTemperatureEn}
+                  disabled={!sysRun}
                   onChange={() => setFaceTemperatureEn(!faceTemperatureEn)}
                 />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
+                  disabled={!sysRun}
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
                   onClick={() => setFaceTemperatureEn(!faceTemperatureEn)}
@@ -151,13 +159,17 @@ function ButtonsBluetooth() {
               </MKBox>
               {/* <Divider>CENTER</Divider> */}
               <MKBox display="flex" alignItems="center">
-                <Switch checked={blinkEn} 
-                onChange={() => setBlinkEn(!blinkEn)}/>
+                <Switch
+                  checked={blinkEn}
+                  disabled={!sysRun}
+                  onChange={() => setBlinkEn(!blinkEn)}
+                />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
+                  disabled={!sysRun}
                   sx={{ cursor: "pointer", userSelect: "none" }}
                   onClick={() => setBlinkEn(!blinkEn)}
                 >
@@ -165,13 +177,17 @@ function ButtonsBluetooth() {
                 </MKTypography>
               </MKBox>
               <MKBox display="flex" alignItems="center">
-                <Switch checked={gasEn} 
-                onChange={() => setGasEn(!gasEn)}/>
+                <Switch
+                  checked={gasEn}
+                  disabled={!sysRun}
+                  onChange={() => setGasEn(!gasEn)}
+                />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
+                  disabled={!sysRun}
                   sx={{ cursor: "pointer", userSelect: "none" }}
                   onClick={() => setGasEn(!gasEn)}
                 >
@@ -179,13 +195,17 @@ function ButtonsBluetooth() {
                 </MKTypography>
               </MKBox>
               <MKBox display="flex" alignItems="center">
-                <Switch checked={lightLevelEn} 
-                onChange={() => setLightLevelEn(!lightLevelEn)} />
+                <Switch
+                  checked={lightLevelEn}
+                  disabled={!sysRun}
+                  onChange={() => setLightLevelEn(!lightLevelEn)}
+                />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
+                  disabled={!sysRun}
                   sx={{ cursor: "pointer", userSelect: "none" }}
                   onClick={() => setLightLevelEn(!lightLevelEn)}
                 >
@@ -193,13 +213,17 @@ function ButtonsBluetooth() {
                 </MKTypography>
               </MKBox>
               <MKBox display="flex" alignItems="center">
-                <Switch checked={lightColorEn} 
-                onChange={() => setLightColorEn(!lightColorEn)} />
+                <Switch
+                  checked={lightColorEn}
+                  disabled={!sysRun}
+                  onChange={() => setLightColorEn(!lightColorEn)}
+                />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
+                  disabled={!sysRun}
                   sx={{ cursor: "pointer", userSelect: "none" }}
                   onClick={() => setLightColorEn(!lightColorEn)}
                 >
@@ -207,22 +231,61 @@ function ButtonsBluetooth() {
                 </MKTypography>
               </MKBox>
               <MKBox display="flex" alignItems="center">
-                <Switch checked={humidityEn} 
-                onChange={() => setHumidityEn(!humidityEn)} />
+                <Switch
+                  checked={humidityEn}
+                  disabled={!sysRun}
+                  onChange={() => setHumidityEn(!humidityEn)}
+                />
                 <MKTypography
                   variant="button"
                   color="text"
                   fontWeight="regular"
                   ml={1}
+                  disabled={!sysRun}
                   sx={{ cursor: "pointer", userSelect: "none" }}
                   onClick={() => setHumidityEn(!humidityEn)}
                 >
                   Humidity
                 </MKTypography>
               </MKBox>
+              <MKBox display="flex" alignItems="center">
+                <Switch
+                  checked={micEn}
+                  disabled={!sysRun}
+                  onChange={() => setMicEn(!micEn)}
+                />
+                <MKTypography
+                  variant="button"
+                  color="text"
+                  fontWeight="regular"
+                  ml={1}
+                  disabled={!sysRun}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => setMicEn(!micEn)}
+                >
+                  Microphone
+                </MKTypography>
+              </MKBox>
               {/* </Grid> */}
 
-              <MKButton variant="gradient" color="success">
+              {sysRun ? (
+                <MKButton
+                  variant="gradient"
+                  color="success"
+                  onClick={(event) => setSysRun(!sysRun)}
+                >
+                  Start System
+                </MKButton>
+              ) : (
+                <MKButton
+                  variant="gradient"
+                  color="warning"
+                  onClick={(event) => setSysRun(!sysRun)}
+                >
+                  Stop System
+                </MKButton>
+              )}
+              <MKButton variant="gradient" color="success" onClick={requestSysInfo}>
                 Start Streaming to Server
               </MKButton>
             </Stack>
