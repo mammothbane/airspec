@@ -7,7 +7,7 @@ export interface AirSpec {
   connect: () => void;
   isConnected: boolean;
   sysInfo: any;
-  setSysInfo: () => void;
+  setSysInfo: (entry: any) => void;
   toggle: () => void;
   requestSysInfo: () => void;
   updateSysInfo: () => void;
