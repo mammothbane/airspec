@@ -47,7 +47,8 @@ import footerRoutes from "footer.routes";
 import 'assets/airspec.css';
 
 // Images
-import bgImage from "assets/images/bg-presentation.jpg";
+// import bgImage from "assets/images/bg-presentation.jpg";
+import bgImage from "assets/images/pexels-barnabas2.jpg"
 import cloudImage from "assets/images/clouds.png";
 import fogLow from "assets/images/fog-low.png";
 
@@ -195,7 +196,18 @@ function Presentation() {
             <Grid container spacing={3}>
               <Grid item xs={12} lg={5} ml="auto" sx={{ textAlign: { xs: "center", lg: "left" } }}>
                 <MKTypography variant="h4" fontWeight="bold" mb={0.5}>
-                  Thank you for your support!
+                  Questions? Send us an {" "}
+                  <MKTypography
+        component="a"
+        href="mailto: chwalek@mit.edu"
+        target="_blank"
+        rel="noreferrer"
+        variant="h4"
+        fontWeight="bold"
+        color="primary"
+      >
+        email! 
+      </MKTypography>
                 </MKTypography>
                 {/* <MKTypography variant="body1" color="text">
                   We deliver the best web products
