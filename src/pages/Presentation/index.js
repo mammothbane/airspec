@@ -44,8 +44,12 @@ import BuiltByDevelopers from "pages/Presentation/components/BuiltByDevelopers";
 import routes from "routes";
 import footerRoutes from "footer.routes";
 
+import 'assets/airspec.css';
+
 // Images
 import bgImage from "assets/images/bg-presentation.jpg";
+import cloudImage from "assets/images/clouds.png";
+import fogLow from "assets/images/fog-low.png";
 
 function Presentation() {
   return (
@@ -60,6 +64,9 @@ function Presentation() {
         // }}
         sticky
       />
+
+      
+
       <MKBox
         minHeight="75vh"
         width="100%"
@@ -71,8 +78,19 @@ function Presentation() {
           placeItems: "center",
         }}
       >
+
+
         <Container>
+
+        <div
+          className="moving-clouds">
+        <div className="fog-low">
+                 <img alt="..." src={cloudImage} />
+               </div>
+               </div>
+
           <Grid container item xs={12} lg={7} justifyContent="center" mx="auto">
+          
             <MKTypography
               variant="h1"
               color="white"
@@ -84,6 +102,7 @@ function Presentation() {
                 },
               })}
             >
+
               AirSpec{" "}
             </MKTypography>
             <MKTypography
@@ -93,14 +112,19 @@ function Presentation() {
               px={{ xs: 6, lg: 12 }}
               mt={1}
             >
+              
               Free & Open Source Smart Eyeglass Platform Designed to Measure You and the Surrounding Environment
               
               {/* Web UI Kit built over ReactJS &amp; MUI. Join over 1.6 million
               developers around the world. */}
             </MKTypography>
+
           </Grid>
+          
         </Container>
+
       </MKBox>
+      
       <Card
         sx={{
           p: 2,
@@ -112,6 +136,7 @@ function Presentation() {
           boxShadow: ({ boxShadows: { xxl } }) => xxl,
         }}
       >
+        
         <Counters />
         <DesignBlocks />
         {/* <Information />
