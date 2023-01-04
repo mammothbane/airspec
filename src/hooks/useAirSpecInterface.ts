@@ -311,7 +311,7 @@ export const useAirSpecInterface = (): AirSpec => {
     // console.log("update sys info");
     // console.log(sysInfo);
     var data = new Uint8Array(sysInfo.dataView.buffer);
-    // console.log(data);
+    console.log(data);
     sysInfoCharacteristic?.writeValue(data);
     // if (sysInfo.length < 1) {
     //   return 0;

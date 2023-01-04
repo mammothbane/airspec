@@ -37,6 +37,8 @@ import MKTypography from "components/MKTypography";
 
 function AirSpecControl(props) {
   // function AirSpecControl = ({ connect }, isConnected, {setBlueGreenMode}) => {
+    const [updateViz, setUpdateViz] = useState(null);
+
   const [dropdown, setDropdown] = useState(null);
   const [specialFuncDropDown, setSpecialFuncDropDown] = useState(null);
   const [specialFuncDropDownAct, setSpecialFuncDropDownAct] = useState(null);
@@ -49,7 +51,7 @@ function AirSpecControl(props) {
   const [blinkConfigFuncDropDownAct, setBlinkConfigFuncDropDownAct] = useState(null);
   const [gasConfigFuncDropDownAct, setGasConfigFuncDropDownAct] = useState(null);
   const [lightLevelConfigFuncDropDownAct, setLightLevelConfigFuncDropDownAct] = useState(null);
-  const [lightIntensityConfigFuncDropDownAct, setLightIntensityConfigFuncDropDownAct] = useState(null);
+  const [lightColorConfigFuncDropDownAct, setLightColorConfigFuncDropDownAct] = useState(null);
   const [humidityConfigFuncDropDownAct, setHumidityConfigFuncDropDownAct] = useState(null);
   const [micConfigFuncDropDownAct, setMicConfigFuncDropDownAct] = useState(null);
 
@@ -102,7 +104,7 @@ function AirSpecControl(props) {
     setBlinkConfigFuncDropDownAct(false);
     setGasConfigFuncDropDownAct(false);
     setLightLevelConfigFuncDropDownAct(false);
-    setLightIntensityConfigFuncDropDownAct(false);
+    setLightColorConfigFuncDropDownAct(false);
     setHumidityConfigFuncDropDownAct(false);
     setMicConfigFuncDropDownAct(false);
 
@@ -114,7 +116,7 @@ function AirSpecControl(props) {
     setBlinkConfigFuncDropDownAct(false);
     setGasConfigFuncDropDownAct(false);
     setLightLevelConfigFuncDropDownAct(false);
-    setLightIntensityConfigFuncDropDownAct(false);
+    setLightColorConfigFuncDropDownAct(false);
     setHumidityConfigFuncDropDownAct(false);
     setMicConfigFuncDropDownAct(false);
 
@@ -126,7 +128,7 @@ function AirSpecControl(props) {
     setBlinkConfigFuncDropDownAct(true);
     setGasConfigFuncDropDownAct(false);
     setLightLevelConfigFuncDropDownAct(false);
-    setLightIntensityConfigFuncDropDownAct(false);
+    setLightColorConfigFuncDropDownAct(false);
     setHumidityConfigFuncDropDownAct(false);
     setMicConfigFuncDropDownAct(false);
 
@@ -138,7 +140,7 @@ function AirSpecControl(props) {
     setBlinkConfigFuncDropDownAct(false);
     setGasConfigFuncDropDownAct(true);
     setLightLevelConfigFuncDropDownAct(false);
-    setLightIntensityConfigFuncDropDownAct(false);
+    setLightColorConfigFuncDropDownAct(false);
     setHumidityConfigFuncDropDownAct(false);
     setMicConfigFuncDropDownAct(false);
 
@@ -150,7 +152,7 @@ function AirSpecControl(props) {
     setBlinkConfigFuncDropDownAct(false);
     setGasConfigFuncDropDownAct(false);
     setLightLevelConfigFuncDropDownAct(true);
-    setLightIntensityConfigFuncDropDownAct(false);
+    setLightColorConfigFuncDropDownAct(false);
     setHumidityConfigFuncDropDownAct(false);
     setMicConfigFuncDropDownAct(false);
 
@@ -162,7 +164,7 @@ function AirSpecControl(props) {
     setBlinkConfigFuncDropDownAct(false);
     setGasConfigFuncDropDownAct(false);
     setLightLevelConfigFuncDropDownAct(false);
-    setLightIntensityConfigFuncDropDownAct(true);
+    setLightColorConfigFuncDropDownAct(true);
     setHumidityConfigFuncDropDownAct(false);
     setMicConfigFuncDropDownAct(false);
 
@@ -174,7 +176,7 @@ function AirSpecControl(props) {
     setBlinkConfigFuncDropDownAct(false);
     setGasConfigFuncDropDownAct(false);
     setLightLevelConfigFuncDropDownAct(false);
-    setLightIntensityConfigFuncDropDownAct(false);
+    setLightColorConfigFuncDropDownAct(false);
     setHumidityConfigFuncDropDownAct(true);
     setMicConfigFuncDropDownAct(false);
 
@@ -186,7 +188,7 @@ function AirSpecControl(props) {
     setBlinkConfigFuncDropDownAct(false);
     setGasConfigFuncDropDownAct(false);
     setLightLevelConfigFuncDropDownAct(false);
-    setLightIntensityConfigFuncDropDownAct(false);
+    setLightColorConfigFuncDropDownAct(false);
     setHumidityConfigFuncDropDownAct(false);
     setMicConfigFuncDropDownAct(true);
 
@@ -215,6 +217,14 @@ function AirSpecControl(props) {
     setSpecialFuncDropDown(!specialFuncDropDown);
     closeDropdown();
   };
+
+  // const updateThermopileProp = (value) => {
+  //   // console.log(val);
+  //   props.sysInfo.thermopileSensorPeriod=value;
+  //   setUpdateViz(!updateViz);
+  //   console.log(props.sysInfo?.thermopileSensorPeriod);
+  // }
+
   const closeDropdown = () => setDropdown(null);
   const closeSpecialFuncDropdown = () => setSpecialFuncDropDown(null);
   const closeSensorConfigDropdown = () => setSensorConfigDropDown(null);
@@ -472,6 +482,16 @@ function AirSpecControl(props) {
             {sensorConfigDropDownAct ? (
                 <Stack direction="column">
 
+<MKTypography
+                  variant="subtitle2"
+                  color="info"
+                  fontWeight="light"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                    Make sure to click "Send Configuration" to send new settings to AirSpecs
+                 </MKTypography>
+     
             {thermopileConfigFuncDropDownAct ? (
               <Stack direction="column" alignItems="left" spacing={2}>
 
@@ -481,7 +501,7 @@ function AirSpecControl(props) {
                   fontWeight="regular"
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={toggleRedFlashModeSwitch}
+                  // onClick={toggleRedFlashModeSwitch}
                 >
                   Thermopile Settings
                 </MKTypography>
@@ -505,21 +525,18 @@ function AirSpecControl(props) {
                   type="number"
                   label="Sample Period (ms)"
                   fullWidth
-                  value={redMaxIntensity}
-                  // onChange={(event) => setRedMaxIntensity(event.target.value)}
+                  value={props.sysInfo.thermopileSensorPeriod}
+                  onChange={(event) => {
+                    props.sysInfo.thermopileSensorPeriod=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
                   InputProps={{
-                    inputProps: { min: 0 },
+                    inputProps: { min: 0 , max:65000},
                   }}
                 />
                 <MKButton
-                  onClick={() =>
-                    props.setRedFlashMode(
-                      enableRedFlashMode,
-                      redMaxIntensity,
-                      redFlashPeriod,
-                      redFlashDuration
-                    )
-                  }
+                  onClick={() => props.updateSysInfo()}
                   variant="gradient"
                   color="dark"
                 >
@@ -527,6 +544,7 @@ function AirSpecControl(props) {
                 </MKButton>
               </Stack>
             ) : null }
+
 
           {inertialConfigFuncDropDownAct ? (
               <Stack direction="column" alignItems="left" spacing={2}>
@@ -537,7 +555,6 @@ function AirSpecControl(props) {
                   fontWeight="regular"
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={toggleRedFlashModeSwitch}
                 >
                   Inertial Settings
                 </MKTypography>
@@ -546,21 +563,18 @@ function AirSpecControl(props) {
                   type="number"
                   label="Sample Rate (Hz)"
                   fullWidth
-                  value={redMaxIntensity}
-                  // onChange={(event) => setRedMaxIntensity(event.target.value)}
+                  value={props.sysInfo.inertialSampleRate}
+                  onChange={(event) => {
+                    props.sysInfo.inertialSampleRate=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
                   InputProps={{
-                    inputProps: { min: 0 },
+                    inputProps: { min: 0 , max:65000},
                   }}
                 />
                 <MKButton
-                  onClick={() =>
-                    props.setRedFlashMode(
-                      enableRedFlashMode,
-                      redMaxIntensity,
-                      redFlashPeriod,
-                      redFlashDuration
-                    )
-                  }
+                  onClick={() => props.updateSysInfo()}
                   variant="gradient"
                   color="dark"
                 >
@@ -578,7 +592,6 @@ function AirSpecControl(props) {
                   fontWeight="regular"
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={toggleRedFlashModeSwitch}
                 >
                   Blink Settings
                 </MKTypography>
@@ -587,21 +600,18 @@ function AirSpecControl(props) {
                   type="number"
                   label="Sample Rate (Hz)"
                   fullWidth
-                  value={redMaxIntensity}
-                  // onChange={(event) => setRedMaxIntensity(event.target.value)}
+                  value={props.sysInfo.micSampleRate}
+                  onChange={(event) => {
+                    props.sysInfo.thermopileSensorPeriod=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
                   InputProps={{
-                    inputProps: { min: 0 },
+                    inputProps: { min: 0 , max:65000},
                   }}
                 />
                 <MKButton
-                  onClick={() =>
-                    props.setRedFlashMode(
-                      enableRedFlashMode,
-                      redMaxIntensity,
-                      redFlashPeriod,
-                      redFlashDuration
-                    )
-                  }
+                  onClick={() => props.updateSysInfo()}
                   variant="gradient"
                   color="dark"
                 >
@@ -619,7 +629,6 @@ function AirSpecControl(props) {
                   fontWeight="regular"
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={toggleRedFlashModeSwitch}
                 >
                   Gas Settings
                 </MKTypography>
@@ -628,21 +637,18 @@ function AirSpecControl(props) {
                   type="number"
                   label="Sample Period (ms)"
                   fullWidth
-                  value={redMaxIntensity}
-                  // onChange={(event) => setRedMaxIntensity(event.target.value)}
+                  value={props.sysInfo.gasSamplePeriod}
+                  onChange={(event) => {
+                    props.sysInfo.gasSamplePeriod=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
                   InputProps={{
-                    inputProps: { min: 0 },
+                    inputProps: { min: 0 , max:65000},
                   }}
                 />
                 <MKButton
-                  onClick={() =>
-                    props.setRedFlashMode(
-                      enableRedFlashMode,
-                      redMaxIntensity,
-                      redFlashPeriod,
-                      redFlashDuration
-                    )
-                  }
+                  onClick={() => props.updateSysInfo()}
                   variant="gradient"
                   color="dark"
                 >
@@ -660,7 +666,6 @@ function AirSpecControl(props) {
                   fontWeight="regular"
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={toggleRedFlashModeSwitch}
                 >
                   Light Level Settings
                 </MKTypography>
@@ -669,21 +674,18 @@ function AirSpecControl(props) {
                   type="number"
                   label="Sample Period (ms)"
                   fullWidth
-                  value={redMaxIntensity}
-                  // onChange={(event) => setRedMaxIntensity(event.target.value)}
+                  value={props.sysInfo.luxSamplePeriod}
+                  onChange={(event) => {
+                    props.sysInfo.luxSamplePeriod=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
                   InputProps={{
-                    inputProps: { min: 0 },
+                    inputProps: { min: 0 , max:65000},
                   }}
                 />
                 <MKButton
-                  onClick={() =>
-                    props.setRedFlashMode(
-                      enableRedFlashMode,
-                      redMaxIntensity,
-                      redFlashPeriod,
-                      redFlashDuration
-                    )
-                  }
+                  onClick={() => props.updateSysInfo()}
                   variant="gradient"
                   color="dark"
                 >
@@ -692,7 +694,7 @@ function AirSpecControl(props) {
               </Stack>
             ) : null }
 
-{lightIntensityConfigFuncDropDownAct ? (
+{lightColorConfigFuncDropDownAct ? (
               <Stack direction="column" alignItems="left" spacing={2}>
 
                 <MKTypography
@@ -701,7 +703,6 @@ function AirSpecControl(props) {
                   fontWeight="regular"
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={toggleRedFlashModeSwitch}
                 >
                   Light Color Settings
                 </MKTypography>
@@ -710,21 +711,18 @@ function AirSpecControl(props) {
                   type="number"
                   label="Sample Period (ms)"
                   fullWidth
-                  value={redMaxIntensity}
-                  // onChange={(event) => setRedMaxIntensity(event.target.value)}
+                  value={props.sysInfo.colorSamplePeriod}
+                  onChange={(event) => {
+                    props.sysInfo.colorSamplePeriod=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
                   InputProps={{
-                    inputProps: { min: 0 },
+                    inputProps: { min: 0 , max:65000},
                   }}
                 />
                 <MKButton
-                  onClick={() =>
-                    props.setRedFlashMode(
-                      enableRedFlashMode,
-                      redMaxIntensity,
-                      redFlashPeriod,
-                      redFlashDuration
-                    )
-                  }
+                  onClick={() => props.updateSysInfo()}
                   variant="gradient"
                   color="dark"
                 >
@@ -742,7 +740,6 @@ function AirSpecControl(props) {
                   fontWeight="regular"
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={toggleRedFlashModeSwitch}
                 >
                   Humidity Settings
                 </MKTypography>
@@ -751,21 +748,18 @@ function AirSpecControl(props) {
                   type="number"
                   label="Sample Period (ms)"
                   fullWidth
-                  value={redMaxIntensity}
-                  // onChange={(event) => setRedMaxIntensity(event.target.value)}
+                  value={props.sysInfo.humiditySamplePeriod}
+                  onChange={(event) => {
+                    props.sysInfo.humiditySamplePeriod=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
                   InputProps={{
-                    inputProps: { min: 0 },
+                    inputProps: { min: 0 , max:65000},
                   }}
                 />
                 <MKButton
-                  onClick={() =>
-                    props.setRedFlashMode(
-                      enableRedFlashMode,
-                      redMaxIntensity,
-                      redFlashPeriod,
-                      redFlashDuration
-                    )
-                  }
+                  onClick={() => props.updateSysInfo()}
                   variant="gradient"
                   color="dark"
                 >
@@ -783,7 +777,6 @@ function AirSpecControl(props) {
                   fontWeight="regular"
                   ml={1}
                   sx={{ cursor: "pointer", userSelect: "none" }}
-                  onClick={toggleRedFlashModeSwitch}
                 >
                   Microphone Settings
                 </MKTypography>
@@ -792,21 +785,18 @@ function AirSpecControl(props) {
                   type="number"
                   label="Sample Period (ms)"
                   fullWidth
-                  value={redMaxIntensity}
-                  // onChange={(event) => setRedMaxIntensity(event.target.value)}
+                  value={props.sysInfo.micSampleRate}
+                  onChange={(event) => {
+                    props.sysInfo.micSampleRate=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
                   InputProps={{
-                    inputProps: { min: 0 },
+                    inputProps: { min: 0 , max:65000},
                   }}
                 />
                 <MKButton
-                  onClick={() =>
-                    props.setRedFlashMode(
-                      enableRedFlashMode,
-                      redMaxIntensity,
-                      redFlashPeriod,
-                      redFlashDuration
-                    )
-                  }
+                  onClick={() => props.updateSysInfo()}
                   variant="gradient"
                   color="dark"
                 >
