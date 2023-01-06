@@ -62,6 +62,8 @@ function AirSpecControl(props) {
   const [specialRedFlashFuncDropDownAct, setSpecialRedFlashFuncDropDownAct] =
     useState(null);
 
+    
+
     // const [specialRedFlashFuncDropDownAct, setSpecialRedFlashFuncDropDownAct] =
     // useState(null);
     // const [specialRedFlashFuncDropDownAct, setSpecialRedFlashFuncDropDownAct] =
@@ -74,6 +76,20 @@ function AirSpecControl(props) {
 
   const openSensorConfigDropDown = ({ currentTarget }) =>
     setSensorConfigDropDown(currentTarget);
+
+    
+  const [sensorConfigSubMenuDropDown_1, setSensorConfigSubMenuDropDown_1] = useState(null);
+  const [sensorConfigSubMenuDropDownAct_1, setSensorConfigSubMenuDropDownAct_1] = useState(null);
+  const openSensorConfigSubMenuDropDown_1 = ({ currentTarget }) =>
+    setSensorConfigSubMenuDropDown_1(currentTarget);
+  const closeSensorConfigSubMenuDropDown_1 = () => setSensorConfigSubMenuDropDown_1(null);
+
+  const [sensorConfigSubMenuDropDown_2, setSensorConfigSubMenuDropDown_2] = useState(null);
+  const [sensorConfigSubMenuDropDownAct_2, setSensorConfigSubMenuDropDownAct_2] = useState(null);
+  const openSensorConfigSubMenuDropDown_2 = ({ currentTarget }) =>
+    setSensorConfigSubMenuDropDown_2(currentTarget);
+  const closeSensorConfigSubMenuDropDown_2 = () => setSensorConfigSubMenuDropDown_2(null);
+
 
   const closeSensorConfigDropDown = ({ currentTarget }) => {
       // setSpecialDFUFuncDropDownAct(false);
@@ -276,6 +292,43 @@ function AirSpecControl(props) {
     setEnableDFUMode(!enableDFUMode);
   };
 
+  function GetLightIntensityIntegrationTime(val){
+    if(val == 0xFF){
+      return "2.73";
+    } 
+    else if (val == 0xF6){
+      return "27.3";
+    }
+    else if (val == 0xDB){
+      return "101";
+    }
+    else if (val == 0xC0){
+      return "175";
+    }
+    else if (val == 0x00){
+      return "600";
+    }else{
+      return "invalid"
+    }
+  }
+
+  function GetLightIntensityGain(val){
+    if(val == 0x00){
+      return "1x";
+    } 
+    else if (val == 0x01){
+      return "8x";
+    }
+    else if (val == 0x02){
+      return "16x";
+    }
+    else if (val == 0x03){
+      return "120x";
+    }else{
+      return "invalid"
+    }
+  }
+
   return (
     // <MKBox component="section" py={12}>
     <Stack direction="column" alignItems="left" spacing={1}>
@@ -342,40 +395,40 @@ function AirSpecControl(props) {
               ) : null}
               {sensorConfigDropDownAct ? (
                 <Stack direction="column" alignItems="left" spacing={1}>
-                  <MKButton
-                    variant="gradient"
-                    color="secondary"
-                    onClick={openSensorConfigDropDown}
-                  >
-                    Sensor Selection{" "}
-                    <Icon sx={dropdownIconStyles}>expand_more</Icon>
-                  </MKButton>
-                  <Menu
-                    anchorEl={sensorConfigDropDown}
-                    open={Boolean(sensorConfigDropDown)}
-                    onClose={closeSensorConfigDropDown}
-                  >
-                    <MenuItem onClick={sensorThermopileConfigurationDropdownAct}>
-                      Face Temperature
-                    </MenuItem>
-                    <MenuItem onClick={sensorInertialConfigurationDropdownAct}>Inertial System</MenuItem>
+                <MKButton
+                  variant="gradient"
+                  color="secondary"
+                  onClick={openSensorConfigDropDown}
+                >
+                  Sensor Selection{" "}
+                  <Icon sx={dropdownIconStyles}>expand_more</Icon>
+                </MKButton>
+                <Menu
+                  anchorEl={sensorConfigDropDown}
+                  open={Boolean(sensorConfigDropDown)}
+                  onClose={closeSensorConfigDropDown}
+                >
+                  <MenuItem onClick={sensorThermopileConfigurationDropdownAct}>
+                    Face Temperature
+                  </MenuItem>
+                  <MenuItem onClick={sensorInertialConfigurationDropdownAct}>Inertial System</MenuItem>
 
-                    <MenuItem onClick={sensorBlinkConfigurationDropdownAct}>Blink Sensing</MenuItem>
-                    <MenuItem onClick={sensorGasConfigurationDropdownAct}>Gas Sensing</MenuItem>
-                    <MenuItem onClick={sensorLightLevelConfigurationDropdownAct}>
-                      Light Level Sensor
-                    </MenuItem>
-                    <MenuItem onClick={sensorLightIntensityConfigurationDropdownAct}>
-                      Light Color Sensor
-                    </MenuItem>
-                    <MenuItem onClick={sensorHumidityConfigurationDropdownAct}>
-                      Humidity
-                    </MenuItem>
-                    <MenuItem onClick={sensorMicConfigurationDropdownAct}>
-                      Microphone
-                    </MenuItem>
-                  </Menu>
-                </Stack>
+                  <MenuItem onClick={sensorBlinkConfigurationDropdownAct}>Blink Sensing</MenuItem>
+                  <MenuItem onClick={sensorGasConfigurationDropdownAct}>Gas Sensing</MenuItem>
+                  <MenuItem onClick={sensorLightLevelConfigurationDropdownAct}>
+                    Light Level Sensor
+                  </MenuItem>
+                  <MenuItem onClick={sensorLightIntensityConfigurationDropdownAct}>
+                    Light Color Sensor
+                  </MenuItem>
+                  <MenuItem onClick={sensorHumidityConfigurationDropdownAct}>
+                    Humidity
+                  </MenuItem>
+                  <MenuItem onClick={sensorMicConfigurationDropdownAct}>
+                    Microphone
+                  </MenuItem>
+                </Menu>
+              </Stack>
               ) : null}
             </Stack>
           </Grid>
@@ -568,6 +621,13 @@ function AirSpecControl(props) {
                     props.sysInfo.inertialSampleRate=event.target.value;
                     setUpdateViz(!updateViz);
                   }} 
+
+                  // props.sysInfo.inertialGyroLPFEn;,
+                  // props.sysInfo.inertialGyroRange;
+                  // props.sysInfo.inertialGyroRate;
+                  // props.sysInfo.inertialAccLPFEn;
+                  // props.sysInfo.inertialAccRange;
+                  // props.sysInfo.inertialAccRate;
                   
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
@@ -600,11 +660,15 @@ function AirSpecControl(props) {
                   type="number"
                   label="Sample Rate (Hz)"
                   fullWidth
-                  value={props.sysInfo.micSampleRate}
+                  value={props.sysInfo.blinkSampleRate}
                   onChange={(event) => {
                     props.sysInfo.thermopileSensorPeriod=event.target.value;
                     setUpdateViz(!updateViz);
                   }} 
+
+                  // props.sysInfo.blinkDaylightCompensatationEN;
+                  // props.sysInfo.blinkDaylightLowerThresh;
+                  // props.sysInfo.blinkDaylightUpperThresh;
                   
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
@@ -679,11 +743,133 @@ function AirSpecControl(props) {
                     props.sysInfo.luxSamplePeriod=event.target.value;
                     setUpdateViz(!updateViz);
                   }} 
+
                   
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
                 />
+
+<Stack direction="row" alignItems="left" spacing={1}>
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="flex-end" spacing={1}>
+
+<MKTypography
+                  // variant="button"
+                  color="inherit"
+                  // fontWeight="light"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Gain
+                </MKTypography>
+                </Stack>
+</Grid>
+
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="left" spacing={1}>
+                <MKButton
+                  variant="gradient"
+                  color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_2}
+                >
+                  {GetLightIntensityGain(props.sysInfo.luxGain)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>expand_more</Icon>
+                </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_2}
+                  open={Boolean(sensorConfigSubMenuDropDown_2)}
+                  onClose={closeSensorConfigSubMenuDropDown_2}
+                >
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.luxGain=0x00;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 1x </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.luxGain=0x01;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 8x </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.luxGain=0x02;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 16x </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.luxGain=0x03;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 120x </MenuItem>
+                </Menu>
+                </Stack>
+                </Grid>
+                
+                </Stack>
+
+<Stack direction="row" alignItems="left" spacing={1}>
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="flex-end" spacing={1}>
+
+<MKTypography
+                  // variant="button"
+                  color="inherit"
+                  // fontWeight="light"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Integration Time (ms)
+                </MKTypography>
+                </Stack>
+</Grid>
+
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="left" spacing={1}>
+                <MKButton
+                  variant="gradient"
+                  color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_1}
+                >
+                  {GetLightIntensityIntegrationTime(props.sysInfo.luxIntegrationTime)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>expand_more</Icon>
+                </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_1}
+                  open={Boolean(sensorConfigSubMenuDropDown_1)}
+                  onClose={closeSensorConfigSubMenuDropDown_1}
+                >
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.luxIntegrationTime=0xFF;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 2.73 </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.luxIntegrationTime=0xF6;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 27.3 </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.luxIntegrationTime=0xDB;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 101 </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.luxIntegrationTime=0xC0;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 175 </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.luxIntegrationTime=0x00;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 600 </MenuItem>
+                </Menu>
+                </Stack>
+                </Grid>
+                
+                </Stack>
+
                 <MKButton
                   onClick={() => props.updateSysInfo()}
                   variant="gradient"
@@ -716,6 +902,10 @@ function AirSpecControl(props) {
                     props.sysInfo.colorSamplePeriod=event.target.value;
                     setUpdateViz(!updateViz);
                   }} 
+
+                  // props.sysInfo.colorIntegrationTime;
+                  // props.sysInfo.colorIntegrationStep;
+                  // props.sysInfo.colorGain;
                   
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
@@ -753,6 +943,9 @@ function AirSpecControl(props) {
                     props.sysInfo.humiditySamplePeriod=event.target.value;
                     setUpdateViz(!updateViz);
                   }} 
+
+                  // props.sysInfo.humidityPrecision;
+                  // props.sysInfo.humidityHeaterSetting;
                   
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
@@ -796,7 +989,10 @@ function AirSpecControl(props) {
                   }}
                 />
                 <MKButton
-                  onClick={() => props.updateSysInfo()}
+                  onClick={() => {
+                    // console.log(props.sysInfo);
+                    props.updateSysInfo();
+                  }}
                   variant="gradient"
                   color="dark"
                 >
