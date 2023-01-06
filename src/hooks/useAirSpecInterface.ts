@@ -161,46 +161,70 @@ export const useAirSpecInterface = (): AirSpec => {
 
   // https://www.npmjs.com/package/@binary-files/structjs#installation
   const airspecSensorConfigHeaderStruct = new Struct(
+    
     Struct.Uint8('systemRunState'),
     Struct.Skip(3),
     Struct.Uint32('uuid'),
     Struct.Uint32('firmware_version'),
     Struct.Uint32('epoch'),
-
-
+    // 4 bytes
+      
       Struct.Uint8('thermopileSensorEn'),
       Struct.Skip(1),
       Struct.Uint16('thermopileSensorPeriod'),
+      // 5 bytes
       
-
       Struct.Uint8('blinkSensorEn'),
-      Struct.Skip(1),
+      Struct.Uint8('blinkDaylightCompensatationEN'),
+      Struct.Uint8('blinkDaylightLowerThresh'),
+      Struct.Uint8('blinkDaylightUpperThresh'),
+      // Struct.Skip(2),
       Struct.Uint16('blinkSampleRate'),
       
-  
+
       Struct.Uint8('inertialSensorEn'),
-      Struct.Skip(1),
-      Struct.Uint16('inertialSampleRate'),
-  
+      Struct.Uint8('inertialGyroLPFEn'),
+      // 7 bytes
+      Struct.Uint8('inertialGyroRange'),
+      Struct.Uint8('inertialGyroRate'),
+      Struct.Uint8('inertialAccLPFEn'),
+      Struct.Uint8('inertialAccRange'),
+      Struct.Uint16('inertialAccRate'),
+
       Struct.Uint8('gasSensorEn'),
       Struct.Skip(1),
+      // 9 bytes
       Struct.Uint16('gasSamplePeriod'),
+      
   
       Struct.Uint8('humiditySensorEn'),
+      Struct.Uint8('humidityPrecision'),
+      Struct.Uint8('humidityHeaterSetting'),
       Struct.Skip(1),
       Struct.Uint16('humiditySamplePeriod'),
-  
+      // 11 bytes
+
       Struct.Uint8('luxSensorEn'),
+      Struct.Uint8('luxGain'),
+      Struct.Uint8('luxIntegrationTime'),
       Struct.Skip(1),
       Struct.Uint16('luxSamplePeriod'),
+      
   
       Struct.Uint8('colorSensorEn'),
+      Struct.Uint8('colorIntegrationTime'),
+      // 12 bytes
+      Struct.Uint16('colorIntegrationStep'),
+      Struct.Uint8('colorGain'),
       Struct.Skip(1),
+      // 13 bytes
       Struct.Uint16('colorSamplePeriod'),
+      
   
       Struct.Uint8('micSensorEn'),
       Struct.Skip(1),
       Struct.Uint16('micSampleRate')
+      // 16 bytes
   );
   
   const connect = async () => {
