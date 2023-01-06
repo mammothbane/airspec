@@ -30,6 +30,7 @@ import MKBox from "components/MKBox";
 import MKButton from "components/MKButton";
 import MKInput from "components/MKInput";
 import MKTypography from "components/MKTypography";
+import MKAlert from "components/MKAlert";
 
 // import { useAirSpecInterface } from "hooks/useAirSpecInterface";
 
@@ -54,6 +55,8 @@ function AirSpecControl(props) {
   const [lightColorConfigFuncDropDownAct, setLightColorConfigFuncDropDownAct] = useState(null);
   const [humidityConfigFuncDropDownAct, setHumidityConfigFuncDropDownAct] = useState(null);
   const [micConfigFuncDropDownAct, setMicConfigFuncDropDownAct] = useState(null);
+
+  const [updateSysAlert, setUpdateSysAlert] = useState(false);
 
   const [specialBlueGreenFuncDropDownAct, setSpecialBlueGreenFuncDropDownAct] =
     useState(null);
@@ -871,12 +874,22 @@ function AirSpecControl(props) {
                 </Stack>
 
                 <MKButton
-                  onClick={() => props.updateSysInfo()}
+                  onClick={() => {
+                    props.updateSysInfo();
+                    setUpdateSysAlert(true);
+                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
+                  }}
                   variant="gradient"
                   color="dark"
                 >
                   Send Configuraton
                 </MKButton>
+                {updateSysAlert ? (
+                <MKAlert>
+                  <Icon fontSize="small">thumb_up</Icon>&nbsp;
+                  Update sent to system!
+                </MKAlert>
+                ):(null)}
               </Stack>
             ) : null }
 
@@ -901,6 +914,7 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.colorSamplePeriod=event.target.value;
                     setUpdateViz(!updateViz);
+            
                   }} 
 
                   // props.sysInfo.colorIntegrationTime;
