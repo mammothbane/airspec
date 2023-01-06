@@ -85,7 +85,20 @@ export default {
       >
         Patrick Chwalek
       </MKTypography>
-      {" "}and David Ramsay
+      {" "}and{" "}
+      <MKTypography
+        component="a"
+        href="https://www.davidbramsay.com/"
+        target="_blank"
+        rel="noreferrer"
+        variant="button"
+        fontWeight="regular"
+      >
+        David Ramsay
+      </MKTypography>
     </MKTypography>
   ),
 };
+
+
+
