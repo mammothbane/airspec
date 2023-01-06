@@ -332,6 +332,84 @@ function AirSpecControl(props) {
     }
   }
 
+  function GetLightColorGain(val){
+    if(val == 0x00){
+      return "0.5x";
+    } 
+    else if (val == 1){
+      return "1x";
+    }
+    else if (val == 2){
+      return "2x";
+    }
+    else if (val == 3){
+      return "4x";
+    }else if (val == 4){
+      return "8x";
+    }else if (val == 5){
+      return "16x";
+    }else if (val == 6){
+      return "32x";
+    }else if (val == 7){
+      return "64x";
+    }else if (val == 8){
+      return "128x";
+    }else if (val == 9){
+      return "256x";
+    }else if (val == 10){
+      return "512x";
+    }else{
+      return "invalid"
+    }
+  }
+
+  function GetLightColorIntegrationTime(ATIME, ASTEP){
+    let intTime = ((ATIME + 1) * (ASTEP + 1) * 2.78)/1000.0 // mS
+    return intTime.toString()
+  }
+
+  function GetLightHumidityPrecision(val){
+    if(val == 0x00){
+      return "Low";
+    } 
+    else if (val == 1){
+      return "Medium";
+    }
+    else if (val == 2){
+      return "High";
+    }
+    else{
+      return "invalid"
+    }
+  }
+
+  function GetLightHumidityHeater(val){
+    if(val == 0x00){
+      return "No Heater";
+    } 
+    else if (val == 1){
+      return "High Heater (1s)";
+    }
+    else if (val == 2){
+      return "High Heater (100ms)";
+    }
+    else if (val == 3){
+      return "Med Heater (1ms)";
+    }
+    else if (val == 4){
+      return "Med Heater (100ms)";
+    }
+    else if (val == 5){
+      return "Low Heater (1s)";
+    }
+    else if (val == 6){
+      return "Low Heater (100ms)";
+    }
+    else{
+      return "invalid"
+    }
+  }
+
   return (
     // <MKBox component="section" py={12}>
     <Stack direction="column" alignItems="left" spacing={1}>
@@ -537,17 +615,6 @@ function AirSpecControl(props) {
             
             {sensorConfigDropDownAct ? (
                 <Stack direction="column">
-
-<MKTypography
-                  variant="subtitle2"
-                  color="info"
-                  fontWeight="light"
-                  ml={1}
-                  sx={{ cursor: "pointer", userSelect: "none" }}
-                >
-                    Make sure to click "Send Configuration" to send new settings to AirSpecs
-                 </MKTypography>
-     
             {thermopileConfigFuncDropDownAct ? (
               <Stack direction="column" alignItems="left" spacing={2}>
 
@@ -592,7 +659,11 @@ function AirSpecControl(props) {
                   }}
                 />
                 <MKButton
-                  onClick={() => props.updateSysInfo()}
+                  onClick={() => {
+                    props.updateSysInfo();
+                    setUpdateSysAlert(true);
+                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
+                  }}
                   variant="gradient"
                   color="dark"
                 >
@@ -637,7 +708,11 @@ function AirSpecControl(props) {
                   }}
                 />
                 <MKButton
-                  onClick={() => props.updateSysInfo()}
+                  onClick={() => {
+                    props.updateSysInfo();
+                    setUpdateSysAlert(true);
+                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
+                  }}
                   variant="gradient"
                   color="dark"
                 >
@@ -678,7 +753,11 @@ function AirSpecControl(props) {
                   }}
                 />
                 <MKButton
-                  onClick={() => props.updateSysInfo()}
+                  onClick={() => {
+                    props.updateSysInfo();
+                    setUpdateSysAlert(true);
+                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
+                  }}
                   variant="gradient"
                   color="dark"
                 >
@@ -715,7 +794,11 @@ function AirSpecControl(props) {
                   }}
                 />
                 <MKButton
-                  onClick={() => props.updateSysInfo()}
+                  onClick={() => {
+                    props.updateSysInfo();
+                    setUpdateSysAlert(true);
+                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
+                  }}
                   variant="gradient"
                   color="dark"
                 >
@@ -776,7 +859,7 @@ function AirSpecControl(props) {
 <Stack direction="column" alignItems="left" spacing={1}>
                 <MKButton
                   variant="gradient"
-                  color="secondary"
+                  // color="secondary"
                   onClick={openSensorConfigSubMenuDropDown_2}
                 >
                   {GetLightIntensityGain(props.sysInfo.luxGain)}{" "}
@@ -834,7 +917,7 @@ function AirSpecControl(props) {
 <Stack direction="column" alignItems="left" spacing={1}>
                 <MKButton
                   variant="gradient"
-                  color="secondary"
+                  // color="secondary"
                   onClick={openSensorConfigSubMenuDropDown_1}
                 >
                   {GetLightIntensityIntegrationTime(props.sysInfo.luxIntegrationTime)}{" "}
@@ -881,15 +964,10 @@ function AirSpecControl(props) {
                   }}
                   variant="gradient"
                   color="dark"
-                >
+                >                    
                   Send Configuraton
                 </MKButton>
-                {updateSysAlert ? (
-                <MKAlert>
-                  <Icon fontSize="small">thumb_up</Icon>&nbsp;
-                  Update sent to system!
-                </MKAlert>
-                ):(null)}
+                
               </Stack>
             ) : null }
 
@@ -916,17 +994,150 @@ function AirSpecControl(props) {
                     setUpdateViz(!updateViz);
             
                   }} 
-
-                  // props.sysInfo.colorIntegrationTime;
-                  // props.sysInfo.colorIntegrationStep;
-                  // props.sysInfo.colorGain;
                   
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
                 />
+
+<MKInput
+                  type="number"
+                  label="Analog Integration Time Per Step (max: 255)"
+                  fullWidth
+                  value={props.sysInfo.colorIntegrationTime}
+                  onChange={(event) => {
+                    props.sysInfo.colorIntegrationTime=event.target.value;
+                    setUpdateViz(!updateViz);
+            
+                  }} 
+                  
+                  InputProps={{
+                    inputProps: { min: 0 , max:255},
+                  }}
+                />
+
+<MKInput
+                  type="number"
+                  label="Analog Integration Step (max: 65534)"
+                  fullWidth
+                  value={props.sysInfo.colorIntegrationStep}
+                  onChange={(event) => {
+                    props.sysInfo.colorIntegrationStep=event.target.value;
+                    setUpdateViz(!updateViz);
+            
+                  }} 
+                  
+                  InputProps={{
+                    inputProps: { min: 0 , max:65534},
+                  }}
+                />
+
+<MKTypography
+                  // variant="button"
+                  color="inherit"
+                  // fontWeight="light"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                 Total Integration Time: {" "} {GetLightColorIntegrationTime(props.sysInfo.colorIntegrationTime,props.sysInfo.colorIntegrationStep)} {" ms"}
+
+                </MKTypography>
+
+<Stack direction="row" alignItems="left" spacing={1}>
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="flex-end" spacing={1}>
+
+<MKTypography
+                  // variant="button"
+                  color="inherit"
+                  // fontWeight="light"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Gain
+                </MKTypography>
+                </Stack>
+</Grid>
+
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="left" spacing={1}>
                 <MKButton
-                  onClick={() => props.updateSysInfo()}
+                  variant="gradient"
+                  // color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_2}
+                >
+                  {GetLightColorGain(props.sysInfo.colorGain)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>expand_more</Icon>
+                </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_2}
+                  open={Boolean(sensorConfigSubMenuDropDown_2)}
+                  onClose={closeSensorConfigSubMenuDropDown_2}
+                >
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=0;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 0.5x </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=1;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 1x </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=2;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 2x </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=3;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 4x </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=4;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 8x </MenuItem>
+                                    <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=5;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 16x </MenuItem>
+                                    <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=6;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 32x </MenuItem>
+                                    <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=7;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 64x </MenuItem>
+                                    <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=8;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 128x </MenuItem>
+                                    <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=9;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 256x </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.colorGain=10;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> 512x </MenuItem>
+                </Menu>
+                </Stack>
+                </Grid>
+                
+                </Stack>
+
+                <MKButton
+                  onClick={() => {
+                    props.updateSysInfo();
+                    setUpdateSysAlert(true);
+                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
+                  }}
                   variant="gradient"
                   color="dark"
                 >
@@ -965,8 +1176,138 @@ function AirSpecControl(props) {
                     inputProps: { min: 0 , max:65000},
                   }}
                 />
+
+<Stack direction="row" alignItems="left" spacing={1}>
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="flex-end" spacing={1}>
+
+<MKTypography
+                  // variant="button"
+                  color="inherit"
+                  // fontWeight="light"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Precision
+                </MKTypography>
+                </Stack>
+</Grid>
+
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="left" spacing={1}>
                 <MKButton
-                  onClick={() => props.updateSysInfo()}
+                  variant="gradient"
+                  // color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_1}
+                >
+                  {GetLightHumidityPrecision(props.sysInfo.humidityPrecision)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>expand_more</Icon>
+                </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_1}
+                  open={Boolean(sensorConfigSubMenuDropDown_1)}
+                  onClose={closeSensorConfigSubMenuDropDown_1}
+                >
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.humidityPrecision=0;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> Low </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.humidityPrecision=1;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> Medium </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.humidityPrecision=2;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> High </MenuItem>
+                </Menu>
+                </Stack>
+                </Grid>
+                
+                </Stack>
+
+                <Stack direction="row" alignItems="left" spacing={1}>
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="flex-end" spacing={1}>
+
+<MKTypography
+                  // variant="button"
+                  color="inherit"
+                  // fontWeight="light"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Heater Settings
+                </MKTypography>
+                </Stack>
+</Grid>
+
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="left" spacing={1}>
+                <MKButton
+                  variant="gradient"
+                  // color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_2}
+                >
+                  {GetLightHumidityHeater(props.sysInfo.humidityHeaterSetting)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>expand_more</Icon>
+                </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_2}
+                  open={Boolean(sensorConfigSubMenuDropDown_2)}
+                  onClose={closeSensorConfigSubMenuDropDown_2}
+                >
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.humidityHeaterSetting=0;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> No Heater </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.humidityHeaterSetting=1;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> High Heater (1s) </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.humidityHeaterSetting=2;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> High Heater (100ms) </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.humidityHeaterSetting=3;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> Med Heater (1s) </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.humidityHeaterSetting=4;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> Med Heater (100s) </MenuItem>
+                                    <MenuItem onClick={(event) => {
+                      props.sysInfo.humidityHeaterSetting=5;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> Low Heater (1s) </MenuItem>
+                                    <MenuItem onClick={(event) => {
+                      props.sysInfo.humidityHeaterSetting=6;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> Low Heater (100s) </MenuItem>
+                  
+                </Menu>
+                </Stack>
+                </Grid>
+                
+                </Stack>
+
+                <MKButton
+                  onClick={() => {
+                    props.updateSysInfo();
+                    setUpdateSysAlert(true);
+                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
+                  }}
                   variant="gradient"
                   color="dark"
                 >
@@ -1004,8 +1345,9 @@ function AirSpecControl(props) {
                 />
                 <MKButton
                   onClick={() => {
-                    // console.log(props.sysInfo);
                     props.updateSysInfo();
+                    setUpdateSysAlert(true);
+                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
                   }}
                   variant="gradient"
                   color="dark"
@@ -1015,8 +1357,25 @@ function AirSpecControl(props) {
               </Stack>
             ) : null }
 
+           {updateSysAlert ? (
+                <MKAlert>
+                  <Icon fontSize="small">thumb_up</Icon>&nbsp;
+                  Update sent to system!
+                </MKAlert>
+                ) : ( 
+            <MKTypography
+                  variant="subtitle2"
+                  color="info"
+                  fontWeight="light"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                    Make sure to click "Send Configuration" to send new settings to AirSpecs
+                 </MKTypography>
+            )}
             </Stack>
             ) : null
+            
             }
             {specialFuncDropDownAct ? (
               <Stack>
