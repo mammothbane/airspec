@@ -194,7 +194,7 @@ function Presentation() {
         <MKBox pt={18} pb={6}>
           <Container>
             <Grid container spacing={3}>
-              <Grid item xs={12} lg={5} ml="auto" sx={{ textAlign: { xs: "center", lg: "left" } }}>
+              <Grid item xs={12} lg={6} ml="auto" sx={{ textAlign: { xs: "center", lg: "left" } }}>
                 <MKTypography variant="h4" fontWeight="bold" mb={0.5}>
                   Questions? Send us an {" "}
                   <MKTypography
@@ -204,14 +204,25 @@ function Presentation() {
         rel="noreferrer"
         variant="h4"
         fontWeight="bold"
-        color="primary"
+        color="info"
       >
         email! 
       </MKTypography>
                 </MKTypography>
-                {/* <MKTypography variant="body1" color="text">
-                  We deliver the best web products
-                </MKTypography> */}
+                <MKTypography variant="body1" color="text">
+                  Interested in seeing our smart eyeglass iteration?{" "}
+                  <MKTypography
+        component="a"
+        href="https://captivate.media.mit.edu/"
+        target="_blank"
+        rel="noreferrer"
+        variant="body1"
+        fontWeight="bold"
+        color="info"
+      >
+        Project Captivate 
+      </MKTypography>
+                </MKTypography>
               </Grid>
               <Grid
                 item
