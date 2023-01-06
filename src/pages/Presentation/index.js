@@ -210,7 +210,7 @@ function Presentation() {
       </MKTypography>
                 </MKTypography>
                 <MKTypography variant="body1" color="text">
-                  Interested in seeing our smart eyeglass iteration?{" "}
+                  Interested in seeing our last smart eyeglass iteration?{" "}
                   <MKTypography
         component="a"
         href="https://captivate.media.mit.edu/"
