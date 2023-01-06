@@ -17,11 +17,13 @@ Coded by www.creative-tim.com
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
+import Icon from "@mui/material/Icon";
 
 // Material Kit 2 React components
 import MKBox from "components/MKBox";
 import MKTypography from "components/MKTypography";
 import MKSocialButton from "components/MKSocialButton";
+import MKAlert from "components/MKAlert";
 
 // Material Kit 2 React examples
 import DefaultNavbar from "examples/Navbars/DefaultNavbar";
