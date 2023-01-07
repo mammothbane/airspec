@@ -36,6 +36,7 @@ import MKAlert from "components/MKAlert";
 
 // import { useAirSpecInterface } from "hooks/useAirSpecInterface";
 
+
 function AirSpecControl(props) {
   // function AirSpecControl = ({ connect }, isConnected, {setBlueGreenMode}) => {
     const [updateViz, setUpdateViz] = useState(null);
@@ -92,6 +93,18 @@ function AirSpecControl(props) {
   const openSensorConfigSubMenuDropDown_2 = ({ currentTarget }) =>
     setSensorConfigSubMenuDropDown_2(currentTarget);
   const closeSensorConfigSubMenuDropDown_2 = () => setSensorConfigSubMenuDropDown_2(null);
+
+  const [sensorConfigSubMenuDropDown_3, setSensorConfigSubMenuDropDown_3] = useState(null);
+  const [sensorConfigSubMenuDropDownAct_3, setSensorConfigSubMenuDropDownAct_3] = useState(null);
+  const openSensorConfigSubMenuDropDown_3= ({ currentTarget }) =>
+    setSensorConfigSubMenuDropDown_3(currentTarget);
+  const closeSensorConfigSubMenuDropDown_3 = () => setSensorConfigSubMenuDropDown_3(null);
+
+  const [sensorConfigSubMenuDropDown_4, setSensorConfigSubMenuDropDown_4] = useState(null);
+  const [sensorConfigSubMenuDropDownAct_4, setSensorConfigSubMenuDropDownAct_4] = useState(null);
+  const openSensorConfigSubMenuDropDown_4 = ({ currentTarget }) =>
+    setSensorConfigSubMenuDropDown_4(currentTarget);
+  const closeSensorConfigSubMenuDropDown_4 = () => setSensorConfigSubMenuDropDown_4(null);
 
 
   const closeSensorConfigDropDown = ({ currentTarget }) => {
@@ -332,6 +345,104 @@ function AirSpecControl(props) {
     }
   }
 
+
+  function GetInertialGyroRange(val){
+    if(val == 0){
+      return "+/- 250 dps";
+    } 
+    else if (val == 1){
+      return "+/- 500 dps";
+    }
+    else if (val == 2){
+      return "+/- 1000 dps";
+    }
+    else if (val == 3){
+      return "+/- 2000 dps";
+    }else{
+      return "invalid"
+    }
+  }
+  function GetInertialGyroLPFCutoff(enable, cutoff){
+    if(enable == 0){
+      return "disabled";
+    }
+
+    if(cutoff == 0){
+      return "196.6 Hz";
+    } 
+    else if (cutoff == 1){
+      return "151.8 Hz";
+    }
+    else if (cutoff == 2){
+      return "119.5 Hz";
+    }
+    else if (cutoff == 3){
+      return "51.2 Hz";
+    }
+    else if (cutoff == 4){
+      return "23.9 Hz";
+    }
+    else if (cutoff == 5){
+      return "11.6 Hz";
+    }
+    else if (cutoff == 6){
+      return "5.7 Hz";
+    }
+    else if (cutoff == 7){
+      return "351.4 Hz";
+    }else{
+      return "invalid"
+    }
+  }
+
+  function GetInertialAccRange(val){
+    
+    if(val == 0){
+      return "+/- 2g";
+    } 
+    else if (val == 1){
+      return "+/- 4g";
+    }
+    else if (val == 2){
+      return "+/- 8g";
+    }
+    else if (val == 3){
+      return "+/- 16g";
+    }else{
+      return "invalid"
+    }
+  }
+  function GetInertialAccLPFCutoff(enable, cutoff){
+    if(enable == 0){
+      return "disabled";
+    }
+    
+    if(cutoff == 0){
+      return "246.0 Hz";
+    } 
+    else if (cutoff == 1){
+      return "111.4 Hz";
+    }
+    else if (cutoff == 2){
+      return "50.4 Hz";
+    }
+    else if (cutoff == 3){
+      return "23.9 Hz";
+    }
+    else if (cutoff == 4){
+      return "11.5 Hz";
+    }
+    else if (cutoff == 5){
+      return "5.7 Hz";
+    }
+    else if (cutoff == 6){
+      return "473 Hz";
+    }
+    else{
+      return "invalid"
+    }
+  }
+
   function GetLightColorGain(val){
     if(val == 0x00){
       return "0.5x";
@@ -363,9 +474,19 @@ function AirSpecControl(props) {
     }
   }
 
+  function GetGyroSampleRate(val){
+    let sampleRate = 1100.0/(1+val)
+    return sampleRate.toString()
+  }
+
+  function GetAccelSampleRate(val){
+    let sampleRate = 1125.0/(1+val)
+    return sampleRate.toString()
+  }
+
   function GetLightColorIntegrationTime(ATIME, ASTEP){
     let intTime = ((ATIME + 1) * (ASTEP + 1) * 2.78)/1000.0 // mS
-    return intTime.toString()
+    return intTime.toPrecision(2).toString()
   }
 
   function GetLightHumidityPrecision(val){
@@ -658,7 +779,7 @@ function AirSpecControl(props) {
                     inputProps: { min: 0 , max:65000},
                   }}
                 />
-                <MKButton
+                {/* <MKButton
                   onClick={() => {
                     props.updateSysInfo();
                     setUpdateSysAlert(true);
@@ -668,7 +789,7 @@ function AirSpecControl(props) {
                   color="dark"
                 >
                   Send Configuraton
-                </MKButton>
+                </MKButton> */}
               </Stack>
             ) : null }
 
@@ -686,38 +807,353 @@ function AirSpecControl(props) {
                   Inertial Settings
                 </MKTypography>
                 
+ 
+
+                <Stack direction="row" alignItems="left" spacing={1}>
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="flex-end" spacing={1}>
+
+<MKTypography
+                  // variant="button"
+                  color="inherit"
+                  // fontWeight="light"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Gyro Low-Pass Filter
+                </MKTypography>
+                </Stack>
+</Grid>
+
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="left" spacing={1}>
+                <MKButton
+                  variant="gradient"
+                  // color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_1}
+                >
+                  {GetInertialGyroLPFCutoff(props.sysInfo.inertialGyroLPFEn,props.sysInfo.inertialGyroLPFCutoff)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>expand_more</Icon>
+                </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_1}
+                  open={Boolean(sensorConfigSubMenuDropDown_1)}
+                  onClose={closeSensorConfigSubMenuDropDown_1}
+                >
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroLPFEn=0;
+                      props.sysInfo.inertialGyroLPFCutoff=0;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> Disabled </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroLPFEn=1;
+                      props.sysInfo.inertialGyroLPFCutoff=0;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 196.6 Hz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroLPFEn=1;
+                      props.sysInfo.inertialGyroLPFCutoff=1;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 151.8 Hz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroLPFEn=1;
+                      props.sysInfo.inertialGyroLPFCutoff=2;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 119.5 Hz </MenuItem>
+                   <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroLPFEn=1;
+                      props.sysInfo.inertialGyroLPFCutoff=3;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 51.2 Hz </MenuItem>
+                   <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroLPFEn=1;
+                      props.sysInfo.inertialGyroLPFCutoff=4;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 23.9 Hz </MenuItem>
+                   <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroLPFEn=1;
+                      props.sysInfo.inertialGyroLPFCutoff=5;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 11.6 Hz </MenuItem>
+                   <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroLPFEn=1;
+                      props.sysInfo.inertialGyroLPFCutoff=6;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 5.7 Hz </MenuItem>
+                   <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroLPFEn=1;
+                      props.sysInfo.inertialGyroLPFCutoff=7;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 351.4 Hz </MenuItem>
+                </Menu>
+                </Stack>
+                </Grid>
+                
+                </Stack>
+
+
+
+<Stack direction="row" alignItems="left" spacing={1}>
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="flex-end" spacing={1}>
+
+<MKTypography
+                  // variant="button"
+                  color="inherit"
+                  // fontWeight="light"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Gyro Range
+                </MKTypography>
+                </Stack>
+</Grid>
+
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="left" spacing={1}>
+                <MKButton
+                  variant="gradient"
+                  // color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_2}
+                >
+                  {GetInertialGyroRange(props.sysInfo.inertialGyroRange)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>expand_more</Icon>
+                </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_2}
+                  open={Boolean(sensorConfigSubMenuDropDown_2)}
+                  onClose={closeSensorConfigSubMenuDropDown_2}
+                >
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroRange=0;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> +/- 250 DPS </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroRange=1;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> +/- 500 DPS </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroRange=2;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> +/- 1000 DPS </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialGyroRange=3;
+                      closeSensorConfigSubMenuDropDown_2();
+                  }}> +/- 2000 DPS </MenuItem>
+                </Menu>
+                </Stack>
+                </Grid>
+                
+                </Stack>
+
                 <MKInput
                   type="number"
-                  label="Sample Rate (Hz)"
+                  label="Gyro Sample Rate Divisor (max: 255)"
                   fullWidth
-                  value={props.sysInfo.inertialSampleRate}
+                  value={props.sysInfo.inertialGyroRate}
                   onChange={(event) => {
-                    props.sysInfo.inertialSampleRate=event.target.value;
+                    props.sysInfo.inertialGyroRate=event.target.value;
                     setUpdateViz(!updateViz);
                   }} 
-
-                  // props.sysInfo.inertialGyroLPFEn;,
-                  // props.sysInfo.inertialGyroRange;
-                  // props.sysInfo.inertialGyroRate;
-                  // props.sysInfo.inertialAccLPFEn;
-                  // props.sysInfo.inertialAccRange;
-                  // props.sysInfo.inertialAccRate;
                   
                   InputProps={{
-                    inputProps: { min: 0 , max:65000},
+                    inputProps: { min: 0 , max:255},
                   }}
-                />
-                <MKButton
-                  onClick={() => {
-                    props.updateSysInfo();
-                    setUpdateSysAlert(true);
-                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
-                  }}
-                  variant="gradient"
-                  color="dark"
+                  />
+
+                <MKTypography
+                  color="inherit"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
                 >
-                  Send Configuraton
+                 Gyro sample rate: {" "} {GetGyroSampleRate(props.sysInfo.inertialGyroRate)} {" Hz"}
+
+                </MKTypography>
+
+                <hr/>
+
+                <Stack direction="row" alignItems="left" spacing={1}>
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="flex-end" spacing={1}>
+
+<MKTypography
+                  // variant="button"
+                  color="inherit"
+                  // fontWeight="light"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Accelerometer Low-Pass Filter
+                </MKTypography>
+                </Stack>
+</Grid>
+
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="left" spacing={1}>
+                <MKButton
+                  variant="gradient"
+                  // color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_3}
+                >
+                  {GetInertialAccLPFCutoff(props.sysInfo.inertialAccLPFEn,props.sysInfo.inertialAccLPFCutoff)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>expand_more</Icon>
                 </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_3}
+                  open={Boolean(sensorConfigSubMenuDropDown_3)}
+                  onClose={closeSensorConfigSubMenuDropDown_3}
+                >
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccLPFEn=0;
+                      props.sysInfo.inertialAccLPFCutoff=0;
+                      closeSensorConfigSubMenuDropDown_3();
+                  }}> Disabled </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccLPFEn=1;
+                      props.sysInfo.inertialAccLPFCutoff=0;
+                      closeSensorConfigSubMenuDropDown_3();
+                  }}> 246.0 Hz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccLPFEn=1;
+                      props.sysInfo.inertialAccLPFCutoff=1;
+                      closeSensorConfigSubMenuDropDown_3();
+                  }}> 111.4 Hz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccLPFEn=1;
+                      props.sysInfo.inertialAccLPFCutoff=2;
+                      closeSensorConfigSubMenuDropDown_3();
+                  }}> 50.4 Hz </MenuItem>
+                   <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccLPFEn=1;
+                      props.sysInfo.inertialAccLPFCutoff=3;
+                      closeSensorConfigSubMenuDropDown_3();
+                  }}> 23.9 Hz </MenuItem>
+                   <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccLPFEn=1;
+                      props.sysInfo.inertialAccLPFCutoff=4;
+                      closeSensorConfigSubMenuDropDown_3();
+                  }}> 11.5 Hz </MenuItem>
+                   <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccLPFEn=1;
+                      props.sysInfo.inertialAccLPFCutoff=5;
+                      closeSensorConfigSubMenuDropDown_3();
+                  }}> 5.7 Hz </MenuItem>
+                   <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccLPFEn=1;
+                      props.sysInfo.inertialAccLPFCutoff=6;
+                      closeSensorConfigSubMenuDropDown_3();
+                  }}> 473 Hz </MenuItem>
+                </Menu>
+                </Stack>
+                </Grid>
+                
+                </Stack>
+
+
+
+                <Stack direction="row" alignItems="left" spacing={1}>
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="flex-end" spacing={1}>
+
+<MKTypography
+                  // variant="button"
+                  color="inherit"
+                  // fontWeight="light"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                  Accelerometer Range
+                </MKTypography>
+                </Stack>
+</Grid>
+
+<Grid item xs={6} xm={6} lg={6}>
+<Stack direction="column" alignItems="left" spacing={1}>
+                <MKButton
+                  variant="gradient"
+                  // color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_4}
+                >
+                  {GetInertialAccRange(props.sysInfo.inertialAccRange)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>expand_more</Icon>
+                </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_4}
+                  open={Boolean(sensorConfigSubMenuDropDown_4)}
+                  onClose={closeSensorConfigSubMenuDropDown_4}
+                >
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccRange=0;
+                      closeSensorConfigSubMenuDropDown_4();
+                  }}> +/- 2g </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccRange=1;
+                      closeSensorConfigSubMenuDropDown_4();
+                  }}> +/- 4g </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccRange=2;
+                      closeSensorConfigSubMenuDropDown_4();
+                  }}> +/- 8g </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.inertialAccRange=3;
+                      closeSensorConfigSubMenuDropDown_4();
+                  }}> +/- 16g</MenuItem>
+                </Menu>
+                </Stack>
+                </Grid>
+                
+                </Stack>
+
+                  <MKInput
+                  type="number"
+                  label="Accelerometer Sample Rate Divisor (max: 4095)"
+                  fullWidth
+                  value={props.sysInfo.inertialAccRate}
+                  onChange={(event) => {
+                    props.sysInfo.inertialAccRate=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
+                  InputProps={{
+                    inputProps: { min: 0 , max:4095},
+                  }}
+                  />
+
+                <MKTypography
+                  color="inherit"
+                  align="center"
+                  variant="button"
+                  verticalAlign="middle"
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                >
+                 Accelerometer sample rate: {" "} {GetAccelSampleRate(props.sysInfo.inertialAccRate)} {" Hz"}
+
+                </MKTypography>
+
               </Stack>
             ) : null }
 
@@ -743,26 +1179,69 @@ function AirSpecControl(props) {
                     props.sysInfo.thermopileSensorPeriod=event.target.value;
                     setUpdateViz(!updateViz);
                   }} 
-
-                  // props.sysInfo.blinkDaylightCompensatationEN;
-                  // props.sysInfo.blinkDaylightLowerThresh;
-                  // props.sysInfo.blinkDaylightUpperThresh;
                   
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
                 />
-                <MKButton
-                  onClick={() => {
-                    props.updateSysInfo();
-                    setUpdateSysAlert(true);
-                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
+
+              <MKBox display="flex" alignItems="center">
+                <Switch
+                  checked={props.sysInfo.blinkDaylightCompensatationEN}
+                  // disabled={Boolean(props.sysInfo.blinkDaylightCompensatationEN)}
+                  onChange={() => {
+                    props.sysInfo.blinkDaylightCompensatationEN = !props.sysInfo.blinkDaylightCompensatationEN;
+                    setUpdateViz(!updateViz);
                   }}
-                  variant="gradient"
-                  color="dark"
+                />
+                <MKTypography
+                  variant="button"
+                  color="text"
+                  fontWeight="regular"
+                  // disabled={!Boolean(props.sysInfo.blinkDaylightCompensatationEN)}
+                  ml={1}
+                  sx={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => {
+                    props.sysInfo.blinkDaylightCompensatationEN = !props.sysInfo.blinkDaylightCompensatationEN;
+                    setUpdateViz(!updateViz);
+                  }}
                 >
-                  Send Configuraton
-                </MKButton>
+                  Daylight Compensation
+                </MKTypography>
+              </MKBox>
+                  
+                  <MKInput
+                  type="number"
+                  label="Daylight Compensation: Lower Threshold"
+                  fullWidth
+                  disabled={Boolean(!props.sysInfo.blinkDaylightCompensatationEN)}
+                  value={props.sysInfo.blinkDaylightLowerThresh}
+                  onChange={(event) => {
+                    props.sysInfo.blinkDaylightLowerThresh=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
+                  InputProps={{
+                    inputProps: { min: 0 , max:props.sysInfo.blinkDaylightUpperThresh},
+                  }}
+                />
+
+                <MKInput
+                  type="number"
+                  label="Daylight Compensation: Upper Threshold"
+                  fullWidth
+                  disabled={Boolean(!props.sysInfo.blinkDaylightCompensatationEN)}
+                  value={props.sysInfo.blinkDaylightUpperThresh}
+                  onChange={(event) => {
+                    props.sysInfo.blinkDaylightUpperThresh=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }}  
+                  
+                  InputProps={{
+                    inputProps: { min: props.sysInfo.blinkDaylightLowerThresh , max:255},
+                  }}
+                />
+
               </Stack>
             ) : null }
 
@@ -793,17 +1272,7 @@ function AirSpecControl(props) {
                     inputProps: { min: 0 , max:65000},
                   }}
                 />
-                <MKButton
-                  onClick={() => {
-                    props.updateSysInfo();
-                    setUpdateSysAlert(true);
-                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
-                  }}
-                  variant="gradient"
-                  color="dark"
-                >
-                  Send Configuraton
-                </MKButton>
+
               </Stack>
             ) : null }
 
@@ -956,7 +1425,7 @@ function AirSpecControl(props) {
                 
                 </Stack>
 
-                <MKButton
+                {/* <MKButton
                   onClick={() => {
                     props.updateSysInfo();
                     setUpdateSysAlert(true);
@@ -966,7 +1435,7 @@ function AirSpecControl(props) {
                   color="dark"
                 >                    
                   Send Configuraton
-                </MKButton>
+                </MKButton> */}
                 
               </Stack>
             ) : null }
@@ -1132,17 +1601,6 @@ function AirSpecControl(props) {
                 
                 </Stack>
 
-                <MKButton
-                  onClick={() => {
-                    props.updateSysInfo();
-                    setUpdateSysAlert(true);
-                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
-                  }}
-                  variant="gradient"
-                  color="dark"
-                >
-                  Send Configuraton
-                </MKButton>
               </Stack>
             ) : null }
 
@@ -1302,17 +1760,6 @@ function AirSpecControl(props) {
                 
                 </Stack>
 
-                <MKButton
-                  onClick={() => {
-                    props.updateSysInfo();
-                    setUpdateSysAlert(true);
-                    setTimeout(function() { setUpdateSysAlert(false);}, 3000);
-                  }}
-                  variant="gradient"
-                  color="dark"
-                >
-                  Send Configuraton
-                </MKButton>
               </Stack>
             ) : null }
 
@@ -1343,7 +1790,15 @@ function AirSpecControl(props) {
                     inputProps: { min: 0 , max:65000},
                   }}
                 />
-                <MKButton
+              </Stack>
+            ) : null }
+            <div style={{ padding: 2 }}>
+
+<Grid container spacing={0}>
+<Stack direction="column" spacing={2}>
+
+              <hr/>
+              <MKButton
                   onClick={() => {
                     props.updateSysInfo();
                     setUpdateSysAlert(true);
@@ -1354,9 +1809,6 @@ function AirSpecControl(props) {
                 >
                   Send Configuraton
                 </MKButton>
-              </Stack>
-            ) : null }
-
            {updateSysAlert ? (
                 <MKAlert>
                   <Icon fontSize="small">thumb_up</Icon>&nbsp;
@@ -1373,6 +1825,9 @@ function AirSpecControl(props) {
                     Make sure to click "Send Configuration" to send new settings to AirSpecs
                  </MKTypography>
             )}
+                        </Stack>
+            </Grid>
+            </div>
             </Stack>
             ) : null
             
