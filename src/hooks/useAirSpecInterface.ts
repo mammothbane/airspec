@@ -185,17 +185,19 @@ export const useAirSpecInterface = (): AirSpec => {
       Struct.Uint8('inertialSensorEn'),
       Struct.Uint8('inertialGyroLPFEn'),
       // 7 bytes
+      Struct.Uint8('inertialGyroLPFCutoff'),
       Struct.Uint8('inertialGyroRange'),
       Struct.Uint8('inertialGyroRate'),
       Struct.Uint8('inertialAccLPFEn'),
+      // 8 bytes
+      Struct.Uint8('inertialAccLPFCutoff'),
       Struct.Uint8('inertialAccRange'),
       Struct.Uint16('inertialAccRate'),
 
       Struct.Uint8('gasSensorEn'),
       Struct.Skip(1),
-      // 9 bytes
       Struct.Uint16('gasSamplePeriod'),
-      
+      // 9 bytes
   
       Struct.Uint8('humiditySensorEn'),
       Struct.Uint8('humidityPrecision'),
