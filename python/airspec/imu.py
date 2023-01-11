@@ -4,7 +4,7 @@ import time
 import struct as struct
 import ctypes
 
-from sensorClass import *
+from .sensorClass import *
 
 # define thermopile packet
 imuStructType = 'BBBBBBBBBBBB'

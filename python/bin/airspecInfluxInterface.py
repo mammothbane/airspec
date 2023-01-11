@@ -13,14 +13,14 @@ from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 from collections import namedtuple
 
-from thermopile import *
-from sht4x import *
-from sgp import *
-from bme import *
-from lux import *
-from spec import *
-from blink import *
-from imu import *
+from airspec.thermopile import *
+from airspec.sht4x import *
+from airspec.sgp import *
+from airspec.bme import *
+from airspec.lux import *
+from airspec.spec import *
+from airspec.blink import *
+from airspec.imu import *
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)

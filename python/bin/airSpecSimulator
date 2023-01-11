@@ -10,14 +10,14 @@ import time
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-# from sensorClass import *
-from thermopile import *
-from sht4x import *
-from sgp import *
-from bme import *
-from lux import *
-from spec import *
-from blink import *
+# from airspec.sensorClass import *
+from airspec.thermopile import *
+from airspec.sht4x import *
+from airspec.sgp import *
+from airspec.bme import *
+from airspec.lux import *
+from airspec.spec import *
+from airspec.blink import *
 
 
 # gasSpec_serial = '/dev/cu.usbserial-014A1C56'

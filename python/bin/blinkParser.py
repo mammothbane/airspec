@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-import blink
+import airspec.blink as blink
 from struct import *
 import numpy as np
 

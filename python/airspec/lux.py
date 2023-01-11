@@ -1,5 +1,5 @@
 
-from sensorClass import *
+from .sensorClass import *
 
 
 # define thermopile packet

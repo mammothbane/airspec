@@ -12,14 +12,14 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # from sensorClass import *
-from thermopile import *
-from sht4x import *
-from sgp import *
-from bme import *
-from lux import *
-from spec import *
-from blink import *
-from imu import *
+from airspec.thermopile import *
+from airspec.sht4x import *
+from airspec.sgp import *
+from airspec.bme import *
+from airspec.lux import *
+from airspec.spec import *
+from airspec.blink import *
+from airspec.imu import *
 
 # airSpec_serial = '/dev/cu.usbserial-014A1C56'
 airSpec_serial = '/dev/cu.usbserial-01D9209A'
@@ -60,7 +60,7 @@ def start_experiment():
 
         # socket_thread = socketMessage(2, "socket_thread", HOST, PORT, msgQueue)
 
-        ''' this thread connects to the server and forwards the data from the 
+        ''' this thread connects to the server and forwards the data from the
             ESP32 dongle '''
         client_thread = serverLogger(2, "socket_thread", SERVER_HOST, SERVER_PORT, msgQueue)
 

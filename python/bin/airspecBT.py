@@ -12,7 +12,7 @@ import logging
 
 import binascii
 from struct import *
-from sensorClass import *
+from airspec.sensorClass import *
 
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic

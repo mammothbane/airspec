@@ -1,9 +1,10 @@
 import socket
-from thermopile import *
-from bme import *
 import numpy as np
-
 import threading
+
+from airspec.thermopile import *
+from airspec.bme import *
+
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 IN_PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
