@@ -8,7 +8,7 @@ async fn main() -> eyre::Result<()> {
 
     let opt: airspec::opt::Influx = airspec::opt::Influx::from_args();
 
-    let client = influxdb2::Client::new("http://localhost:8086", &opt.org, opt.token);
+    let client = influxdb2::Client::new("http://localhost:8086", opt.token);
 
     let count = 3_000_000;
 
@@ -30,7 +30,7 @@ async fn main() -> eyre::Result<()> {
 
     let start = std::time::Instant::now();
 
-    client.write(&opt.bucket, items).compat().await?;
+    client.write(&opt.org, &opt.bucket, items).compat().await?;
 
     let diff = std::time::Instant::now() - start;
     let frac_seconds = diff.as_secs_f64();
