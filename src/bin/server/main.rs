@@ -34,6 +34,8 @@ pub struct Measurement {
     pub specs: SpecsId,
     pub user:  UserId,
 
+    // TODO(nathan): sync on desired resolution
+    #[serde(with = "::chrono::serde::ts_milliseconds")]
     pub timestamp: DateTime<Utc>,
     pub sensor:    String,
     pub values:    Vec<(String, FieldValue)>,

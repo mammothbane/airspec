@@ -15,11 +15,18 @@ async fn main() -> eyre::Result<()> {
     let items = {
         let _span = tracing::info_span!("generating items", count).entered();
 
-        let now = chrono::Utc::now().timestamp_nanos();
+        let now = chrono::Utc::now();
+        tracing::info!(now = now.timestamp(), "starting");
+        let now = now.timestamp_nanos();
 
         (0i64..count)
-            .map(|elem| {
-                DataPoint::builder("testmsmt").timestamp(now).field("x", elem).build().unwrap()
+            .enumerate()
+            .map(|(i, elem)| {
+                DataPoint::builder("testmsmt")
+                    .timestamp(now + i as i64 * 10000)
+                    .field("x", elem)
+                    .build()
+                    .unwrap()
             })
             .collect::<Vec<_>>()
     };

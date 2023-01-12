@@ -1,7 +1,12 @@
 use std::sync::Arc;
 
+use async_compat::CompatExt;
 use influxdb2::models::Query;
-use tide::Request;
+use tide::{
+    Request,
+    Response,
+    StatusCode,
+};
 
 use crate::{
     SpecsId,
@@ -10,24 +15,29 @@ use crate::{
 };
 
 #[derive(serde::Deserialize)]
-pub enum CsvRequest {
-    User {
-        user: UserId,
-    },
-    Specs {
-        specs: SpecsId,
-    },
+pub struct CsvRequest {
+    user:  Option<UserId>,
+    specs: Option<SpecsId>,
 }
 
-pub async fn csv_download(mut req: Request<Arc<State>>) -> tide::Result {
-    let dlreq: CsvRequest = crate::util::decode_msgpack_or_json(&mut req).await?;
+pub async fn csv_download(req: Request<Arc<State>>) -> tide::Result {
+    let dlreq: CsvRequest = req.query().map_err(|e| {
+        tracing::error!(%e);
+        e
+    })?;
 
     let state = req.state();
 
-    match dlreq {
-        CsvRequest::Specs {
-            specs: SpecsId(id),
+    let content = match dlreq {
+        CsvRequest {
+            specs: Some(SpecsId(id)),
+            user: None,
         } => {
+            if id.contains('"') {
+                tracing::error!(%id, "injection detected");
+                return Ok(StatusCode::BadRequest.into());
+            }
+
             let items = state
                 .influx_client
                 .query_raw(
@@ -35,19 +45,26 @@ pub async fn csv_download(mut req: Request<Arc<State>>) -> tide::Result {
                     Some(Query::new(format!(
                         r#"
                     from(bucket: "{}")
-                        |> filter(fn(r) => r.specs == "{}")
-                        |> yield()
+                        |> range(start: 0)
+                        |> filter(fn: (r) => r.specs == "{}")
                     "#,
                         state.influx_cfg.bucket, id,
                     ))),
                 )
+                .compat()
                 .await?;
 
-            Ok(items.into())
+            items
         },
-        CsvRequest::User {
-            user: UserId(id),
+        CsvRequest {
+            user: Some(UserId(id)),
+            specs: None,
         } => {
+            if id.contains('"') {
+                tracing::error!(%id, "injection detected");
+                return Ok(StatusCode::BadRequest.into());
+            }
+
             let items = state
                 .influx_client
                 .query_raw(
@@ -55,15 +72,30 @@ pub async fn csv_download(mut req: Request<Arc<State>>) -> tide::Result {
                     Some(Query::new(format!(
                         r#"
                     from(bucket: "{}")
-                        |> filter(fn(r) => r.user == "{}")
-                        |> yield()
+                        |> range(start: 0)
+                        |> filter(fn: (r) => r.user == "{}")
                     "#,
                         state.influx_cfg.bucket, id,
                     ))),
                 )
-                .await?;
+                .compat()
+                .await
+                .map_err(|e| {
+                    tracing::error!(%e);
+                    e
+                })?;
 
-            Ok(items.into())
+            items
         },
-    }
+
+        _ => return Ok(StatusCode::BadRequest.into()),
+    };
+
+    let resp = {
+        let mut resp = Response::from_res(content);
+        resp.set_content_type("text/csv");
+        resp
+    };
+
+    Ok(resp)
 }
