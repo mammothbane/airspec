@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package airspecs.sample.blink;
+
+message Sample {
+    uint64 sample_rate = 1;
+    bool diode_saturated = 2;
+}

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package airspecs.sample;
+
+message BTPacket {
+    message Metadata {
+        string specs_id = 1;
+        uint64 uptime = 2;
+        optional uint64 seq = 3;
+    };
+
+    Metadata meta = 1;
+    repeated Sample payload = 2;
+}
+
+message Sample {
+    oneof value {
+        bme.Sample bme = 1;
+        blink.Blink blink = 2;
+    }
+}
+
+
