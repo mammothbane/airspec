@@ -36,20 +36,53 @@ add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-le
 add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    message(STATUS "Maximum optimization for speed")
-    add_compile_options(-Ofast)
-elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-    message(STATUS "Maximum optimization for speed, debug info included")
-    add_compile_options(-Ofast -g)
-elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
-    message(STATUS "Maximum optimization for size")
     add_compile_options(-Os)
 else ()
     message(STATUS "Minimal optimization, debug info included")
     add_compile_options(-Og -g)
 endif ()
 
-include_directories(Core/Inc STM32_WPAN/App USB_Device/App USB_Device/Target Drivers/STM32WBxx_HAL_Driver/Inc Drivers/STM32WBxx_HAL_Driver/Inc/Legacy Utilities/lpm/tiny_lpm Middlewares/Third_Party/FreeRTOS/Source/include Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F Middlewares/ST/STM32_WPAN Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/shci Middlewares/ST/STM32_WPAN/utilities Middlewares/ST/STM32_WPAN/ble/core Middlewares/ST/STM32_WPAN/ble/core/auto Middlewares/ST/STM32_WPAN/ble/core/template Middlewares/ST/STM32_WPAN/ble/svc/Inc Middlewares/ST/STM32_WPAN/ble/svc/Src Middlewares/ST/STM32_USB_Device_Library/Core/Inc Drivers/CMSIS/Device/ST/STM32WBxx/Include Middlewares/ST/STM32_WPAN/ble Drivers/CMSIS/Include "Middlewares/STM32_Calipile" "Middlewares/STM32_AS7341" "Middlewares/STM32_TSL2772" "Middlewares/STM32_BME680" "Middlewares/STM32_AdafruitSensor" "Middlewares/STM32_SHT4X" "Middlewares/Sensirion_Core/src" "Middlewares/STM32_ICM20948" "Drivers/CMSIS/DSP/Include" "Middlewares/bsec_2_2_0_0/algo/normal_version/inc" "Middlewares/STM32_SGP41" "Middlewares/gas-index-algorithm/sensirion_gas_index_algorithm" "Middlewares/bsec_2_2_0_0" Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc Middlewares/arduinojson/src)
+include_directories(
+        Core/Inc
+        STM32_WPAN/App
+        USB_Device/App
+        USB_Device/Target
+        Drivers/STM32WBxx_HAL_Driver/Inc
+        Drivers/STM32WBxx_HAL_Driver/Inc/Legacy
+        Utilities/lpm/tiny_lpm
+        Middlewares/Third_Party/FreeRTOS/Source/include
+        Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2
+        Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
+        Middlewares/ST/STM32_WPAN
+        Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread
+        Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl
+        Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/shci
+        Middlewares/ST/STM32_WPAN/utilities
+        Middlewares/ST/STM32_WPAN/ble/core
+        Middlewares/ST/STM32_WPAN/ble/core/auto
+        Middlewares/ST/STM32_WPAN/ble/core/template
+        Middlewares/ST/STM32_WPAN/ble/svc/Inc
+        Middlewares/ST/STM32_WPAN/ble/svc/Src
+        Middlewares/ST/STM32_USB_Device_Library/Core/Inc
+        Drivers/CMSIS/Device/ST/STM32WBxx/Include
+        Middlewares/ST/STM32_WPAN/ble
+        Drivers/CMSIS/Include
+        "Middlewares/STM32_Calipile"
+        "Middlewares/STM32_AS7341"
+        "Middlewares/STM32_TSL2772"
+        "Middlewares/STM32_BME680"
+        "Middlewares/STM32_AdafruitSensor"
+        "Middlewares/STM32_SHT4X"
+        "Middlewares/Sensirion_Core/src"
+        "Middlewares/STM32_ICM20948"
+        "Drivers/CMSIS/DSP/Include"
+        "Middlewares/bsec_2_2_0_0/algo/normal_version/inc"
+        "Middlewares/STM32_SGP41"
+        "Middlewares/gas-index-algorithm/sensirion_gas_index_algorithm"
+        "Middlewares/bsec_2_2_0_0"
+        Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc
+        Middlewares/arduinojson/src
+)
 
 add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32WB5Mxx)
 
