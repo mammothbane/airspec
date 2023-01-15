@@ -30,13 +30,43 @@
         buildInputs = with pkgs; [
           py3
 
+          cmake
           pkgsCross.armhf-embedded.stdenv.cc
+
           openocd
           stm32cubemx
 
           protobuf
+
+          qemu
         ];
       };
     })
-  );
+  ) // {
+    nixosConfigurations = let
+      system = modules: {
+        system = "x86_64-linux";
+
+        modules = [
+          ./nix/nixos/airspecs
+          ./nix/nixos/airspecs/hardware.nix
+        ] ++ modules;
+
+        specialArgs = {
+          inherit nixpkgs;
+        };
+      };
+
+    in {
+      airspecs = nixpkgs.lib.nixosSystem (system []);
+
+      airspecs-vm = nixpkgs.lib.nixosSystem (system [
+        "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
+
+        {
+          boot.kernelParams = ["console=ttyS0,115200" "console=tty1"];
+        }
+      ]);
+    };
+  };
 }
