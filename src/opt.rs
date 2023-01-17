@@ -3,12 +3,18 @@ pub struct Influx {
     #[structopt(short, long, default_value = "http://localhost:8086")]
     pub url: String,
 
-    #[structopt(short, long)]
-    pub token: String,
+    #[structopt(short, long, help = "if missing, reads from TOKEN env var")]
+    pub token: Option<String>,
 
     #[structopt(short, long, default_value = "testbkt")]
     pub bucket: String,
 
     #[structopt(short, long, default_value = "test")]
     pub org: String,
+}
+
+impl Influx {
+    pub fn token_or_env(&self) -> Option<String> {
+        self.token.clone().or_else(|| std::env::var("TOKEN").ok())
+    }
 }

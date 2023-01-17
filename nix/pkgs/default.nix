@@ -2,4 +2,5 @@
   docs-site       = pkgs.callPackage ../../web/docs       { inherit self; };
   website         = pkgs.callPackage ../../web/website    { inherit self; };
   swift_protobuf  = pkgs.callPackage ./swift_protobuf.nix {};
+  server          = pkgs.callPackage ./airspecs_server.nix {};
 }

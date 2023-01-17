@@ -10,9 +10,28 @@
       url = "github:oxalica/rust-overlay/master";
 
       inputs = {
-        flake-utils.follows = "flake-utils";
         nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
       };
+    };
+
+    crane = {
+      url = "github:ipetkov/crane";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+        rust-overlay.follows = "rust-overlay";
+      };
+    };
+
+    naersk = {
+      url = "github:nix-community/naersk";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    sops-nix = {
+      url = github:Mic92/sops-nix;
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -25,6 +44,18 @@
         config.allowUnfree = true;
         overlays = [
           (import inputs.rust-overlay)
+          (final: prev: let
+            local_rust = prev.rust-bin.nightly."2023-01-10".default.override {
+              extensions = [ "rust-src" ];
+            };
+          in {
+            inherit local_rust;
+            crane-lib = (inputs.crane.mkLib final).overrideToolchain local_rust;
+            naersk = prev.callPackage inputs.naersk {
+              cargo = local_rust;
+              rustc = local_rust;
+            };
+          })
         ];
       };
 
@@ -38,9 +69,6 @@
         grpcio-tools
       ] ++ (localPackages.docs-site.passthru.pydeps pypkgs)));
 
-      local_rust = pkgs.rust-bin.nightly."2023-01-10".default.override {
-        extensions = [ "rust-src" ];
-      };
 
     in {
       packages = localPackages;
@@ -49,7 +77,15 @@
         pname = "airspec devenv";
         version = self.rev or "dirty";
 
-        buildInputs = with pkgs; [
+        sopsPGPKeyDirs = [
+          ./nix/keys/machines
+        ];
+
+        sopsPGPKeys = [
+          ./nix/keys/mammothbane.asc
+        ];
+
+        nativeBuildInputs = with pkgs; with inputs.sops-nix.packages.${system}; [
           py3
           influxdb2
           local_rust
@@ -58,7 +94,6 @@
           swift
 
           cmake
-          pkgsCross.armhf-embedded.stdenv.cc
 
           openocd
           stm32cubemx
@@ -67,6 +102,10 @@
           nanopb
 
           qemu
+
+          ssh-to-pgp
+          sops
+          sops-import-keys-hook
         ] ++ localPackages.website.passthru.deps;
 
         NODE_OPTIONS = "--openssl-legacy-provider";
@@ -80,6 +119,8 @@
         system = "x86_64-linux";
 
         modules = [
+          inputs.sops-nix.nixosModules.sops
+
           ./nix/nixos/airspecs
           ./nix/nixos/airspecs/hardware.nix
         ] ++ modules;

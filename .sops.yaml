@@ -1,0 +1,11 @@
+keys:
+  - &mammothbane  51823FB78BDE4316BE0D32DCBEC7D5711325BB59
+  - &airspecs     C421AB3BEA2CD8049AF57BA57250A9054689EFE7
+
+creation_rules:
+  - path_regex: nix/nixos/airspecs/.*
+    key_groups:
+      - pgp:
+        - *mammothbane
+        - *airspecs
+

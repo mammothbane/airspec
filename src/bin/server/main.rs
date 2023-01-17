@@ -85,7 +85,9 @@ async fn main() -> eyre::Result<()> {
 
     let (msr_tx, msr_rx) = channel::bounded(4192);
 
-    let client = influxdb2::Client::new(&influx.url, &influx.token);
+    let token = influx.token_or_env().ok_or(eyre::eyre!("influx token was missing"))?;
+
+    let client = influxdb2::Client::new(&influx.url, &token);
     let client = Arc::new(client);
 
     let influx_fwd =

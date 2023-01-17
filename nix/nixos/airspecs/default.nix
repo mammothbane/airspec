@@ -4,6 +4,8 @@
     ./users.nix
     ./influx.nix
     ./image.nix
+    ./server.nix
+    ./secrets.nix
   ];
 
   system.stateVersion = "22.11";
@@ -46,6 +48,8 @@
   networking = {
     useDHCP = true;
 
+    # nb: hostname _must_ be set properly if continuing to deploy onto necsys VMs, as they do dns by self-reported
+    # hostname
     hostName = "airspecs";
     domain = "media.mit.edu";
 
@@ -53,13 +57,11 @@
       enable = true;
       checkReversePath = "loose";
 
+      trustedInterfaces = lib.optional config.services.tailscale.enable config.services.tailscale.interfaceName;
+
       allowedTCPPorts = [
         80
         443
-      ];
-
-      allowedUDPPorts = [
-        # 53 TODO
       ];
     };
   };

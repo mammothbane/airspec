@@ -8,7 +8,8 @@ async fn main() -> eyre::Result<()> {
 
     let opt: airspec::opt::Influx = airspec::opt::Influx::from_args();
 
-    let client = influxdb2::Client::new("http://localhost:8086", opt.token);
+    let token = opt.token_or_env().ok_or(eyre::eyre!("influx token missing"))?;
+    let client = influxdb2::Client::new("http://localhost:8086", &token);
 
     let count = 3_000_000;
 

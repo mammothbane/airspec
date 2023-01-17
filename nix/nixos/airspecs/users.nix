@@ -1,9 +1,12 @@
 let
-  extraGroups = [
+  adminGroups = [
     "wheel"
+    "sudo"
+  ];
+
+  extraGroups = [
     "uucp"
     "dialout"
-    "sudo"
     "cdrom"
     "plugdev"
   ];
@@ -29,7 +32,7 @@ in {
 
         hashedPassword = ''$6$d59cUd31u4j$LGIlTS.qmV60wYBt2ZvNX0p5SAQCplYTxwg3u8E359pHOq.ycP3zGbarD/.AN5IN.sUacHBleb8C3p3DDa2M5.'';
 
-        inherit extraGroups;
+        extraGroups = extraGroups ++ adminGroups;
       };
 
       sailinz = {
