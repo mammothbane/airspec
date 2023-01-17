@@ -46,6 +46,9 @@
   networking = {
     useDHCP = true;
 
+    hostName = "airspecs";
+    domain = "media.mit.edu";
+
     firewall = {
       enable = true;
       checkReversePath = "loose";
