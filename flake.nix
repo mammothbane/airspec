@@ -1,11 +1,9 @@
-# vim: ft=nix :
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
 
     flake-utils = {
       url = "github:numtide/flake-utils/master";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     rust-overlay = {
@@ -30,15 +28,23 @@
         ];
       };
 
-      py3 = pkgs.python3.withPackages (pypkgs: with pypkgs; [
-        influxdb-client
-      ]);
+      localPackages = pkgs.callPackage ./nix/pkgs {};
 
-      rust = pkgs.rust-bin.nightly."2023-01-10".default.override {
+      py3 = pkgs.python3.withPackages (pypkgs: with pypkgs; ([
+        influxdb-client
+        protobuf
+
+        grpcio
+        grpcio-tools
+      ] ++ (localPackages.docs-site.passthru.pydeps pypkgs)));
+
+      local_rust = pkgs.rust-bin.nightly."2023-01-10".default.override {
         extensions = [ "rust-src" ];
       };
 
     in {
+      packages = localPackages;
+
       devShells.default = pkgs.mkShell {
         pname = "airspec devenv";
         version = self.rev or "dirty";
@@ -46,10 +52,46 @@
         buildInputs = with pkgs; [
           py3
           influxdb2
-          rust
+          local_rust
           stdenv.cc
-        ];
+          pkg-config
+          swift
+
+          cmake
+          pkgsCross.armhf-embedded.stdenv.cc
+
+          openocd
+          stm32cubemx
+
+          protobuf
+          nanopb
+
+          qemu
+        ] ++ localPackages.website.passthru.deps;
+
+        NODE_OPTIONS = "--openssl-legacy-provider";
       };
+
+      legacyPackages = pkgs // localPackages;
     })
-  );
+  ) // {
+    nixosConfigurations = let
+      system = modules: {
+        system = "x86_64-linux";
+
+        modules = [
+          ./nix/nixos/airspecs
+          ./nix/nixos/airspecs/hardware.nix
+        ] ++ modules;
+
+        specialArgs = {
+          inherit nixpkgs;
+          flake = self;
+        };
+      };
+
+    in {
+      airspecs = nixpkgs.lib.nixosSystem (system []);
+    };
+  };
 }
