@@ -25,13 +25,19 @@ in {
         ];
 
         locations."/" = {
-          root = flake.packages.x86_64-linux.site;
+          root = flake.packages.x86_64-linux.website;
         };
       };
 
       "airspecs.media.mit.edu" = commonOptions // {
         locations."/" = {
-          root = flake.packages.x86_64-linux.site;
+          root = flake.packages.x86_64-linux.website;
+        };
+      };
+
+      "docs.airspecs.media.mit.edu" = commonOptions // {
+        locations."/" = {
+          root = flake.packages.x86_64-linux.docs-site;
         };
       };
 
