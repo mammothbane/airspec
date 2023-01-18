@@ -11,7 +11,7 @@ pub fn init(pretty: bool) {
         tracing_subscriber::fmt::layer().with_writer(std::io::stderr).with_target(false);
 
     let level_filter = mk_level_filter();
-    eprintln!("enabling tracing with filter directive: {}", level_filter);
+    eprintln!("enabling tracing with filter directive: {level_filter}");
 
     let s = tracing_subscriber::registry().with(level_filter);
 

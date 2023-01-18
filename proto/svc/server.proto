@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package airspecs.server;
+
+import "sample.proto";
+
+message SamplesAck {
+    repeated uint64 msg = 1;
+}
+
+message Dump {
+    oneof what {
+        string user = 1;
+        string specs_id = 2;
+    }
+}
+
+message CSV {
+    string csv = 1;
+}
+
+message RawSample {
+    bytes unparsed_bytes = 1;
+}
+
+message RawSampleResponse {
+    enum RawSampleStatus {
+        OK = 0;
+        ERR = 2;
+    }
+
+    RawSampleStatus status = 1;
+}
+
+service Backend {
+    rpc StreamRawSamples (stream Sample) returns (RawSampleResponse);
+    rpc StreamSamples(stream Sample) returns (stream SamplesAck);
+    rpc Dump(CSV) returns (CSV);
+}

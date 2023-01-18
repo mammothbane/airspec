@@ -46,7 +46,7 @@
           (import inputs.rust-overlay)
           (final: prev: let
             local_rust = prev.rust-bin.nightly."2023-01-10".default.override {
-              extensions = [ "rust-src" ];
+              extensions = [ "rust-src" "clippy" ];
             };
           in {
             inherit local_rust;
@@ -69,7 +69,6 @@
         grpcio-tools
       ] ++ (localPackages.docs-site.passthru.pydeps pypkgs)));
 
-
     in {
       packages = localPackages;
 
@@ -85,13 +84,15 @@
           ./nix/keys/mammothbane.asc
         ];
 
-        nativeBuildInputs = with pkgs; with inputs.sops-nix.packages.${system}; [
+        nativeBuildInputs = with pkgs; with inputs.sops-nix.packages.${system}; with localPackages; [
           py3
           influxdb2
           local_rust
           stdenv.cc
           pkg-config
+
           swift
+          swift_protobuf
 
           cmake
 
@@ -109,6 +110,8 @@
         ] ++ localPackages.website.passthru.deps;
 
         NODE_OPTIONS = "--openssl-legacy-provider";
+        NANOPB_PROTO = "${pkgs.nanopb}/share/nanopb/generator/proto";
+        RUST_BACKTRACE = "full";
       };
 
       legacyPackages = pkgs // localPackages;

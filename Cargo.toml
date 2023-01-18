@@ -27,6 +27,9 @@ lazy_static = "1.4"
 
 chrono = { version = "0.4", features = ["serde"] }
 
+tonic = "0.8"
+prost = "0.11"
+
 [dependencies.influxdb2]
 package = "influxdb2_client"
 git = "https://github.com/mammothbane/influxdb_iox"
@@ -34,3 +37,9 @@ rev = "6937d1a2a"
 
 [features]
 chunked = ["futures-batch"]
+
+[build-dependencies]
+tonic-build = "0.8"
+eyre = "0.6"
+tempfile = "3.3"
+walkdir = "2.3"
