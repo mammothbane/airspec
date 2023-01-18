@@ -6,6 +6,7 @@
     ./image.nix
     ./server.nix
     ./secrets.nix
+    ./sshguard.nix
   ];
 
   system.stateVersion = "22.11";
