@@ -1,9 +1,7 @@
 use std::borrow::Borrow;
 
 use async_compat::CompatExt;
-use async_std::{
-    prelude::Stream,
-};
+use async_std::prelude::Stream;
 use influxdb2::models::DataPoint;
 
 pub async fn forward_to_influx(
