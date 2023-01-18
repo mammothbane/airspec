@@ -102,8 +102,6 @@
           openocd
           stm32cubemx
 
-          swift
-          swift_protobuf
           protobuf
           grpcurl
 
@@ -111,7 +109,10 @@
 
           ssh-to-pgp
           sops
-        ];
+        ] ++ (pkgs.lib.optionals pkgs.hostPlatform.isLinux [
+          swift
+          swift_protobuf
+        ]);
 
         NODE_OPTIONS = "--openssl-legacy-provider";
         NANOPB_PROTO = nanopb_proto;
