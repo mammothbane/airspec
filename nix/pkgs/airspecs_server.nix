@@ -36,13 +36,16 @@
   cargoArtifacts = crane-lib.buildDepsOnly (commonOptions // {
     pname = "airspec-global";
     inherit cargoVendorDir;
+
   });
 
   rustFmt = crane-lib.cargoFmt (commonOptions // {
     inherit cargoVendorDir cargoArtifacts;
+
     preBuild = ''
       echo -ne '\n' > src/svc/backend/src/pb.rs
     '';
+
   });
 
   clippy = crane-lib.cargoClippy (commonOptions // {
@@ -57,4 +60,6 @@ in crane-lib.buildPackage (commonOptions // {
     rustFmt
     clippy
   ];
+
+  cargoExtraArgs = commonOptions.cargoExtraArgs + " --bin server";
 })
