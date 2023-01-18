@@ -59,14 +59,6 @@
 
       localPackages = pkgs.callPackage ./nix/pkgs {};
 
-      py3 = pkgs.python3.withPackages (pypkgs: with pypkgs; ([
-        influxdb-client
-        protobuf
-
-        grpcio
-        grpcio-tools
-      ] ++ (localPackages.docs-site.passthru.pydeps pypkgs)));
-
       nanopb_proto = "${pkgs.nanopb}/share/nanopb/generator/proto";
 
     in {
@@ -95,61 +87,105 @@
         program = "${deploy}/bin/deploy";
       };
 
-      devShells.default = pkgs.mkShell {
-        pname = "airspec devenv";
-        version = self.rev or "dirty";
+      devShells = let
+        common = {
+          version = self.rev or "dirty";
+        };
 
-        sopsPGPKeyDirs = [
-          ./nix/keys/machines
-        ];
+      in {
+        default = pkgs.mkShell (common // {
+          pname = "airspec devenv";
 
-        sopsPGPKeys = [
-          ./nix/keys/mammothbane.asc
-        ];
+          sopsPGPKeyDirs = [
+            ./nix/keys/machines
+          ];
 
-        nativeBuildInputs = with pkgs; with inputs.sops-nix.packages.${system}; with localPackages; [
-          nanopb
+          sopsPGPKeys = [
+            ./nix/keys/mammothbane.asc
+          ];
 
-          sops-import-keys-hook
-        ] ++ localPackages.website.passthru.deps;
+          nativeBuildInputs = with pkgs; with inputs.sops-nix.packages.${system}; with localPackages; [
+            sops-import-keys-hook
+          ];
 
-        packages = with pkgs; with inputs.sops-nix.packages.${system}; with localPackages; [
-          py3
-          influxdb2
-          local_rust
-          stdenv.cc
-          pkg-config
+          packages = with pkgs; with inputs.sops-nix.packages.${system}; with localPackages; let
+            py3 = python3.withPackages (pypkgs: with pypkgs; ([
+              influxdb-client
+              protobuf
+              grpcio
+              grpcio-tools
+            ] ++ (localPackages.docs-site.passthru.pydeps pypkgs)));
+          in [
+            py3
 
-          cmake
+            ssh-to-pgp
+            sops
+          ] ++ (pkgs.lib.optionals pkgs.hostPlatform.isLinux [
+            swift
+            swift_protobuf
+          ]);
 
-          openocd
-          stm32cubemx
+          NANOPB_PROTO = nanopb_proto;
 
-          protobuf
-          grpcurl
+          shellHook = with pkgs; with localPackages; ''
+            readonly ROOT=$(git rev-parse --show-toplevel)
+            mkdir -p $ROOT/.devlinks
 
-          qemu
+            rm -f $ROOT/.devlinks/nanopb
+            rm -f $ROOT/.devlinks/rust
 
-          ssh-to-pgp
-          sops
-        ] ++ (pkgs.lib.optionals pkgs.hostPlatform.isLinux [
-          swift
-          swift_protobuf
-        ]);
+            ln -sf ${nanopb_proto} $ROOT/.devlinks/nanopb
+            ln -sf ${local_rust} $ROOT/.devlinks/rust
+          '';
+        });
 
-        NODE_OPTIONS = "--openssl-legacy-provider";
-        NANOPB_PROTO = nanopb_proto;
-        RUST_BACKTRACE = "1";
+        embedded = pkgs.mkShell (common // {
+          pname = "airspec-devenv-embedded";
 
-        shellHook = with pkgs; with localPackages; ''
-          mkdir -p .devlinks
+          packages = with pkgs; [
+            cmake
+            pkg-config
 
-          rm -f .devlinks/nanopb
-          rm -f .devlinks/rust
+            openocd
+            stm32cubemx
 
-          ln -sf ${nanopb_proto} .devlinks/nanopb
-          ln -sf ${local_rust} .devlinks/rust
-        '';
+            protobuf
+
+            pkgsCross.armhf-embedded.stdenv.cc
+          ];
+        });
+
+        nixos = pkgs.mkShell (common // {
+          pname = "airspec-devenv-nixos";
+
+          packages = with pkgs; [
+            qemu
+          ];
+        });
+
+        rust = pkgs.mkShell (common // {
+          pname = "airspec-devenv-rust";
+
+          RUST_BACKTRACE = "1";
+
+          packages = with pkgs; [
+            local_rust
+            protobuf
+            grpcurl
+            influxdb2
+          ];
+        });
+
+        web = pkgs.mkShell (common // {
+          pname = "airspec-devenv-web";
+
+          NODE_OPTIONS = "--openssl-legacy-provider";
+
+          packages = with pkgs; [
+            protobuf
+            grpcurl
+          ] ++ localPackages.website.passthru.deps;
+        });
       };
 
       legacyPackages = pkgs // localPackages;

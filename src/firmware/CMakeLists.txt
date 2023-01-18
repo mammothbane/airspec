@@ -24,21 +24,36 @@ find_package(Nanopb REQUIRED)
 include_directories(${NANOPB_INCLUDE_DIRS})
 
 nanopb_generate_cpp(PROTO_SRCS PROTO_HDRS
-        proto/blink.proto
-        proto/bme.proto
-        proto/imu.proto
-        proto/lib.proto
-        proto/lp5523.proto
-        proto/lux.proto
-        proto/mic.proto
-        proto/sample.proto
-        proto/sht.proto
-        proto/spectrometer.proto
-        proto/thermopile.proto
-        proto/colors.proto
-        proto/sensor_control.proto
-        proto/config.proto
-        proto/sgp.proto
+        ../../proto/firmware/sensor.proto
+        ../../proto/firmware/sensor/blink.proto
+        ../../proto/firmware/sensor/bme.proto
+        ../../proto/firmware/sensor/imu.proto
+        ../../proto/firmware/sensor/lp5523.proto
+        ../../proto/firmware/sensor/lux.proto
+        ../../proto/firmware/sensor/mic.proto
+        ../../proto/firmware/sensor/sht.proto
+        ../../proto/firmware/sensor/spectrometer.proto
+        ../../proto/firmware/sensor/thermopile.proto
+        ../../proto/firmware/sensor/sgp.proto
+
+        ../../proto/firmware/config.proto
+        ../../proto/firmware/config/blink.proto
+        ../../proto/firmware/config/bme.proto
+        ../../proto/firmware/config/imu.proto
+        ../../proto/firmware/config/lp5523.proto
+        ../../proto/firmware/config/lux.proto
+        ../../proto/firmware/config/mic.proto
+        ../../proto/firmware/config/sht.proto
+        ../../proto/firmware/config/spectrometer.proto
+        ../../proto/firmware/config/thermopile.proto
+        ../../proto/firmware/config/sgp.proto
+
+        ../../proto/bluetooth/sensor_control.proto
+        ../../proto/bluetooth/packet.proto
+
+        ../../proto/color.proto
+        ../../proto/lib.proto
+
 )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
