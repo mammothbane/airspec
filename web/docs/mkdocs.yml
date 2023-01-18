@@ -13,3 +13,9 @@ markdown_extensions:
 
 plugins:
   - search
+
+nav:
+  - Home: 'index.md'
+  - 'software':
+    - 'Nix': 'nix.md'
+    - 'MkDocs': 'docs.md'
