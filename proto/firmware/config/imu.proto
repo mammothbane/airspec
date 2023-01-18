@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package airspecs.firmware.config;
+
+import "nanopb.proto";
+
+message IMU {
+    message Subcfg {
+        bool lopass = 1;
+        uint32 sample_rate = 2 [(nanopb).int_size = IS_8];
+        uint32 range = 3 [(nanopb).int_size = IS_8];
+    }
+
+    Subcfg gyro = 1;
+    Subcfg accel = 2;
+}
+

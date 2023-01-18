@@ -1,5 +1,0 @@
-syntax = "proto3";
-
-package airspecs.lp5523;
-
-message Sample {}

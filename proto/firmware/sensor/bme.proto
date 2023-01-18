@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+import "nanopb.proto";
+
+package airspecs.firmware.sensor;
+
+message BME {
+    message Sample {
+        SenseType sensor = 1;
+        uint32 sensor_dimension = 2;
+        float value = 3;
+        int64 timestamp_ns = 4;
+        Accuracy accuracy = 5;
+    }
+
+    enum SenseType {
+        UNSPECIFIED = 0;
+
+        IAQ = 1;
+        STATIC_IAQ = 2;
+        CO2_EQ = 3;
+        BREATH_VOC_EQ = 4;
+        RAW_TEMP = 6;
+        RAW_PRESSURE = 7;
+        RAW_HUM = 8;
+        RAW_GAS = 9;
+        OUTPUT_STABLE = 12;
+        OUTPUT_RUN_STATUS = 13;
+        HEAT_COMP_TEMP = 14;
+        HEAT_COMP_HUM = 15;
+        OUT_COMP_GAS = 18;
+        OUT_GAS_PERC = 21;
+    }
+
+    enum Accuracy {
+        INACCURATE = 0;
+        LOW = 1;
+        MEDIUM = 2;
+        HIGH = 3;
+    }
+
+    repeated Sample samples = 1 [(nanopb).max_count = 8];
+}
+
+

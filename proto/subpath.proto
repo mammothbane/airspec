@@ -1,5 +1,0 @@
-syntax = "proto3";
-
-package airspecs.sub.path;
-
-message Test {}

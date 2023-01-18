@@ -2,76 +2,119 @@
 
 use std::sync::Arc;
 
-use async_std::channel;
-use chrono::{
-    DateTime,
-    Utc,
+use async_std::{
+    channel,
 };
 use structopt::StructOpt;
+use tonic::{
+    Request,
+    Response,
+    Status,
+    Streaming,
+};
 
-mod csv_download;
 mod forward;
 mod opt;
 mod util;
 
-use csv_download::*;
 use opt::*;
 
-pub struct State {
-    msr_tx:        channel::Sender<Measurement>,
+use airspec::pb::airspecs::{
+    server,
+    server::{
+        RawSample,
+        RawSampleResponse,
+        SubmitPoint,
+    },
+};
+
+#[derive(Clone, Debug)]
+pub struct Server {
+    msr_tx:        channel::Sender<influxdb2::models::DataPoint>,
     influx_client: Arc<influxdb2::Client>,
     influx_cfg:    airspec::opt::Influx,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-pub struct SpecsId(pub String);
+#[tonic::async_trait]
+impl server::backend_server::Backend for Server {
+    type SubmitPointsStream = Self::SubmitSamplesStream;
+    type SubmitSamplesStream = Box<
+        dyn async_std::stream::Stream<Item = Result<server::SamplesAck, tonic::Status>>
+            + Send
+            + Unpin,
+    >;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-pub struct UserId(pub String);
+    async fn submit_raw_samples(
+        &self,
+        request: Request<Streaming<RawSample>>,
+    ) -> Result<Response<RawSampleResponse>, Status> {
+        let _contents = request.into_inner();
 
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct Measurement {
-    pub specs: SpecsId,
-    pub user:  UserId,
+        let resp = Response::new(server::RawSampleResponse {
+            status: server::raw_sample_response::RawSampleStatus::Ok.into(),
+        });
 
-    // TODO(nathan): sync on desired resolution
-    #[serde(with = "::chrono::serde::ts_milliseconds")]
-    pub timestamp: DateTime<Utc>,
-    pub sensor:    String,
-    pub values:    Vec<(String, FieldValue)>,
-}
+        Ok(resp)
+    }
 
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-#[serde(untagged)]
-pub enum FieldValue {
-    Bool(bool),
-    F64(f64),
-    I64(i64),
-    String(String),
-}
+    async fn submit_samples(
+        &self,
+        _request: Request<Streaming<airspec::pb::airspecs::bluetooth::SensorPacket>>,
+    ) -> Result<Response<Self::SubmitSamplesStream>, Status> {
+        todo!()
+    }
 
-impl From<FieldValue> for influxdb2::models::FieldValue {
-    fn from(value: FieldValue) -> Self {
-        use FieldValue::*;
+    async fn submit_points(
+        &self,
+        _request: Request<Streaming<SubmitPoint>>,
+    ) -> Result<Response<Self::SubmitPointsStream>, Status> {
+        let _msr_tx = &self.msr_tx;
+        todo!()
+    }
 
-        match value {
-            Bool(b) => Self::Bool(b),
-            F64(f) => Self::F64(f),
-            I64(i) => Self::I64(i),
-            String(s) => Self::String(s),
+    async fn dump(
+        &self,
+        request: Request<server::DumpRequest>,
+    ) -> Result<Response<server::Csv>, Status> {
+        use influxdb2::models::Query;
+        use server::dump_request::What;
+
+        let (field, id) = match request
+            .into_inner()
+            .what
+            .ok_or_else(|| Status::invalid_argument("missing what field"))?
+        {
+            What::User(id) => ("user", id),
+            What::SpecsId(id) => ("specs", id),
+        };
+
+        if id.contains('"') {
+            tracing::error!(%id, "injection detected");
+            return Err(Status::invalid_argument("injection detected"));
         }
+
+        let query = format!(
+            r#"
+                    from(bucket: "{}")
+                        |> range(start: 0)
+                        |> filter(fn: (r) => r.{} == "{}")
+                    "#,
+            self.influx_cfg.bucket, field, id,
+        );
+
+        let csv = self
+            .influx_client
+            .query_raw(&self.influx_cfg.org, Some(Query::new(query)))
+            .await
+            .map_err(|e| {
+                tracing::error!(?e, "influx request failed");
+                Status::unavailable("datastore request failed")
+            })?;
+
+        Ok(Response::new(server::Csv {
+            csv,
+        }))
     }
-}
-
-async fn submit(mut req: tide::Request<Arc<State>>) -> tide::Result {
-    let msrs: Vec<Measurement> = util::decode_msgpack_or_json(&mut req).await?;
-    let state = req.state();
-
-    for msr in msrs.into_iter() {
-        state.msr_tx.send(msr).await?;
-    }
-
-    Ok(tide::http::StatusCode::Accepted.into())
 }
 
 #[async_std::main]
@@ -93,20 +136,16 @@ async fn main() -> eyre::Result<()> {
     let influx_fwd =
         async_std::task::spawn(forward::forward_to_influx(client.clone(), influx.clone(), msr_rx));
 
-    let server = {
-        let mut server = tide::with_state(Arc::new(State {
+    tonic::transport::server::Server::builder()
+        .concurrency_limit_per_connection(256)
+        .add_service(server::backend_server::BackendServer::new(Server {
             msr_tx,
             influx_client: client,
             influx_cfg: influx,
-        }));
+        }))
+        .serve(bind)
+        .await?;
 
-        server.at("/submit").post(submit);
-        server.at("/dump").get(csv_download);
-
-        server
-    };
-
-    server.listen(bind).await?;
     influx_fwd.await;
 
     Ok(())

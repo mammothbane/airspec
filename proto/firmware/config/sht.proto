@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package airspecs.firmware.config;
+
+import "nanopb.proto";
+
+message SHT {
+    uint32 precision = 1 [(nanopb).int_size = IS_8];
+    uint32 heater = 2 [(nanopb).int_size = IS_8];
+    uint32 sample_period = 3 [(nanopb).int_size = IS_16];
+}

@@ -85,33 +85,41 @@
         ];
 
         nativeBuildInputs = with pkgs; with inputs.sops-nix.packages.${system}; with localPackages; [
+          nanopb
+
+          sops-import-keys-hook
+        ] ++ localPackages.website.passthru.deps;
+
+        packages = with pkgs; with inputs.sops-nix.packages.${system}; with localPackages; [
           py3
           influxdb2
           local_rust
           stdenv.cc
           pkg-config
 
-          swift
-          swift_protobuf
-
           cmake
 
           openocd
           stm32cubemx
 
+          swift
+          swift_protobuf
           protobuf
-          nanopb
-
           qemu
-
           ssh-to-pgp
           sops
-          sops-import-keys-hook
-        ] ++ localPackages.website.passthru.deps;
+        ];
 
         NODE_OPTIONS = "--openssl-legacy-provider";
         NANOPB_PROTO = "${pkgs.nanopb}/share/nanopb/generator/proto";
         RUST_BACKTRACE = "full";
+
+        shellHook = with pkgs; with localPackages; ''
+          mkdir -p .devlinks
+
+          ln -sf ${nanopb}/share/nanopb/generator/proto .devlinks/nanopb
+          ln -sf ${local_rust} .devlinks/rust
+        '';
       };
 
       legacyPackages = pkgs // localPackages;

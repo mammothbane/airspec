@@ -25,7 +25,7 @@ fn main() -> eyre::Result<()> {
     tonic_build::configure()
         .build_client(false)
         .out_dir(workdir)
-        .compile(&["proto/svc/server.proto", "proto/subpath.proto"], &["proto", &nanopb_proto])?;
+        .compile(&["proto/svc/server.proto"], &["proto", &nanopb_proto])?;
 
     std::thread::sleep(Duration::from_secs(1));
 

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package airspecs.server;
+
+message AuthToken {
+    uint64 token = 1;
+}
+
+message RequestMetadata {
+    AuthToken token = 1;
+    uint32 specs = 2;
+    optional string user = 3;
+    uint32 timestamp = 4;
+}
+

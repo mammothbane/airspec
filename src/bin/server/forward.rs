@@ -3,26 +3,14 @@ use std::borrow::Borrow;
 use async_compat::CompatExt;
 use async_std::{
     prelude::Stream,
-    stream::StreamExt,
 };
 use influxdb2::models::DataPoint;
-
-use crate::Measurement;
 
 pub async fn forward_to_influx(
     client: impl Borrow<influxdb2::Client>,
     influxcfg: airspec::opt::Influx,
-    msrs: impl Stream<Item = Measurement> + Unpin + Send + Sync + 'static,
+    msrs: impl Stream<Item = DataPoint> + Unpin + Send + Sync + 'static,
 ) {
-    let msrs = msrs.filter(|msr: &Measurement| !msr.values.is_empty()).map(|msr: Measurement| {
-        let builder = DataPoint::builder(msr.sensor)
-            .timestamp(msr.timestamp.timestamp_nanos())
-            .tag("user", msr.user.0)
-            .tag("specs", msr.specs.0);
-
-        msr.values.into_iter().fold(builder, |builder, (k, v)| builder.field(k, v)).build().unwrap() // safe given filter on empty above -- only errors if no fields added
-    });
-
     cfg_if::cfg_if! {
         if #[cfg(feature = "chunked")] {
             use futures_batch::ChunksTimeoutStreamExt;

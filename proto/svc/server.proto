@@ -2,16 +2,19 @@ syntax = "proto3";
 
 package airspecs.server;
 
-import "sample.proto";
+import "bluetooth/packet.proto";
+import "svc/meta.proto";
 
 message SamplesAck {
     repeated uint64 msg = 1;
 }
 
-message Dump {
+message DumpRequest {
+    RequestMetadata metadata = 1;
+
     oneof what {
-        string user = 1;
-        string specs_id = 2;
+        string user = 2;
+        string specs_id = 3;
     }
 }
 
@@ -20,7 +23,8 @@ message CSV {
 }
 
 message RawSample {
-    bytes unparsed_bytes = 1;
+    RequestMetadata metadata = 1;
+    bytes unparsed_bytes = 2;
 }
 
 message RawSampleResponse {
@@ -32,8 +36,33 @@ message RawSampleResponse {
     RawSampleStatus status = 1;
 }
 
+message Point {
+    message Value {
+        oneof value {
+            float float = 1;
+            string string = 2;
+            int64 int = 3;
+            uint64 uint = 4;
+            bool bool = 5;
+        }
+    }
+
+    string measurement = 1;
+    map<string, string> tags = 2;
+    map<string, Value> fields = 3;
+    optional int64 timestamp = 4;
+}
+
+message SubmitPoint {
+    RequestMetadata meta = 1;
+
+    Point value = 2;
+}
+
+
 service Backend {
-    rpc StreamRawSamples (stream Sample) returns (RawSampleResponse);
-    rpc StreamSamples(stream Sample) returns (stream SamplesAck);
-    rpc Dump(CSV) returns (CSV);
+    rpc SubmitRawSamples (stream RawSample) returns (RawSampleResponse);
+    rpc SubmitSamples(stream bluetooth.SensorPacket) returns (stream SamplesAck);
+    rpc SubmitPoints(stream SubmitPoint) returns (stream SamplesAck);
+    rpc Dump(DumpRequest) returns (CSV);
 }

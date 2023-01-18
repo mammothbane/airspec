@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package airspecs.firmware.sensor;
+
+import "nanopb.proto";
+
+message Blink {
+    message Sample {
+    }
+
+    uint64 sample_rate = 1;
+    bool diode_saturated = 2;
+    uint32 init_timestamp = 3;
+    repeated Sample samples = 4 [(nanopb).max_count = 128];
+}

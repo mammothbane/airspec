@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package airspecs.firmware.config;
+
+import "firmware/config/blink.proto";
+import "firmware/config/bme.proto";
+import "firmware/config/imu.proto";
+import "firmware/config/lux.proto";
+import "firmware/config/mic.proto";
+import "firmware/config/thermopile.proto";
+import "firmware/config/spectrometer.proto";
+import "firmware/config/sht.proto";
+import "firmware/config/sgp.proto";
+
+import "nanopb.proto";
+
+message Config {
+    bool run = 1;
+    fixed32 uuid = 2;
+    fixed32 firmware_version = 3;
+    fixed32 epoch = 4;
+
+    fixed64 enabled_sensors = 5;
+    Sensors sensors = 6;
+}
+
+message Sensors {
+    Lux lux = 1;
+    BME bme = 2;
+    IMU imu = 3;
+    Spectrometer spectrometer = 4;
+    Thermopile thermopile = 5;
+    Blink blink = 6;
+    Mic mic = 7;
+    SHT sht = 8;
+    SGP sgp = 9;
+}
+
+message AnySensor {
+    oneof config {
+        Blink blink = 1;
+        BME bme = 2;
+        IMU imu = 3;
+        Lux lux = 4;
+        Mic mic = 5;
+        SHT sht = 6;
+        Spectrometer spec = 7;
+        Thermopile therm = 8;
+        SGP sgp = 9;
+    }
+}
