@@ -9,12 +9,14 @@ let
     "dialout"
     "cdrom"
     "plugdev"
-  ];
+  ] ++ adminGroups;
 
 in {
   nix.settings.trusted-users = [
     "root"
     "npry"
+    "chwalek"
+    "sailinz"
   ];
 
   users = {

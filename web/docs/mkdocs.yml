@@ -3,10 +3,10 @@ site_url: https://airspecs.media.mit.edu
 theme: material
 repo_url: https://github.com/pchwalek/env_glasses
 strict: true
+
 markdown_extensions:
   - smarty
   - sane_lists
-  - nl2br
   - footnotes
   - codehilite
   - meta

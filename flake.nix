@@ -72,6 +72,29 @@
     in {
       packages = localPackages;
 
+      apps.deploy = let
+        deploy = pkgs.writeShellScriptBin "deploy" ''
+          set -euo pipefail
+
+          echo 'building server'
+          nix build \
+            -L \
+            --keep-going \
+            --no-link \
+            $(git rev-parse --show-toplevel)#nixosConfigurations.airspecs.config.system.build.toplevel
+
+          echo 'deploying to chwalek@airspecs.media.mit.edu'
+          sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild \
+            --flake $(git rev-parse --show-toplevel)#airspecs \
+            --target-host chwalek@airspecs.media.mit.edu \
+            switch
+        '';
+
+      in {
+        type = "app";
+        program = "${deploy}/bin/deploy";
+      };
+
       devShells.default = pkgs.mkShell {
         pname = "airspec devenv";
         version = self.rev or "dirty";
@@ -120,6 +143,9 @@
 
         shellHook = with pkgs; with localPackages; ''
           mkdir -p .devlinks
+
+          rm -f .devlinks/nanopb
+          rm -f .devlinks/rust
 
           ln -sf ${nanopb_proto} .devlinks/nanopb
           ln -sf ${local_rust} .devlinks/rust
