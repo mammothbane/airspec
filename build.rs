@@ -13,11 +13,11 @@ macro_rules! relpath {
     };
 }
 
+const DESCRIPTOR_NAME: &str = "descriptor.proto.bin";
+
 fn main() -> eyre::Result<()> {
     let base_dir = tempfile::tempdir()?;
     let workdir = base_dir.path();
-
-    println!("working in {workdir:?}");
 
     println!("cargo-rerun-if-env-changed=NANOPB_PROTO");
     let nanopb_proto = std::env::var("NANOPB_PROTO")?;
@@ -25,6 +25,7 @@ fn main() -> eyre::Result<()> {
     tonic_build::configure()
         .build_client(false)
         .out_dir(workdir)
+        .file_descriptor_set_path(workdir.join(DESCRIPTOR_NAME))
         .compile(&["proto/svc/server.proto"], &["proto", &nanopb_proto])?;
 
     std::thread::sleep(Duration::from_secs(1));
@@ -89,6 +90,22 @@ fn main() -> eyre::Result<()> {
         parent_file.write_all(content.as_bytes())?;
     }
 
+    {
+        let mut modrs = File::options()
+            .create(false)
+            .write(true)
+            .append(true)
+            .truncate(false)
+            .open(workdir.join("mod.rs"))?;
+
+        modrs.write_all(
+            format!(
+                r#"pub const FILE_DESCRIPTOR_SET: &[u8] = include_bytes!("{DESCRIPTOR_NAME}");"#,
+            )
+            .as_bytes(),
+        )?;
+    }
+
     let tmppath = PathBuf::from(relpath!("src/.pb.tmp"));
     let _ = std::fs::remove_dir_all(&tmppath);
     std::fs::create_dir_all(&tmppath)?;
@@ -117,7 +134,9 @@ fn main() -> eyre::Result<()> {
     std::fs::create_dir_all(&target_path)?;
 
     println!("rename {tmppath:?} -> {target_path:?}");
-    std::fs::rename(&tmppath, target_path)?;
+    std::fs::rename(&tmppath, &target_path)?;
+
+    std::fs::copy(workdir.join(DESCRIPTOR_NAME), target_path.join(DESCRIPTOR_NAME))?;
 
     Ok(())
 }

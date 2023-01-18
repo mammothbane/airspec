@@ -45,9 +45,7 @@
         overlays = [
           (import inputs.rust-overlay)
           (final: prev: let
-            local_rust = prev.rust-bin.nightly."2023-01-10".default.override {
-              extensions = [ "rust-src" "clippy" ];
-            };
+            local_rust = prev.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
           in {
             inherit local_rust;
             crane-lib = (inputs.crane.mkLib final).overrideToolchain local_rust;
@@ -68,6 +66,8 @@
         grpcio
         grpcio-tools
       ] ++ (localPackages.docs-site.passthru.pydeps pypkgs)));
+
+      nanopb_proto = "${pkgs.nanopb}/share/nanopb/generator/proto";
 
     in {
       packages = localPackages;
@@ -105,19 +105,22 @@
           swift
           swift_protobuf
           protobuf
+          grpcurl
+
           qemu
+
           ssh-to-pgp
           sops
         ];
 
         NODE_OPTIONS = "--openssl-legacy-provider";
-        NANOPB_PROTO = "${pkgs.nanopb}/share/nanopb/generator/proto";
-        RUST_BACKTRACE = "full";
+        NANOPB_PROTO = nanopb_proto;
+        RUST_BACKTRACE = "1";
 
         shellHook = with pkgs; with localPackages; ''
           mkdir -p .devlinks
 
-          ln -sf ${nanopb}/share/nanopb/generator/proto .devlinks/nanopb
+          ln -sf ${nanopb_proto} .devlinks/nanopb
           ln -sf ${local_rust} .devlinks/rust
         '';
       };

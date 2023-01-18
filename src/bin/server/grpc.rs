@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use async_std::channel;
 use tonic::{
+    metadata::MetadataMap,
     Request,
     Response,
     Status,
@@ -11,17 +12,31 @@ use tonic::{
 use airspec::pb::airspecs::{
     server,
     server::{
+        Point,
         RawSample,
         RawSampleResponse,
-        SubmitPoint,
     },
 };
+
+const AUTH_KEY: &str = "Authentication";
 
 #[derive(Clone, Debug)]
 pub struct Server {
     pub msr_tx:        channel::Sender<influxdb2::models::DataPoint>,
     pub influx_client: Arc<influxdb2::Client>,
     pub influx_cfg:    airspec::opt::Influx,
+}
+
+impl Server {
+    fn verify_auth(&self, meta: &MetadataMap) -> Result<(), tonic::Status> {
+        let _auth_value = meta.get(AUTH_KEY).ok_or_else(|| {
+            tonic::Status::unauthenticated(format!(
+                "auth key (metadata field: \"{AUTH_KEY}\") missing"
+            ))
+        })?;
+
+        Ok(())
+    }
 }
 
 #[tonic::async_trait]
@@ -37,6 +52,8 @@ impl server::backend_server::Backend for Server {
         &self,
         request: Request<Streaming<RawSample>>,
     ) -> Result<Response<RawSampleResponse>, Status> {
+        self.verify_auth(request.metadata())?;
+
         let _contents = request.into_inner();
 
         let resp = Response::new(server::RawSampleResponse {
@@ -48,15 +65,18 @@ impl server::backend_server::Backend for Server {
 
     async fn submit_samples(
         &self,
-        _request: Request<Streaming<airspec::pb::airspecs::bluetooth::SensorPacket>>,
+        request: Request<Streaming<airspec::pb::airspecs::bluetooth::SensorPacket>>,
     ) -> Result<Response<Self::SubmitSamplesStream>, Status> {
+        self.verify_auth(request.metadata())?;
+
         todo!()
     }
 
     async fn submit_points(
         &self,
-        _request: Request<Streaming<SubmitPoint>>,
+        request: Request<Streaming<Point>>,
     ) -> Result<Response<Self::SubmitPointsStream>, Status> {
+        self.verify_auth(request.metadata())?;
         let _msr_tx = &self.msr_tx;
         todo!()
     }
@@ -67,6 +87,8 @@ impl server::backend_server::Backend for Server {
     ) -> Result<Response<server::Csv>, Status> {
         use influxdb2::models::Query;
         use server::dump_request::What;
+
+        self.verify_auth(request.metadata())?;
 
         let (field, id) = match request
             .into_inner()
@@ -84,10 +106,10 @@ impl server::backend_server::Backend for Server {
 
         let query = format!(
             r#"
-                    from(bucket: "{}")
-                        |> range(start: 0)
-                        |> filter(fn: (r) => r.{} == "{}")
-                    "#,
+            from(bucket: "{}")
+                |> range(start: 0)
+                |> filter(fn: (r) => r.{} == "{}")
+            "#,
             self.influx_cfg.bucket, field, id,
         );
 

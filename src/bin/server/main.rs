@@ -1,5 +1,6 @@
 #![feature(option_result_contains)]
 
+use airspec::pb::FILE_DESCRIPTOR_SET;
 use async_std::channel;
 use structopt::StructOpt;
 
@@ -10,7 +11,7 @@ mod util;
 
 use opt::*;
 
-#[async_std::main]
+#[tokio::main]
 async fn main() -> eyre::Result<()> {
     airspec::trace::init(true);
 
@@ -29,8 +30,16 @@ async fn main() -> eyre::Result<()> {
     let influx_fwd =
         async_std::task::spawn(forward::forward_to_influx(client.clone(), influx.clone(), msr_rx));
 
+    tracing::info!(bind = ?bind, "starting");
+
     tonic::transport::server::Server::builder()
         .concurrency_limit_per_connection(256)
+        .add_service(
+            tonic_reflection::server::Builder::configure()
+                .include_reflection_service(true)
+                .register_encoded_file_descriptor_set(FILE_DESCRIPTOR_SET)
+                .build()?,
+        )
         .add_service(airspec::pb::airspecs::server::backend_server::BackendServer::new(
             grpc::Server {
                 msr_tx,
