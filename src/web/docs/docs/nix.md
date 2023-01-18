@@ -52,5 +52,5 @@ from here.
 
 - `nixos` has the NixOS system definitions we have in use (currently just `airspecs`)
 - `pkgs` has the package definitions. For in-tree packages, the actual derivation lives in that package's directory (
-  e.g. `web/docs/default.nix`) and is reexported here. Out-of-tree packages are defined by their own `.nix` file in this
-  directory.
+  e.g. `src/web/docs/default.nix`) and is reexported here. Out-of-tree packages are defined by their own `.nix` file in
+  this directory.
