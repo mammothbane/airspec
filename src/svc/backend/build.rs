@@ -26,7 +26,7 @@ fn main() -> eyre::Result<()> {
         .build_client(false)
         .out_dir(workdir)
         .file_descriptor_set_path(workdir.join(DESCRIPTOR_NAME))
-        .compile(&["proto/svc/server.proto"], &["proto", &nanopb_proto])?;
+        .compile(&["../../../proto/svc/server.proto"], &["../../../proto", &nanopb_proto])?;
 
     std::thread::sleep(Duration::from_secs(1));
 

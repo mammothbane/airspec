@@ -24,20 +24,24 @@
     nativeBuildInputs = [
     ];
 
+    cargoExtraArgs = "-p airspec";
+
     inherit NANOPB_PROTO;
   };
 
   cargoVendorDir = crane-lib.vendorCargoDeps (commonOptions // {
+    pname = "airspec-global";
   });
 
   cargoArtifacts = crane-lib.buildDepsOnly (commonOptions // {
+    pname = "airspec-global";
     inherit cargoVendorDir;
   });
 
   rustFmt = crane-lib.cargoFmt (commonOptions // {
     inherit cargoVendorDir cargoArtifacts;
     preBuild = ''
-      echo -ne '\n' > src/pb.rs
+      echo -ne '\n' > src/svc/backend/src/pb.rs
     '';
   });
 
