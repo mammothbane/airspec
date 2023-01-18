@@ -60,7 +60,7 @@ message TriggerFunc {
     }
 
     oneof action {
-        Unit enterDFU = 1;
+        lib.Unit enterDFU = 1;
         BlueGreenTransition bg_trans = 2;
         RedFlash red_flash = 3;
     };
