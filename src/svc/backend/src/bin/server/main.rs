@@ -13,12 +13,12 @@ use opt::*;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
-    airspec::trace::init(true);
-
     let Opt {
         bind,
         influx,
     } = Opt::from_args();
+
+    airspec::trace::init(true);
 
     let (msr_tx, msr_rx) = channel::bounded(4096);
 
