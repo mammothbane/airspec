@@ -17,7 +17,7 @@ of the build process in each language.
 >gRPC is a modern open source high performance Remote Procedure Call (RPC)
 >framework that can run in any environment.
 
-gRPC uses protobuf to provide this RPC framework, so the protos we've already
-defined can be used in the RPC definitions. Presently, these are found at
-`proto/svc/`.
+gRPC uses protobuf as its declaration language, so it's fully interoperable
+with any protobufs defined for other systems (e.g. the Bluetooth link).
 
+Presently, the ingest service definitions can be found in `proto/svc/`.

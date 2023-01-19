@@ -2,7 +2,6 @@
 
 To work on these docs:
 
-
 ```console
 $ nix develop
 $ cd src/web/docs

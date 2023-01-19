@@ -129,6 +129,7 @@
 
           shellHook = with pkgs; with localPackages; ''
             readonly ROOT=$(git rev-parse --show-toplevel)
+
             mkdir -p $ROOT/.devlinks
 
             rm -f $ROOT/.devlinks/nanopb
@@ -136,6 +137,11 @@
 
             ln -sf ${nanopb_proto} $ROOT/.devlinks/nanopb
             ln -sf ${local_rust} $ROOT/.devlinks/rust
+
+            cat <<'EOF' >$ROOT/.devlinks/rust.env
+            PROTOC=${protobuf}/bin/protoc
+            NANOPB_PROTO=${nanopb_proto}
+            EOF
           '';
         });
 

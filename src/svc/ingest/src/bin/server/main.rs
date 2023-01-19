@@ -1,13 +1,16 @@
 #![feature(option_result_contains)]
 
-use airspec::pb::FILE_DESCRIPTOR_SET;
 use async_std::channel;
 use structopt::StructOpt;
+
+use airspecs_ingest::pb::{
+    airspecs::svc,
+    FILE_DESCRIPTOR_SET,
+};
 
 mod forward;
 mod grpc;
 mod opt;
-mod util;
 
 use opt::*;
 
@@ -15,20 +18,23 @@ use opt::*;
 async fn main() -> eyre::Result<()> {
     let Opt {
         bind,
-        influx,
+        influx: influx_cfg,
     } = Opt::from_args();
 
-    airspec::trace::init(true);
+    airspecs_ingest::trace::init(true);
 
     let (msr_tx, msr_rx) = channel::bounded(4096);
 
-    let token = influx.token_or_env().ok_or(eyre::eyre!("influx token was missing"))?;
+    let token = influx_cfg.token_or_env().ok_or(eyre::eyre!("influx token was missing"))?;
 
-    let client = influxdb2::Client::new(&influx.url, &token);
+    let client = influxdb2::Client::new(&influx_cfg.url, &token);
     let client = std::sync::Arc::new(client);
 
-    let influx_fwd =
-        async_std::task::spawn(forward::forward_to_influx(client.clone(), influx.clone(), msr_rx));
+    let influx_fwd = async_std::task::spawn(forward::forward_to_influx(
+        client.clone(),
+        influx_cfg.clone(),
+        msr_rx,
+    ));
 
     tracing::info!(bind = ?bind, "starting");
 
@@ -40,12 +46,18 @@ async fn main() -> eyre::Result<()> {
                 .register_encoded_file_descriptor_set(FILE_DESCRIPTOR_SET)
                 .build()?,
         )
-        .add_service(airspec::pb::airspecs::server::backend_server::BackendServer::new(
-            grpc::Server {
-                msr_tx,
+        .add_service(svc::dump::csv_dump_server::CsvDumpServer::with_interceptor(
+            grpc::Dump {
                 influx_client: client,
-                influx_cfg: influx,
+                influx_cfg,
             },
+            grpc::authenticate,
+        ))
+        .add_service(svc::ingest::ingest_server::IngestServer::with_interceptor(
+            grpc::Ingest {
+                msr_tx,
+            },
+            grpc::authenticate,
         ))
         .serve(bind)
         .await?;

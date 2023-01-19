@@ -46,11 +46,10 @@ place.
 When you:
 
 ```console
-$ nix build .#airspecs_server
+$ nix build .#ingest
 ```
 
-nix knows what `airspecs_server` is because the flake exposes it in the
-`packages` output.
+nix knows what `ingest` is because the flake exposes it in the `packages` output.
 
 ### `nix/`
 

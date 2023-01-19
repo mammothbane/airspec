@@ -19,14 +19,22 @@ fn main() -> eyre::Result<()> {
     let base_dir = tempfile::tempdir()?;
     let workdir = base_dir.path();
 
+    if let Err(e) = dotenv::from_filename(relpath!("../../../.devlinks/rust.env")) {
+        println!("unable to load dotenv: {e}");
+    }
+
     println!("cargo-rerun-if-env-changed=NANOPB_PROTO");
-    let nanopb_proto = std::env::var("NANOPB_PROTO")?;
+    let nanopb_proto =
+        std::env::var("NANOPB_PROTO").unwrap_or(relpath!(".devlinks/nanopb").to_owned());
 
     tonic_build::configure()
         .build_client(false)
         .out_dir(workdir)
         .file_descriptor_set_path(workdir.join(DESCRIPTOR_NAME))
-        .compile(&["../../../proto/svc/server.proto"], &["../../../proto", &nanopb_proto])?;
+        .compile(&["../../../proto/svc/ingest.proto", "../../../proto/svc/dump.proto"], &[
+            "../../../proto",
+            &nanopb_proto,
+        ])?;
 
     std::thread::sleep(Duration::from_secs(1));
 

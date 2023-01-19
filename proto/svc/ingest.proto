@@ -1,23 +1,8 @@
 syntax = "proto3";
 
-package airspecs.server;
+package airspecs.svc.ingest;
 
 import "bluetooth/packet.proto";
-
-message SamplesAck {
-    repeated uint64 msg = 1;
-}
-
-message DumpRequest {
-    oneof what {
-        string user = 1;
-        string specs_id = 2;
-    }
-}
-
-message CSV {
-    string csv = 1;
-}
 
 message RawSample {
     bytes unparsed_bytes = 1;
@@ -51,10 +36,12 @@ message Point {
     optional int64 timestamp = 4;
 }
 
+message SamplesAck {
+    repeated uint64 msg = 1;
+}
 
-service Backend {
+service Ingest {
     rpc SubmitRawSamples (stream RawSample) returns (RawSampleResponse);
     rpc SubmitSamples(stream bluetooth.SensorPacket) returns (stream SamplesAck);
     rpc SubmitPoints(stream Point) returns (stream SamplesAck);
-    rpc Dump(DumpRequest) returns (CSV);
 }

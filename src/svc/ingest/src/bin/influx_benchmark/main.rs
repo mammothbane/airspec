@@ -4,9 +4,9 @@ use structopt::StructOpt;
 
 #[async_std::main]
 async fn main() -> eyre::Result<()> {
-    airspec::trace::init(true);
+    airspecs_ingest::trace::init(true);
 
-    let opt: airspec::opt::Influx = airspec::opt::Influx::from_args();
+    let opt: airspecs_ingest::opt::Influx = airspecs_ingest::opt::Influx::from_args();
 
     let token = opt.token_or_env().ok_or(eyre::eyre!("influx token missing"))?;
     let client = influxdb2::Client::new("http://localhost:8086", &token);

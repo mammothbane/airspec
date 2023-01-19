@@ -10,10 +10,10 @@
   NANOPB_PROTO = "${nanopb}/share/nanopb/generator/proto";
 
   commonOptions = {
-    pname = "airspec-server";
+    pname = "airspecs-ingest";
 
     src = lib.cleanSourceWith {
-      src = ../..;
+      src = ../../..;
       filter = protoOrCargo;
     };
 
@@ -24,17 +24,17 @@
     nativeBuildInputs = [
     ];
 
-    cargoExtraArgs = "-p airspec";
+    cargoExtraArgs = "-p airspecs_ingest";
 
     inherit NANOPB_PROTO;
   };
 
   cargoVendorDir = crane-lib.vendorCargoDeps (commonOptions // {
-    pname = "airspec-global";
+    pname = "airspecs-global";
   });
 
   cargoArtifacts = crane-lib.buildDepsOnly (commonOptions // {
-    pname = "airspec-global";
+    pname = "airspecs-global";
     inherit cargoVendorDir;
 
   });
@@ -43,7 +43,7 @@
     inherit cargoVendorDir cargoArtifacts;
 
     preBuild = ''
-      echo -ne '\n' > src/svc/backend/src/pb.rs
+      echo -ne '\n' > src/svc/ingest/src/pb.rs
     '';
 
   });

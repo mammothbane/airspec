@@ -6,7 +6,7 @@ use influxdb2::models::DataPoint;
 
 pub async fn forward_to_influx(
     client: impl Borrow<influxdb2::Client>,
-    influxcfg: airspec::opt::Influx,
+    influxcfg: airspecs_ingest::opt::Influx,
     msrs: impl Stream<Item = DataPoint> + Unpin + Send + Sync + 'static,
 ) {
     cfg_if::cfg_if! {

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package airspecs.svc.dump;
+
+message DumpRequest {
+    oneof what {
+        string user = 1;
+        string specs_id = 2;
+    }
+}
+
+message CSV {
+    string csv = 1;
+}
+
+service CSVDump {
+    rpc Dump(DumpRequest) returns (CSV);
+}

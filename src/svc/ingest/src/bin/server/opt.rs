@@ -6,5 +6,5 @@ pub struct Opt {
     pub bind: SocketAddr,
 
     #[structopt(flatten)]
-    pub influx: airspec::opt::Influx,
+    pub influx: airspecs_ingest::opt::Influx,
 }
