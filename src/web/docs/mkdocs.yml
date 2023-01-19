@@ -15,7 +15,8 @@ plugins:
   - search
 
 nav:
-  - Home: 'index.md'
-  - 'software':
-    - 'Nix': 'nix.md'
-    - 'MkDocs': 'docs.md'
+  - home: index.md
+  - software:
+    - nix: software/nix.md
+    - mkDocs: software/docs.md
+    - protobuf: software/proto.md
