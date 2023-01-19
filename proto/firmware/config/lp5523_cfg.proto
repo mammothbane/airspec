@@ -2,7 +2,5 @@ syntax = "proto3";
 
 package airspecs.firmware.config;
 
-import "nanopb.proto";
-
 message LP5523 {
 }

@@ -2,17 +2,15 @@ syntax = "proto3";
 
 package airspecs.firmware.config;
 
-import "firmware/config/blink.proto";
-import "firmware/config/bme.proto";
-import "firmware/config/imu.proto";
-import "firmware/config/lux.proto";
-import "firmware/config/mic.proto";
-import "firmware/config/thermopile.proto";
-import "firmware/config/spectrometer.proto";
-import "firmware/config/sht.proto";
-import "firmware/config/sgp.proto";
-
-import "nanopb.proto";
+import "firmware/config/blink_cfg.proto";
+import "firmware/config/bme_cfg.proto";
+import "firmware/config/imu_cfg.proto";
+import "firmware/config/lux_cfg.proto";
+import "firmware/config/mic_cfg.proto";
+import "firmware/config/thermopile_cfg.proto";
+import "firmware/config/spectrometer_cfg.proto";
+import "firmware/config/sht_cfg.proto";
+import "firmware/config/sgp_cfg.proto";
 
 message Config {
     bool run = 1;

@@ -37,16 +37,16 @@ nanopb_generate_cpp(PROTO_SRCS PROTO_HDRS
         ../../proto/firmware/sensor/sgp.proto
 
         ../../proto/firmware/config.proto
-        ../../proto/firmware/config/blink.proto
-        ../../proto/firmware/config/bme.proto
-        ../../proto/firmware/config/imu.proto
-        ../../proto/firmware/config/lp5523.proto
-        ../../proto/firmware/config/lux.proto
-        ../../proto/firmware/config/mic.proto
-        ../../proto/firmware/config/sht.proto
-        ../../proto/firmware/config/spectrometer.proto
-        ../../proto/firmware/config/thermopile.proto
-        ../../proto/firmware/config/sgp.proto
+        ../../proto/firmware/config/blink_cfg.proto
+        ../../proto/firmware/config/bme_cfg.proto
+        ../../proto/firmware/config/imu_cfg.proto
+        ../../proto/firmware/config/lp5523_cfg.proto
+        ../../proto/firmware/config/lux_cfg.proto
+        ../../proto/firmware/config/mic_cfg.proto
+        ../../proto/firmware/config/sht_cfg.proto
+        ../../proto/firmware/config/spectrometer_cfg.proto
+        ../../proto/firmware/config/thermopile_cfg.proto
+        ../../proto/firmware/config/sgp_cfg.proto
 
         ../../proto/bluetooth/sensor_control.proto
         ../../proto/bluetooth/packet.proto

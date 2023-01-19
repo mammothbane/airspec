@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package airspecs.firmware.config;
 
-import "nanopb.proto";
-
 message BME {
     uint32 sample_period = 1;
 }
