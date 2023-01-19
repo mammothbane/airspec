@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package airspecs.firmware.sensor;
 
-import "nanopb.proto";
-
 import "firmware/sensor/blink.proto";
 import "firmware/sensor/bme.proto";
 import "firmware/sensor/imu.proto";

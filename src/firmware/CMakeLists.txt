@@ -18,12 +18,11 @@ project(captivatesEnv C CXX ASM)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/nanopb/extra)
 find_package(Nanopb REQUIRED)
 
 include_directories(${NANOPB_INCLUDE_DIRS})
 
-nanopb_generate_cpp(PROTO_SRCS PROTO_HDRS
+nanopb_generate_cpp(PROTO_SRCS PROTO_HDRS RELPATH ../../proto
         ../../proto/firmware/sensor.proto
         ../../proto/firmware/sensor/blink.proto
         ../../proto/firmware/sensor/bme.proto
