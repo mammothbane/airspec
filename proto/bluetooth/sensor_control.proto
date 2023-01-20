@@ -32,7 +32,7 @@ message ControlSensors {
 }
 
 message ConfigSensors {
-    repeated firmware.config.AnySensor set_sensor = 1;
+    repeated firmware.config.AnySensor set_sensor = 1 [(nanopb).max_count = 10];
 }
 
 message TriggerFunc {

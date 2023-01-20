@@ -15,6 +15,6 @@ message IMU {
     }
 
     uint32 sample_rate = 1;
-    repeated Sample samples = 2 [(nanopb).max_count = 8];
+    repeated Sample samples = 2 [(nanopb).max_count = 3];
 }
 

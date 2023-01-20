@@ -2,4 +2,30 @@ syntax = "proto3";
 
 package airspecs.firmware.sensor;
 
-message Thermopile {}
+import "nanopb.proto";
+
+message Thermopile {
+    enum Position {
+        UNKNOWN = 0;
+
+        NOSE_TIP = 1;
+        BRIDGE = 2;
+        TEMPLE_FRONT = 3;
+        TEMPLE_MID = 4;
+        TEMPLE_BACK = 5;
+    }
+
+    message Sample {
+        message Temperature {
+            float processed = 1;
+            uint32 raw = 2;
+        }
+
+        Position position = 1;
+        Temperature ambient = 2;
+        Temperature object = 3;
+        uint32 descriptor = 4 [(nanopb).int_size = IS_8];
+    }
+
+    repeated Sample samples = 1 [(nanopb).fixed_count = true, (nanopb).max_count = 5];
+}

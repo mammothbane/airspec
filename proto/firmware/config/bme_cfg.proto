@@ -2,6 +2,14 @@ syntax = "proto3";
 
 package airspecs.firmware.config;
 
+import "nanopb.proto";
+
 message BME {
     uint32 sample_period = 1;
+    uint32 temp_oversampling = 2 [(nanopb).int_size = IS_8];
+    uint32 humidity_oversampling = 3;
+    uint32 pressure_oversampling = 4;
+    uint32 iir_filter_size = 5;
+    uint32 gas_heater_temp = 6;
+    uint32 gas_heater_period = 7;
 }
