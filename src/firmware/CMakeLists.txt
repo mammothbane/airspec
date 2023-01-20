@@ -17,9 +17,6 @@ set(SIZE                ${ARCH}size     CACHE STRING "size")
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-message("ARCH: ${ARCH}")
-message("C COMPILER: ${CMAKE_C_COMPILER}")
-
 # nix/direnv should set this for you. if you're not building with nix, point this at $your_nanopb_src/extra.
 if (DEFINED ENV{NANOPB_CMAKE_MODULE})
     SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};$ENV{NANOPB_CMAKE_MODULE}")

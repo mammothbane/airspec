@@ -150,12 +150,11 @@
           pname = "airspec-devenv-embedded";
 
           packages = with pkgs; [
-            cmake
-            pkg-config
-
             openocd
             stm32cubemx
 
+            cmake
+            pkg-config
             protobuf
 
             pkgsCross.armhf-embedded.stdenv.cc
