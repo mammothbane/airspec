@@ -126,6 +126,7 @@
           ]);
 
           NANOPB_PROTO = nanopb_proto;
+          NANOPB_CMAKE_MODULE = "${pkgs.nanopb.src}/extra";
 
           shellHook = with pkgs; with localPackages; ''
             readonly ROOT=$(git rev-parse --show-toplevel)

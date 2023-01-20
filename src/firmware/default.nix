@@ -35,20 +35,12 @@
     filter = path: type: (isProto path type) || (isFirmwareDir path type) || (isFirmwareFile path type);
   };
 
-  nanopb_version = "0.4.7";
-  nanopb_src = fetchFromGitHub {
-    owner = "nanopb";
-    repo = "nanopb";
-    rev = nanopb_version;
-    sha256 = "EgrEUQbxLn3Hxn33UokkkDRgkmDwCC/h6lA6YPX4yp8=";
-  };
-
-in stdenv.mkDerivation {
+in cross.stdenv.mkDerivation {
   pname = "firmware";
   version = self.rev or "dirty";
 
   cmakeFlags = [
-    "-DCMAKE_MODULE_PATH=${nanopb_src}/extra"
+    "-DCMAKE_MODULE_PATH=${nanopb.src}/extra"
   ];
 
   preConfigure = ''

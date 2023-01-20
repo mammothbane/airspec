@@ -1,58 +1,44 @@
-#THIS FILE IS AUTO GENERATED FROM THE TEMPLATE! DO NOT CHANGE!
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.22)
 
-# specify cross-compilers and tools
-set(CMAKE_C_COMPILER arm-none-eabihf-gcc)
-set(CMAKE_CXX_COMPILER arm-none-eabihf-g++)
-set(CMAKE_ASM_COMPILER  arm-none-eabihf-gcc)
-set(CMAKE_AR arm-none-eabihf-ar)
-set(CMAKE_OBJCOPY arm-none-eabihf-objcopy)
-set(CMAKE_OBJDUMP arm-none-eabihf-objdump)
-set(SIZE arm-none-eabihf-size)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-
-# project settings
-project(captivatesEnv C CXX ASM)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
+set(ARCH arm-none-eabihf- CACHE STRING "architecture prefix")
+
+set(CMAKE_C_COMPILER    ${ARCH}gcc      CACHE STRING "c compiler")
+set(CMAKE_CXX_COMPILER  ${ARCH}g++      CACHE STRING "c++ compiler")
+set(CMAKE_ASM_COMPILER  ${ARCH}gcc      CACHE STRING "assembler")
+set(CMAKE_AR            ${ARCH}ar       CACHE STRING "ar tool")
+set(CMAKE_OBJCOPY       ${ARCH}objcopy  CACHE STRING "objcopy")
+set(CMAKE_OBJDUMP       ${ARCH}objdump  CACHE STRING "objdump")
+set(SIZE                ${ARCH}size     CACHE STRING "size")
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+set(CMAKE_EXE_LINKER_FLAGS_INIT "--specs=nosys.specs" CACHE INTERNAL "")
+
+message("ARCH: ${ARCH}")
+message("C COMPILER: ${CMAKE_C_COMPILER}")
+
+# nix/direnv should set this for you. if you're not building with nix, point this at $your_nanopb_src/extra.
+if (DEFINED ENV{NANOPB_CMAKE_MODULE})
+    SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};$ENV{NANOPB_CMAKE_MODULE}")
+endif()
+
+project(airspecs_firmware C CXX ASM)
+
+# expect this to be set on PATH -- build with nix or in .direnv
 find_package(Nanopb REQUIRED)
 
 include_directories(${NANOPB_INCLUDE_DIRS})
 
+file(GLOB_RECURSE PROTOS CONFIGURE_DEPENDS
+    "../../proto/*.proto"
+)
+
 nanopb_generate_cpp(PROTO_SRCS PROTO_HDRS RELPATH ../../proto
-        ../../proto/firmware/sensor.proto
-        ../../proto/firmware/sensor/blink.proto
-        ../../proto/firmware/sensor/bme.proto
-        ../../proto/firmware/sensor/imu.proto
-        ../../proto/firmware/sensor/lp5523.proto
-        ../../proto/firmware/sensor/lux.proto
-        ../../proto/firmware/sensor/mic.proto
-        ../../proto/firmware/sensor/sht.proto
-        ../../proto/firmware/sensor/spectrometer.proto
-        ../../proto/firmware/sensor/thermopile.proto
-        ../../proto/firmware/sensor/sgp.proto
-
-        ../../proto/firmware/config.proto
-        ../../proto/firmware/config/blink_cfg.proto
-        ../../proto/firmware/config/bme_cfg.proto
-        ../../proto/firmware/config/imu_cfg.proto
-        ../../proto/firmware/config/lp5523_cfg.proto
-        ../../proto/firmware/config/lux_cfg.proto
-        ../../proto/firmware/config/mic_cfg.proto
-        ../../proto/firmware/config/sht_cfg.proto
-        ../../proto/firmware/config/spectrometer_cfg.proto
-        ../../proto/firmware/config/thermopile_cfg.proto
-        ../../proto/firmware/config/sgp_cfg.proto
-
-        ../../proto/bluetooth/sensor_control.proto
-        ../../proto/bluetooth/packet.proto
-
-        ../../proto/color.proto
-        ../../proto/lib.proto
-
+    ${PROTOS}
 )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -116,7 +102,7 @@ include_directories(
 
 add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32WB5Mxx)
 
-file(GLOB_RECURSE SOURCES
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
         "USB_Device/*.*"
         "STM32_WPAN/*.*"
         "Core/*.*"
