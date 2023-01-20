@@ -2,7 +2,7 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.22)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 11)
 
 set(ARCH arm-none-eabihf- CACHE STRING "architecture prefix")
@@ -16,7 +16,6 @@ set(CMAKE_OBJDUMP       ${ARCH}objdump  CACHE STRING "objdump")
 set(SIZE                ${ARCH}size     CACHE STRING "size")
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-set(CMAKE_EXE_LINKER_FLAGS_INIT "--specs=nosys.specs" CACHE INTERNAL "")
 
 message("ARCH: ${ARCH}")
 message("C COMPILER: ${CMAKE_C_COMPILER}")
