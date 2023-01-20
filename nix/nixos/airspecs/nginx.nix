@@ -34,6 +34,14 @@ in {
         locations."/api" = {
           proxyPass = "http://localhost:6666";
         };
+
+        locations."/assets/firmware/" = {
+          alias = "${flake.packages.x86_64-linux.firmware}/bin/";
+
+          extraConfig = ''
+            autoindex on;
+          '';
+        };
       };
 
       "default" = {

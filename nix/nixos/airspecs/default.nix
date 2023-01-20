@@ -4,7 +4,7 @@
     ./users.nix
     ./influx.nix
     ./image.nix
-    ./server.nix
+    ./ingest.nix
     ./secrets.nix
     ./sshguard.nix
   ];

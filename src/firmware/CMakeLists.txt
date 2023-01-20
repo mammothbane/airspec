@@ -69,7 +69,7 @@ add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-le
 add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    add_compile_options(-Os)
+    add_compile_options(-Os -s)
 else ()
     message(STATUS "Minimal optimization, debug info included")
     add_compile_options(-Og -g)

@@ -68,6 +68,8 @@
         deploy = pkgs.writeShellScriptBin "deploy" ''
           set -euo pipefail
 
+          username=''${1:-chwalek}
+
           echo 'building server'
           nix build \
             -L \
@@ -75,10 +77,10 @@
             --no-link \
             $(git rev-parse --show-toplevel)#nixosConfigurations.airspecs.config.system.build.toplevel
 
-          echo 'deploying to chwalek@airspecs.media.mit.edu'
+          echo "deploying to $username@airspecs.media.mit.edu"
           sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild \
             --flake $(git rev-parse --show-toplevel)#airspecs \
-            --target-host chwalek@airspecs.media.mit.edu \
+            --target-host $username@airspecs.media.mit.edu \
             switch
         '';
 
@@ -197,15 +199,18 @@
       legacyPackages = pkgs // localPackages;
     })
   ) // {
+    hydraJobs.x86_64-linux = {
+      shells = self.devShells.x86_64-linux;
+      packages = self.packages.x86_64-linux;
+      nixos = self.nixosConfigurations;
+    };
+
     nixosConfigurations = let
       system = modules: {
         system = "x86_64-linux";
 
         modules = [
           inputs.sops-nix.nixosModules.sops
-
-          ./nix/nixos/airspecs
-          ./nix/nixos/airspecs/hardware.nix
         ] ++ modules;
 
         specialArgs = {
@@ -215,7 +220,10 @@
       };
 
     in {
-      airspecs = nixpkgs.lib.nixosSystem (system []);
+      airspecs = nixpkgs.lib.nixosSystem (system [
+        ./nix/nixos/airspecs
+        ./nix/nixos/airspecs/hardware.nix
+      ]);
     };
   };
 }

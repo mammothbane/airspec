@@ -7,6 +7,7 @@
   stdenv,
   nanopb,
   fetchFromGitHub,
+  binutils,
 }: let
   cross = pkgsCross.armhf-embedded;
 
@@ -16,7 +17,6 @@
   nativeBuildInputs = [
     protobuf
     cmake
-    cross.stdenv.cc
     nanopb
   ];
 
@@ -44,7 +44,11 @@ in cross.stdenv.mkDerivation {
   cmakeFlags = [
     "-DCMAKE_MODULE_PATH=${nanopb.src}/extra"
     "-DCMAKE_VERBOSE_MAKEFILE=ON"
+    "-DCMAKE_BUILD_TYPE=Release"
   ];
+
+  strictDeps = true;
+  allowedRequisites = [];
 
   inherit
     src
@@ -62,7 +66,7 @@ in cross.stdenv.mkDerivation {
   '';
 
   installPhase = ''
-    mkdir -p $out
-    cp ${name}.{elf,bin,hex} $out
+    mkdir -p $out/bin
+    cp ${name}.{elf,bin,hex} $out/bin
   '';
 }
