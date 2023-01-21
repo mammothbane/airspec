@@ -38,6 +38,7 @@ nanopb_generate_cpp(PROTO_SRCS PROTO_HDRS
         proto/colors.proto
         proto/sensor_control.proto
         proto/config.proto
+        proto/sgp.proto
 )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 

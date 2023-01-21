@@ -13,6 +13,7 @@ import "mic.proto";
 import "sht.proto";
 import "spectrometer.proto";
 import "thermopile.proto";
+import "sgp.proto";
 
 message BluetoothPacket {
     message Metadata {
@@ -43,6 +44,7 @@ message Sample {
         sht.Sample sht = 8;
         spectrometer.Sample spectrometer = 9;
         thermopile.Sample thermopile = 10;
+        sgp.Sample sgp = 11;
     }
 }
 
@@ -58,5 +60,6 @@ enum SensorType {
     SHT = 8;
     Spectrometer = 9;
     Thermopile = 10;
+    SGP = 11;
 }
 

@@ -1,6 +1,12 @@
 syntax = "proto3";
 
+import "nanopb.proto";
+
 package airspecs.bme;
+
+message SampleGroup {
+    repeated Sample samples = 1 [(nanopb).max_count = 8];
+}
 
 message Sample {
     Sensor sensor = 1;

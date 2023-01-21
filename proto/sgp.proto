@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package airspecs.sgp;
+
+import "nanopb.proto";
+
+message Sample {
+    GasSample voc = 1;
+    GasSample nox = 2;
+}
+
+message GasSample {
+    uint32 raw = 1 [(nanopb).int_size = IS_16];
+    int32 index = 2;
+}
