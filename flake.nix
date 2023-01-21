@@ -33,7 +33,7 @@
           python3.pkgs.venvShellHook
           py3
 
-          pkgsCross.arm-embedded.stdenv.cc
+          pkgsCross.armhf-embedded.stdenv.cc
           openocd
           stm32cubemx
         ];
