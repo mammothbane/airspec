@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package airspecs.sensor_control;
+
+import "nanopb.proto";
+
+import "colors.proto";
+import "sample.proto";
+import "config.proto";
+
+message Control {
+    optional uint32 epoch = 1;
+
+    oneof value {
+        ControlLED ctrl_led = 2;
+        ControlSensors ctrl_sensors = 3;
+        ConfigSensors cfg_sensors = 4;
+        TriggerFunc trigger_func = 5;
+        Unit _set_clock = 6;
+    };
+}
+
+message Unit {}
+
+message ControlLED {
+
+}
+
+message ControlSensors {
+    repeated SensorType sensors = 1 [(nanopb).max_count = 8];
+    bool all = 2;
+    bool enable = 3;
+}
+
+message ConfigSensors {
+    repeated config.AnySensor set_sensor = 1;
+}
+
+message TriggerFunc {
+    oneof action {
+        Unit enterDFU = 1;
+        colors.BlueGreenTransition bg_trans = 2;
+        colors.RedFlash red_flash = 3;
+    };
+}

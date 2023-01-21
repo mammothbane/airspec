@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package airspecs.imu;
+
+import "nanopb.proto";
+import "lib.proto";
+
+message SampleGroup {
+    uint32 sample_rate = 1;
+    repeated Sample samples = 2 [(nanopb).max_count = 8];
+}
+
+message Sample {
+    airspecs.lib.IntVector3 accel = 1;
+    airspecs.lib.IntVector3 gyro = 2;
+    optional airspecs.lib.IntVector3 mag = 3;
+
+    optional float temperature = 5;
+}

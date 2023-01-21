@@ -18,21 +18,36 @@ project(captivatesEnv C CXX ASM)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
-#Uncomment for hardware floating point
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/nanopb/extra)
+find_package(Nanopb REQUIRED)
+
+include_directories(${NANOPB_INCLUDE_DIRS})
+
+nanopb_generate_cpp(PROTO_SRCS PROTO_HDRS
+        proto/blink.proto
+        proto/bme.proto
+        proto/imu.proto
+        proto/lib.proto
+        proto/lp5523.proto
+        proto/lux.proto
+        proto/mic.proto
+        proto/sample.proto
+        proto/sht.proto
+        proto/spectrometer.proto
+        proto/thermopile.proto
+        proto/colors.proto
+        proto/sensor_control.proto
+        proto/config.proto
+)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
 add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
 add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
 
-#Uncomment for software floating point
-#add_compile_options(-mfloat-abi=soft)
-
 add_compile_options(-mcpu=cortex-m4 -marm -march=armv7e-m -mthumb -mthumb-interwork)
 add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
 
-# uncomment to mitigate c++17 absolute addresses warnings
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-register")
-
-# Enable assembler files preprocessing
 add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
@@ -67,19 +82,19 @@ include_directories(
         Drivers/CMSIS/Device/ST/STM32WBxx/Include
         Middlewares/ST/STM32_WPAN/ble
         Drivers/CMSIS/Include
-        "Middlewares/STM32_Calipile"
-        "Middlewares/STM32_AS7341"
-        "Middlewares/STM32_TSL2772"
-        "Middlewares/STM32_BME680"
-        "Middlewares/STM32_AdafruitSensor"
-        "Middlewares/STM32_SHT4X"
-        "Middlewares/Sensirion_Core/src"
-        "Middlewares/STM32_ICM20948"
-        "Drivers/CMSIS/DSP/Include"
-        "Middlewares/bsec_2_2_0_0/algo/normal_version/inc"
-        "Middlewares/STM32_SGP41"
-        "Middlewares/gas-index-algorithm/sensirion_gas_index_algorithm"
-        "Middlewares/bsec_2_2_0_0"
+        Middlewares/STM32_Calipile
+        Middlewares/STM32_AS7341
+        Middlewares/STM32_TSL2772
+        Middlewares/STM32_BME680
+        Middlewares/STM32_AdafruitSensor
+        Middlewares/STM32_SHT4X
+        Middlewares/Sensirion_Core/src
+        Middlewares/STM32_ICM20948
+        Drivers/CMSIS/DSP/Include
+        Middlewares/bsec_2_2_0_0/algo/normal_version/inc
+        Middlewares/STM32_SGP41
+        Middlewares/gas-index-algorithm/sensirion_gas_index_algorithm
+        Middlewares/bsec_2_2_0_0
         Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc
         Middlewares/arduinojson/src
 )
@@ -110,7 +125,7 @@ add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR
 add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
 add_link_options(-T ${LINKER_SCRIPT})
 
-add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
+add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT} ${PROTO_SRCS} ${PROTO_HDRS})
 target_link_libraries(${PROJECT_NAME}.elf algobsec)
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)

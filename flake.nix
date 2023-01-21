@@ -17,7 +17,9 @@
       };
 
       py3 = pkgs.python3.withPackages (pypkgs: with pypkgs; [
-        poetry
+        protobuf
+        grpcio
+        grpcio-tools
       ]);
 
     in {
@@ -25,10 +27,7 @@
         pname = "airspec devenv";
         version = self.rev or "dirty";
 
-        venvDir = "python/.venv";
-
         buildInputs = with pkgs; [
-          python3.pkgs.venvShellHook
           py3
 
           pkgsCross.armhf-embedded.stdenv.cc

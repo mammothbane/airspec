@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package airspecs.lux;
+
+import "nanopb.proto";
+
+message SampleGroup {
+    repeated Sample samples = 1 [(nanopb).max_count = 8];
+    uint32 sample_rate = 2;
+    uint32 gain = 3;
+    uint32 integration_time = 4;
+}
+
+message Sample {
+    uint32 value = 1;
+    uint32 uptime = 2;
+}

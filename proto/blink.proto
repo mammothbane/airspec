@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package airspecs.sample.blink;
+package airspecs.blink;
 
 message Sample {
     uint64 sample_rate = 1;

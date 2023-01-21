@@ -1,12 +1,12 @@
 syntax = "proto3";
 
-package airspecs.sample.bme;
+package airspecs.bme;
 
 message Sample {
     Sensor sensor = 1;
     uint32 sensor_dimension = 2;
     float value = 3;
-    uint32 timestamp_ns = 4;
+    int64 timestamp_ns = 4;
     Accuracy accuracy = 5;
 }
 
