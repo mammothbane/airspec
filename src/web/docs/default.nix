@@ -2,7 +2,7 @@
   stdenv,
   python3,
   lib,
-  self ? null,
+  self,
 }: let
   pydeps = pypkgs: with pypkgs; [
     mkdocs-material
