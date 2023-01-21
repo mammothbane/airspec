@@ -202,7 +202,7 @@
     hydraJobs.x86_64-linux = {
       shells = self.devShells.x86_64-linux;
       packages = self.packages.x86_64-linux;
-      nixos = self.nixosConfigurations;
+      nixos = builtins.mapAttrs (name: value: value.config.system.build.toplevel) self.nixosConfigurations;
     };
 
     nixosConfigurations = let
