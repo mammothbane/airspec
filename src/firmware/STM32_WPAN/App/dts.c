@@ -21,7 +21,7 @@
 #include "ble_common.h"
 #include "ble.h"
 #include "dbg_trace.h"
-#include "dts.h"   
+#include "dts.h"
 
 #include "captivate_config.h"
 
@@ -131,7 +131,7 @@ void enterDFUMode(void);
 static DataTransferSvcContext_t aDataTransferContext;
 extern uint16_t Att_Mtu_Exchanged;
 struct LogMessage receivedCntrlPacket;
-union ColorComplex receivedColor;
+static union ColorComplex receivedColor;
 union BlueGreenTransition blueGreenTranRX;
 union RedFlash redFlashRX;
 uint8_t sensorCtrl[26];
@@ -548,7 +548,7 @@ void DTS_STM_Init(void) {
  * @brief  Characteristic update
  * @param  UUID: UUID of the characteristic
  * @param  Service_Instance: Instance of the service to which the characteristic belongs
- * 
+ *
  */
 tBleStatus DTS_STM_UpdateChar(uint16_t UUID, uint8_t *pPayload) {
 	tBleStatus result = BLE_STATUS_INVALID_PARAMS;

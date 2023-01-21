@@ -44,7 +44,7 @@ extern "C" {
 GPIO_TypeDef* GPIO_PORT_DONGLE[3] = {LED1_GPIO_Port, LED2_GPIO_Port, LED3_GPIO_Port};
 const uint16_t GPIO_PIN_DONGLE[3] = {LED1_Pin, LED2_Pin, LED3_Pin};
 #endif
-union ColorComplex receivedColor;
+static union ColorComplex receivedColor;
 osTimerId_t resetTimer;
 /* Functions Definition ------------------------------------------------------*/
 

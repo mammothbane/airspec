@@ -61,14 +61,14 @@ void IMU_Task(void *argument){
 		sensorSettings.accelSampleRate = 1;
 	}
 
-	imu.updateGyroSettings(sensorSettings.gyroLPFEn,
-			sensorSettings.accelLPFCutoff,
-			sensorSettings.gyroRange,
-			sensorSettings.gyroSampleRate);
-	imu.updateAccelSettings(sensorSettings.accelLPFEn,
-			sensorSettings.accelLPFCutoff,
-			sensorSettings.accelRange,
-			sensorSettings.accelSampleRate);
+	//imu.updateGyroSettings(sensorSettings.gyroLPFEn,
+			//sensorSettings.accelLPFCutoff,
+			//sensorSettings.gyroRange,
+			//sensorSettings.gyroSampleRate);
+	//imu.updateAccelSettings(sensorSettings.accelLPFEn,
+			//sensorSettings.accelLPFCutoff,
+			//sensorSettings.accelRange,
+			//sensorSettings.accelSampleRate);
 
 
 	while(!imu.begin_SPI(&hspi2,IMU_CS_GPIO_Port,IMU_CS_Pin)){

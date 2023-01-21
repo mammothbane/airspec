@@ -60,7 +60,7 @@ float tick_ms_diff = 0;
 //struct LogMessage statusMessage;
 uint8_t diodeState = 0;
 
-SensorPacket *sensorPacket;
+static SensorPacket *sensorPacket;
 
 /**
  * @brief Thread initialization.

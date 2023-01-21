@@ -44,11 +44,11 @@ typedef void (*IO_RECEIVE_DATA_USER_CALLBACK_TYPE)(uint8_t *rx_data,
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
-osThreadId_t DataWriteProcessId;
-osThreadId_t DataTransferProcessId;
-osThreadId_t Button_SW1_ProcessId;
-osThreadId_t Button_SW2_ProcessId;
-osThreadId_t Button_SW3_ProcessId;
+extern osThreadId_t DataWriteProcessId;
+extern osThreadId_t DataTransferProcessId;
+extern osThreadId_t Button_SW1_ProcessId;
+extern osThreadId_t Button_SW2_ProcessId;
+extern osThreadId_t Button_SW3_ProcessId;
 
 /* External variables --------------------------------------------------------*/
 /* Exported macros -----------------------------------------------------------*/

@@ -38,9 +38,11 @@
 
 //#include "master_thread.h"
 
-
-
-
+osThreadId_t DataWriteProcessId;
+osThreadId_t DataTransferProcessId;
+osThreadId_t Button_SW1_ProcessId;
+osThreadId_t Button_SW2_ProcessId;
+osThreadId_t Button_SW3_ProcessId;
 
 /* Private defines -----------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
@@ -332,7 +334,7 @@ volatile temp_var = 0;
 //}
 
 #define MAX_BLE_RETRIES	4
-SensorPacket *sensorPacket;
+static SensorPacket *sensorPacket;
 
 //void senderThread(void *argument){
 //    uint8_t retry;
