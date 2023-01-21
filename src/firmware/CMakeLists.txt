@@ -27,17 +27,38 @@ endif()
 
 project(airspecs_firmware C CXX ASM)
 
-# expect this to be set on PATH -- build with nix or in .direnv
 find_package(Nanopb REQUIRED)
 
 include_directories(${NANOPB_INCLUDE_DIRS})
 
-file(GLOB_RECURSE PROTOS CONFIGURE_DEPENDS
-    "../../proto/*.proto"
-)
-
+# find ../../proto -name '*.proto'
 nanopb_generate_cpp(PROTO_SRCS PROTO_HDRS RELPATH ../../proto
-    ${PROTOS}
+    ../../proto/lib.proto
+    ../../proto/color.proto
+    ../../proto/firmware/config.proto
+    ../../proto/firmware/sensor.proto
+    ../../proto/firmware/sensor/mic.proto
+    ../../proto/firmware/sensor/sgp.proto
+    ../../proto/firmware/sensor/sht.proto
+    ../../proto/firmware/sensor/lux.proto
+    ../../proto/firmware/sensor/blink.proto
+    ../../proto/firmware/sensor/spectrometer.proto
+    ../../proto/firmware/sensor/lp5523.proto
+    ../../proto/firmware/sensor/thermopile.proto
+    ../../proto/firmware/sensor/imu.proto
+    ../../proto/firmware/sensor/bme.proto
+    ../../proto/firmware/config/lux_cfg.proto
+    ../../proto/firmware/config/sgp_cfg.proto
+    ../../proto/firmware/config/sht_cfg.proto
+    ../../proto/firmware/config/thermopile_cfg.proto
+    ../../proto/firmware/config/blink_cfg.proto
+    ../../proto/firmware/config/spectrometer_cfg.proto
+    ../../proto/firmware/config/lp5523_cfg.proto
+    ../../proto/firmware/config/imu_cfg.proto
+    ../../proto/firmware/config/bme_cfg.proto
+    ../../proto/firmware/config/mic_cfg.proto
+    ../../proto/bluetooth/packet.proto
+    ../../proto/bluetooth/sensor_control.proto
 )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
