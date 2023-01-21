@@ -57,7 +57,7 @@
         ];
       };
 
-      localPackages = pkgs.callPackage ./nix/pkgs {};
+      localPackages = pkgs.callPackages ./nix/pkgs {};
 
       nanopb_proto = "${pkgs.nanopb}/share/nanopb/generator/proto";
 
