@@ -13,7 +13,10 @@
 
   outputs = { self, nixpkgs, flake-utils }: (flake-utils.lib.eachDefaultSystem (system:
     let
-      pkgs = import nixpkgs { inherit system; };
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
 
       py3 = pkgs.python3.withPackages (pypkgs: with pypkgs; [
         poetry
@@ -29,6 +32,10 @@
         buildInputs = with pkgs; [
           python3.pkgs.venvShellHook
           py3
+
+          pkgsCross.arm-embedded.stdenv.cc
+          openocd
+          stm32cubemx
         ];
       };
     })
