@@ -1,0 +1,6 @@
+/Debug/
+*.pyc
+/python/__pycache__/
+.venv/
+/cmake-build-*/
+*.qcow2

@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package airspecs;
+
+import "nanopb.proto";
+
+import "blink.proto";
+import "bme.proto";
+import "imu.proto";
+import "lp5523.proto";
+import "lux.proto";
+import "mic.proto";
+import "sht.proto";
+import "spectrometer.proto";
+import "thermopile.proto";
+import "sgp.proto";
+
+message BluetoothPacket {
+    message Metadata {
+        uint32 specs_id = 1;
+        uint64 uptime = 2;
+        uint64 seq = 3;
+    };
+
+    Metadata meta = 1;
+    repeated Sample payload = 2 [(nanopb).max_count = 1];
+}
+
+message Sample {
+    message Metadata {
+        uint32 uptime = 1;
+        uint32 seq = 2;
+    };
+
+    Metadata metadata = 1;
+
+    oneof value {
+        blink.Sample blink = 2;
+        bme.Sample bme = 3;
+        imu.SampleGroup imu = 4;
+        lp5523.Sample lp5523 = 5;
+        lux.SampleGroup lux = 6;
+        mic.Sample mic = 7;
+        sht.Sample sht = 8;
+        spectrometer.Sample spectrometer = 9;
+        thermopile.Sample thermopile = 10;
+        sgp.Sample sgp = 11;
+    }
+}
+
+// Please keep in sync with Sample.value
+enum SensorType {
+    Unknown = 0;
+    Blink = 2;
+    BME = 3;
+    IMU = 4;
+    LP5523 = 5;
+    Lux = 6;
+    MIC = 7;
+    SHT = 8;
+    Spectrometer = 9;
+    Thermopile = 10;
+    SGP = 11;
+}
+

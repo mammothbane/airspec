@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package airspecs.config;
+
+import "nanopb.proto";
+
+message Config {
+    bool run = 1;
+    fixed32 uuid = 2;
+    fixed32 firmware_version = 3;
+    fixed32 epoch = 4;
+
+    fixed64 enabled_sensors = 5;
+    Sensors sensors = 6;
+}
+
+message Sensors {
+    Lux lux = 1;
+    BME bme = 2;
+    IMU imu = 3;
+    Spectrometer spectrometer = 4;
+    Thermopile thermopile = 5;
+    Blink blink = 6;
+    Mic mic = 7;
+    SHT sht = 8;
+}
+
+message AnySensor {
+    oneof config {
+        config.Blink blink = 1;
+        config.BME bme = 2;
+        config.IMU imu = 3;
+        config.Lux lux = 4;
+        config.Mic mic = 5;
+        config.SHT sht = 6;
+        config.Spectrometer spec = 7;
+        config.Thermopile therm = 8;
+    }
+}
+
+message Lux {
+    uint32 gain = 1 [(nanopb).int_size = IS_8];
+    uint32 integration_time = 2 [(nanopb).int_size = IS_8];
+    uint32 sample_period = 3 [(nanopb).int_size = IS_16];
+}
+
+message BME {
+    uint32 sample_period = 1;
+}
+
+message IMU {
+    message Subcfg {
+        bool lopass = 1;
+        uint32 sample_rate = 2 [(nanopb).int_size = IS_8];
+        uint32 range = 3 [(nanopb).int_size = IS_8];
+    }
+
+    Subcfg gyro = 1;
+    Subcfg accel = 2;
+}
+
+message Spectrometer {
+    uint32 gain = 1 [(nanopb).int_size = IS_8];
+    uint32 integration_time = 2 [(nanopb).int_size = IS_8];
+    uint32 integration_step = 3 [(nanopb).int_size = IS_16];
+    uint32 sample_period = 4 [(nanopb).int_size = IS_16];
+}
+
+message Thermopile {
+    uint32 sample_period = 1 [(nanopb).int_size = IS_16];
+}
+
+message Blink {
+    bool daylight_compensation = 1;
+    uint32 compensation_hi = 2 [(nanopb).int_size = IS_8];
+    uint32 compensation_lo = 3 [(nanopb).int_size = IS_8];
+    uint32 sample_period = 4 [(nanopb).int_size = IS_16];
+}
+
+message Mic {
+    uint32 sample_period = 1 [(nanopb).int_size = IS_16];
+}
+
+message SHT {
+    uint32 precision = 1 [(nanopb).int_size = IS_8];
+    uint32 heater = 2 [(nanopb).int_size = IS_8];
+    uint32 sample_period = 3 [(nanopb).int_size = IS_16];
+}
