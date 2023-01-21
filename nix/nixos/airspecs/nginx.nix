@@ -1,4 +1,4 @@
-{ ... }: let
+{ flake, ... }: let
   commonOptions = {
     onlySSL = true;
     enableACME = true;
@@ -16,8 +16,22 @@ in {
     resolver.addresses = ["1.1.1.1:53"];
 
     virtualHosts = {
+      "localhost" = {
+        listen = [
+          {
+            addr = "127.0.0.1";
+            port = 80;
+          }
+        ];
+
+        locations."/" = {
+          root = flake.packages.x86_64-linux.site;
+        };
+      };
+
       "airspecs.media.mit.edu" = commonOptions // {
         locations."/" = {
+          root = flake.packages.x86_64-linux.site;
         };
       };
 

@@ -20,9 +20,39 @@
         protobuf
         grpcio
         grpcio-tools
+        mkdocs-material
+        pygments
       ]);
 
+      docs-site = pkgs.stdenv.mkDerivation {
+        pname = "airspecs-site";
+        version = self.rev or "dirty";
+
+        src = ./docs;
+
+        buildPhase = ''
+          mkdocs build
+        '';
+
+        installPhase = ''
+          mkdir -p $out
+          ls site
+          cp -r --reflink=auto site/* $out
+        '';
+
+        buildInputs = [
+          (pkgs.python3.withPackages (pypkgs: with pypkgs; [
+            mkdocs-material
+            pygments
+          ]))
+        ];
+      };
+
     in {
+      packages = {
+        site = docs-site;
+      };
+
       devShells.default = pkgs.mkShell {
         pname = "airspec devenv";
         version = self.rev or "dirty";
@@ -54,19 +84,12 @@
 
         specialArgs = {
           inherit nixpkgs;
+          flake = self;
         };
       };
 
     in {
       airspecs = nixpkgs.lib.nixosSystem (system []);
-
-      airspecs-vm = nixpkgs.lib.nixosSystem (system [
-        "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
-
-        {
-          boot.kernelParams = ["console=ttyS0,115200" "console=tty1"];
-        }
-      ]);
     };
   };
 }

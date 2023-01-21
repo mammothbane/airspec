@@ -35,7 +35,6 @@
       helpLine = lib.mkForce "";
     };
 
-
     tailscale.enable = true;
   };
 
@@ -156,5 +155,4 @@
 
   hardware.enableRedistributableFirmware = true;
   sound.enable = false;
-
 }
