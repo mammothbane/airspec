@@ -167,12 +167,12 @@ export const useAirSpecInterface = (): AirSpec => {
     Struct.Uint32('uuid'),
     Struct.Uint32('firmware_version'),
     Struct.Uint32('epoch'),
-    // 4 bytes
+    // 4 bytes * 4
       
       Struct.Uint8('thermopileSensorEn'),
       Struct.Skip(1),
       Struct.Uint16('thermopileSensorPeriod'),
-      // 5 bytes
+      // 5 bytes * 4
       
       Struct.Uint8('blinkSensorEn'),
       Struct.Uint8('blinkDaylightCompensatationEN'),
@@ -184,12 +184,12 @@ export const useAirSpecInterface = (): AirSpec => {
 
       Struct.Uint8('inertialSensorEn'),
       Struct.Uint8('inertialGyroLPFEn'),
-      // 7 bytes
+      // 7 bytes * 4
       Struct.Uint8('inertialGyroLPFCutoff'),
       Struct.Uint8('inertialGyroRange'),
       Struct.Uint8('inertialGyroRate'),
       Struct.Uint8('inertialAccLPFEn'),
-      // 8 bytes
+      // 8 bytes * 4
       Struct.Uint8('inertialAccLPFCutoff'),
       Struct.Uint8('inertialAccRange'),
       Struct.Uint16('inertialAccRate'),
@@ -197,14 +197,14 @@ export const useAirSpecInterface = (): AirSpec => {
       Struct.Uint8('gasSensorEn'),
       Struct.Skip(1),
       Struct.Uint16('gasSamplePeriod'),
-      // 9 bytes
+      // 9 bytes * 4
   
       Struct.Uint8('humiditySensorEn'),
       Struct.Uint8('humidityPrecision'),
       Struct.Uint8('humidityHeaterSetting'),
       Struct.Skip(1),
       Struct.Uint16('humiditySamplePeriod'),
-      // 11 bytes
+      // 11 bytes * 4
 
       Struct.Uint8('luxSensorEn'),
       Struct.Uint8('luxGain'),
@@ -215,18 +215,18 @@ export const useAirSpecInterface = (): AirSpec => {
   
       Struct.Uint8('colorSensorEn'),
       Struct.Uint8('colorIntegrationTime'),
-      // 12 bytes
+      // 12 bytes * 4
       Struct.Uint16('colorIntegrationStep'),
       Struct.Uint8('colorGain'),
       Struct.Skip(1),
-      // 13 bytes
+      // 13 bytes * 4
       Struct.Uint16('colorSamplePeriod'),
       
   
       Struct.Uint8('micSensorEn'),
       Struct.Skip(1),
-      Struct.Uint16('micSampleRate')
-      // 16 bytes
+      Struct.Uint32('micSampleRate')
+      // 15 bytes * 4
   );
   
   const connect = async () => {
@@ -236,10 +236,12 @@ export const useAirSpecInterface = (): AirSpec => {
         {
           namePrefix: 'AirSpec'
         }
-      ],
+      ]
+      ,
       // Philips Hue Light Control Service
       optionalServices: [0xfe80]
     });
+    // console.log('getting sys info');
     if (!device) {
       console.error('Failed to connect to device.');
       return;
