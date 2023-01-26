@@ -1776,7 +1776,7 @@ function AirSpecControl(props) {
                   Microphone Settings
                 </MKTypography>
                 
-                <MKInput
+                {/* <MKInput
                   type="number"
                   label="Sample Period (ms)"
                   fullWidth
@@ -1789,7 +1789,70 @@ function AirSpecControl(props) {
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
+                /> */}
+
+                <MKButton
+                  variant="gradient"
+                  // color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_1}
+                >
+                  {GetLightHumidityPrecision(props.sysInfo.micSampleRate)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>Mic Sample Rate</Icon>
+                </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_1}
+                  open={Boolean(sensorConfigSubMenuDropDown_1)}
+                  onClose={closeSensorConfigSubMenuDropDown_1}
+                >
+
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=8000;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 8 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=11025;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 11.025 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=16000;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 16 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=22050;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 22.05 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=32000;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 32 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=44100;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 44.1 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=48000;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 48 kHz </MenuItem>
+                </Menu>
+
+                <MKInput
+                  type="number"
+                  label="FFT Sample Period (ms)"
+                  fullWidth
+                  value={props.sysInfo.fftSamplePeriod}
+                  onChange={(event) => {
+                    props.sysInfo.fftSamplePeriod=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }} 
+                  
+                  InputProps={{
+                    inputProps: { min: 0 , max:65000},
+                  }}
                 />
+
+                
               </Stack>
             ) : null }
             <div style={{ padding: 2 }}>
