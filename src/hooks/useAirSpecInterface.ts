@@ -226,7 +226,8 @@ export const useAirSpecInterface = (): AirSpec => {
       Struct.Uint8('micSensorEn'),
       Struct.Skip(1),
       Struct.Uint32('micSampleRate')
-      // 15 bytes * 4
+      Struct.Uint32('micSysSamplePeriod')
+      // 16 bytes * 4
   );
   
   const connect = async () => {
