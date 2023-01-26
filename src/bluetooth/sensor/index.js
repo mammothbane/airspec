@@ -443,6 +443,34 @@ function AirSpecControl(props) {
     }
   }
 
+  function GetMicSampleRate(val){
+    
+    if(val == 8000){
+      return "8 kHz";
+    } 
+    else if (val == 11025){
+      return "11.025 kHz";
+    }
+    else if (val == 16000){
+      return "16 kHz";
+    }
+    else if (val == 22050){
+      return "22.05 kHz";
+    }
+    else if (val == 32000){
+      return "32 kHz";
+    }
+    else if (val == 44100){
+      return "44.1 kHz";
+    }
+    else if (val == 48000){
+      return "48 kHz";
+    }
+    else{
+      return "invalid"
+    }
+  }
+
   function GetLightColorGain(val){
     if(val == 0x00){
       return "0.5x";
@@ -1796,7 +1824,7 @@ function AirSpecControl(props) {
                   // color="secondary"
                   onClick={openSensorConfigSubMenuDropDown_1}
                 >
-                  {GetLightHumidityPrecision(props.sysInfo.micSampleRate)}{" "}
+                  {GetMicSampleRate(props.sysInfo.micSampleRate)}{" "}
                   {}{" "}
                   <Icon sx={dropdownIconStyles}>Mic Sample Rate</Icon>
                 </MKButton>
