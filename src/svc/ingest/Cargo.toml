@@ -40,3 +40,8 @@ rev = "6937d1a2a"
 
 [features]
 chunked = ["futures-batch"]
+
+[dev-dependencies]
+tempdir = "0.3"
+rand = "0.8"
+surf = { version = "2.3", default-features = false, features = ["h1-client-rustls", "middleware-logger", "encoding"] }

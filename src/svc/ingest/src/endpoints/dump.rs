@@ -1,3 +1,4 @@
+use async_compat::CompatExt;
 use influxdb2::models::Query;
 use tide::{
     Response,
@@ -36,6 +37,7 @@ pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
     let csv = state
         .influx
         .query_raw(&state.influx_cfg.org, Some(Query::new(query)))
+        .compat()
         .await
         .status(StatusCode::BadGateway)?;
 

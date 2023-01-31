@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use async_std::channel;
+use tide::listener::ToListener;
 
 use crate::{
     auth,
@@ -16,12 +17,7 @@ pub struct State {
     pub tx:         channel::Sender<influxdb2::models::DataPoint>,
 }
 
-pub async fn serve(opt: opt::Opt) -> eyre::Result<()> {
-    let opt::Opt {
-        bind,
-        influx: influx_cfg,
-    } = opt;
-
+pub async fn serve(bind: impl ToListener<State>, influx_cfg: opt::Influx) -> eyre::Result<()> {
     let (msr_tx, msr_rx) = channel::bounded(4096);
 
     let token = influx_cfg.token_or_env().ok_or(eyre::eyre!("influx token was missing"))?;
@@ -35,8 +31,6 @@ pub async fn serve(opt: opt::Opt) -> eyre::Result<()> {
         msr_rx,
     ));
 
-    tracing::info!(bind = ?bind, "starting");
-
     let mut server = tide::with_state(State {
         influx: client.clone(),
         influx_cfg,
@@ -45,11 +39,12 @@ pub async fn serve(opt: opt::Opt) -> eyre::Result<()> {
 
     server
         .with(auth::authenticate)
-        .at("/")
-        .post(endpoints::ingest)
         .at("/dump")
-        .get(endpoints::dump);
+        .get(endpoints::dump)
+        .at("/")
+        .post(endpoints::ingest);
 
+    tracing::info!("starting");
     server.listen(bind).await?;
     influx_fwd.await;
 

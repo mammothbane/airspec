@@ -4,8 +4,8 @@ use airspecs_ingest::*;
 
 #[async_std::main]
 async fn main() -> eyre::Result<()> {
-    let opt = opt::Opt::from_args();
+    let opt: opt::Opt = opt::Opt::from_args();
     trace::init(true);
 
-    run::serve(opt).await
+    run::serve(opt.bind, opt.influx).await
 }
