@@ -3,13 +3,7 @@
 use async_std::channel;
 use structopt::StructOpt;
 
-use airspecs_ingest::pb::{
-    airspecs::svc,
-    FILE_DESCRIPTOR_SET,
-};
-
 mod forward;
-mod grpc;
 mod opt;
 
 use opt::*;
@@ -37,30 +31,6 @@ async fn main() -> eyre::Result<()> {
     ));
 
     tracing::info!(bind = ?bind, "starting");
-
-    tonic::transport::server::Server::builder()
-        .concurrency_limit_per_connection(256)
-        .add_service(
-            tonic_reflection::server::Builder::configure()
-                .include_reflection_service(true)
-                .register_encoded_file_descriptor_set(FILE_DESCRIPTOR_SET)
-                .build()?,
-        )
-        .add_service(svc::dump::csv_dump_server::CsvDumpServer::with_interceptor(
-            grpc::Dump {
-                influx_client: client,
-                influx_cfg,
-            },
-            grpc::authenticate,
-        ))
-        .add_service(svc::ingest::ingest_server::IngestServer::with_interceptor(
-            grpc::Ingest {
-                msr_tx,
-            },
-            grpc::authenticate,
-        ))
-        .serve(bind)
-        .await?;
 
     influx_fwd.await;
 
