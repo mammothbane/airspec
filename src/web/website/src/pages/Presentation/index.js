@@ -59,16 +59,10 @@ function Presentation() {
     <>
       <DefaultNavbar
         routes={routes}
-        // action={{
-        //   type: "external",
-        //   route: "https://www.creative-tim.com/product/material-kit-react",
-        //   label: "free dowad",
-        //   color: "info",
-        // }}
         sticky
       />
 
-      
+
 
       <MKBox
         minHeight="75vh"
@@ -93,7 +87,7 @@ function Presentation() {
                </div>
 
           <Grid container item xs={12} lg={7} justifyContent="center" mx="auto">
-          
+
             <MKTypography
               variant="h1"
               color="white"
@@ -115,19 +109,19 @@ function Presentation() {
               px={{ xs: 6, lg: 12 }}
               mt={1}
             >
-              
+
               Free & Open Source Smart Eyeglass Platform Designed to Measure You and the Surrounding Environment
-              
+
               {/* Web UI Kit built over ReactJS &amp; MUI. Join over 1.6 million
               developers around the world. */}
             </MKTypography>
 
           </Grid>
-          
+
         </Container>
 
       </MKBox>
-      
+
       <Card
         sx={{
           p: 2,
@@ -139,7 +133,7 @@ function Presentation() {
           boxShadow: ({ boxShadows: { xxl } }) => xxl,
         }}
       >
-        
+
         <Counters />
         <DesignBlocks />
         {/* <Information />
@@ -208,7 +202,7 @@ function Presentation() {
         fontWeight="bold"
         color="info"
       >
-        email! 
+        email!
       </MKTypography>
                 </MKTypography>
                 <MKTypography variant="body1" color="text">
@@ -222,7 +216,7 @@ function Presentation() {
         fontWeight="bold"
         color="info"
       >
-        Project Captivate 
+        Project Captivate
       </MKTypography>
                 </MKTypography>
               </Grid>
