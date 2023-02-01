@@ -161,35 +161,35 @@ export const useAirSpecInterface = (): AirSpec => {
 
   // https://www.npmjs.com/package/@binary-files/structjs#installation
   const airspecSensorConfigHeaderStruct = new Struct(
-    
+
     Struct.Uint8('systemRunState'),
     Struct.Skip(3),
     Struct.Uint32('uuid'),
     Struct.Uint32('firmware_version'),
     Struct.Uint32('epoch'),
-    // 4 bytes
-      
+    // 4 bytes * 4
+
       Struct.Uint8('thermopileSensorEn'),
       Struct.Skip(1),
       Struct.Uint16('thermopileSensorPeriod'),
-      // 5 bytes
-      
+      // 5 bytes * 4
+
       Struct.Uint8('blinkSensorEn'),
       Struct.Uint8('blinkDaylightCompensatationEN'),
       Struct.Uint8('blinkDaylightLowerThresh'),
       Struct.Uint8('blinkDaylightUpperThresh'),
       // Struct.Skip(2),
       Struct.Uint16('blinkSampleRate'),
-      
+
 
       Struct.Uint8('inertialSensorEn'),
       Struct.Uint8('inertialGyroLPFEn'),
-      // 7 bytes
+      // 7 bytes * 4
       Struct.Uint8('inertialGyroLPFCutoff'),
       Struct.Uint8('inertialGyroRange'),
       Struct.Uint8('inertialGyroRate'),
       Struct.Uint8('inertialAccLPFEn'),
-      // 8 bytes
+      // 8 bytes * 4
       Struct.Uint8('inertialAccLPFCutoff'),
       Struct.Uint8('inertialAccRange'),
       Struct.Uint16('inertialAccRate'),
@@ -197,38 +197,39 @@ export const useAirSpecInterface = (): AirSpec => {
       Struct.Uint8('gasSensorEn'),
       Struct.Skip(1),
       Struct.Uint16('gasSamplePeriod'),
-      // 9 bytes
-  
+      // 9 bytes * 4
+
       Struct.Uint8('humiditySensorEn'),
       Struct.Uint8('humidityPrecision'),
       Struct.Uint8('humidityHeaterSetting'),
       Struct.Skip(1),
       Struct.Uint16('humiditySamplePeriod'),
-      // 11 bytes
+      // 11 bytes * 4
 
       Struct.Uint8('luxSensorEn'),
       Struct.Uint8('luxGain'),
       Struct.Uint8('luxIntegrationTime'),
       Struct.Skip(1),
       Struct.Uint16('luxSamplePeriod'),
-      
-  
+
+
       Struct.Uint8('colorSensorEn'),
       Struct.Uint8('colorIntegrationTime'),
-      // 12 bytes
+      // 12 bytes * 4
       Struct.Uint16('colorIntegrationStep'),
       Struct.Uint8('colorGain'),
       Struct.Skip(1),
-      // 13 bytes
+      // 13 bytes * 4
       Struct.Uint16('colorSamplePeriod'),
-      
-  
+
+
       Struct.Uint8('micSensorEn'),
       Struct.Skip(1),
-      Struct.Uint16('micSampleRate')
-      // 16 bytes
+      Struct.Uint32('micSampleRate'),
+      Struct.Uint32('fftSamplePeriod'),
+      // 16 bytes * 4
   );
-  
+
   const connect = async () => {
     const device = await navigator.bluetooth.requestDevice({
       // acceptAllDevices: true
@@ -236,10 +237,12 @@ export const useAirSpecInterface = (): AirSpec => {
         {
           namePrefix: 'AirSpec'
         }
-      ],
+      ]
+      ,
       // Philips Hue Light Control Service
       optionalServices: [0xfe80]
     });
+    // console.log('getting sys info');
     if (!device) {
       console.error('Failed to connect to device.');
       return;
@@ -284,7 +287,7 @@ export const useAirSpecInterface = (): AirSpec => {
       return;
     }
     setSysInfoCharacteristic(sysInfoChar);
-    
+
     const sysInfoArray = await sysInfoChar.readValue();
     setSysInfo(airspecSensorConfigHeaderStruct.createObject(sysInfoArray.buffer, 0, true));
 
@@ -299,7 +302,7 @@ export const useAirSpecInterface = (): AirSpec => {
       new Uint8Array([lightIsCurrentlyOn ? 0x0 : 0x1])
     );
   };
-  
+
   const requestSysInfo = async () => {
     console.log('getting sys info');
     const sysInfoArray = await sysInfoCharacteristic?.readValue();

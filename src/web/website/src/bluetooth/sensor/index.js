@@ -66,7 +66,7 @@ function AirSpecControl(props) {
   const [specialRedFlashFuncDropDownAct, setSpecialRedFlashFuncDropDownAct] =
     useState(null);
 
-    
+
 
     // const [specialRedFlashFuncDropDownAct, setSpecialRedFlashFuncDropDownAct] =
     // useState(null);
@@ -81,7 +81,7 @@ function AirSpecControl(props) {
   const openSensorConfigDropDown = ({ currentTarget }) =>
     setSensorConfigDropDown(currentTarget);
 
-    
+
   const [sensorConfigSubMenuDropDown_1, setSensorConfigSubMenuDropDown_1] = useState(null);
   const [sensorConfigSubMenuDropDownAct_1, setSensorConfigSubMenuDropDownAct_1] = useState(null);
   const openSensorConfigSubMenuDropDown_1 = ({ currentTarget }) =>
@@ -311,7 +311,7 @@ function AirSpecControl(props) {
   function GetLightIntensityIntegrationTime(val){
     if(val == 0xFF){
       return "2.73";
-    } 
+    }
     else if (val == 0xF6){
       return "27.3";
     }
@@ -331,7 +331,7 @@ function AirSpecControl(props) {
   function GetLightIntensityGain(val){
     if(val == 0x00){
       return "1x";
-    } 
+    }
     else if (val == 0x01){
       return "8x";
     }
@@ -349,7 +349,7 @@ function AirSpecControl(props) {
   function GetInertialGyroRange(val){
     if(val == 0){
       return "+/- 250 dps";
-    } 
+    }
     else if (val == 1){
       return "+/- 500 dps";
     }
@@ -369,7 +369,7 @@ function AirSpecControl(props) {
 
     if(cutoff == 0){
       return "196.6 Hz";
-    } 
+    }
     else if (cutoff == 1){
       return "151.8 Hz";
     }
@@ -396,10 +396,10 @@ function AirSpecControl(props) {
   }
 
   function GetInertialAccRange(val){
-    
+
     if(val == 0){
       return "+/- 2g";
-    } 
+    }
     else if (val == 1){
       return "+/- 4g";
     }
@@ -416,10 +416,10 @@ function AirSpecControl(props) {
     if(enable == 0){
       return "disabled";
     }
-    
+
     if(cutoff == 0){
       return "246.0 Hz";
-    } 
+    }
     else if (cutoff == 1){
       return "111.4 Hz";
     }
@@ -443,10 +443,38 @@ function AirSpecControl(props) {
     }
   }
 
+  function GetMicSampleRate(val){
+
+    if(val == 8000){
+      return "8 kHz";
+    }
+    else if (val == 11025){
+      return "11.025 kHz";
+    }
+    else if (val == 16000){
+      return "16 kHz";
+    }
+    else if (val == 22050){
+      return "22.05 kHz";
+    }
+    else if (val == 32000){
+      return "32 kHz";
+    }
+    else if (val == 44100){
+      return "44.1 kHz";
+    }
+    else if (val == 48000){
+      return "48 kHz";
+    }
+    else{
+      return "invalid"
+    }
+  }
+
   function GetLightColorGain(val){
     if(val == 0x00){
       return "0.5x";
-    } 
+    }
     else if (val == 1){
       return "1x";
     }
@@ -492,7 +520,7 @@ function AirSpecControl(props) {
   function GetLightHumidityPrecision(val){
     if(val == 0x00){
       return "Low";
-    } 
+    }
     else if (val == 1){
       return "Medium";
     }
@@ -507,7 +535,7 @@ function AirSpecControl(props) {
   function GetLightHumidityHeater(val){
     if(val == 0x00){
       return "No Heater";
-    } 
+    }
     else if (val == 1){
       return "High Heater (1s)";
     }
@@ -733,7 +761,7 @@ function AirSpecControl(props) {
                 </MKButton>
               </Stack>
             ) : null}
-            
+
             {sensorConfigDropDownAct ? (
                 <Stack direction="column">
             {thermopileConfigFuncDropDownAct ? (
@@ -773,8 +801,8 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.thermopileSensorPeriod=event.target.value;
                     setUpdateViz(!updateViz);
-                  }} 
-                  
+                  }}
+
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
@@ -806,8 +834,8 @@ function AirSpecControl(props) {
                 >
                   Inertial Settings
                 </MKTypography>
-                
- 
+
+
 
                 <Stack direction="row" alignItems="left" spacing={1}>
 <Grid item xs={6} xm={6} lg={6}>
@@ -893,7 +921,7 @@ function AirSpecControl(props) {
                 </Menu>
                 </Stack>
                 </Grid>
-                
+
                 </Stack>
 
 
@@ -953,7 +981,7 @@ function AirSpecControl(props) {
                 </Menu>
                 </Stack>
                 </Grid>
-                
+
                 </Stack>
 
                 <MKInput
@@ -964,8 +992,8 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.inertialGyroRate=event.target.value;
                     setUpdateViz(!updateViz);
-                  }} 
-                  
+                  }}
+
                   InputProps={{
                     inputProps: { min: 0 , max:255},
                   }}
@@ -1064,7 +1092,7 @@ function AirSpecControl(props) {
                 </Menu>
                 </Stack>
                 </Grid>
-                
+
                 </Stack>
 
 
@@ -1124,7 +1152,7 @@ function AirSpecControl(props) {
                 </Menu>
                 </Stack>
                 </Grid>
-                
+
                 </Stack>
 
                   <MKInput
@@ -1135,8 +1163,8 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.inertialAccRate=event.target.value;
                     setUpdateViz(!updateViz);
-                  }} 
-                  
+                  }}
+
                   InputProps={{
                     inputProps: { min: 0 , max:4095},
                   }}
@@ -1169,7 +1197,7 @@ function AirSpecControl(props) {
                 >
                   Blink Settings
                 </MKTypography>
-                
+
                 <MKInput
                   type="number"
                   label="Sample Rate (Hz)"
@@ -1178,8 +1206,8 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.thermopileSensorPeriod=event.target.value;
                     setUpdateViz(!updateViz);
-                  }} 
-                  
+                  }}
+
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
@@ -1209,7 +1237,7 @@ function AirSpecControl(props) {
                   Daylight Compensation
                 </MKTypography>
               </MKBox>
-                  
+
                   <MKInput
                   type="number"
                   label="Daylight Compensation: Lower Threshold"
@@ -1219,8 +1247,8 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.blinkDaylightLowerThresh=event.target.value;
                     setUpdateViz(!updateViz);
-                  }} 
-                  
+                  }}
+
                   InputProps={{
                     inputProps: { min: 0 , max:props.sysInfo.blinkDaylightUpperThresh},
                   }}
@@ -1235,8 +1263,8 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.blinkDaylightUpperThresh=event.target.value;
                     setUpdateViz(!updateViz);
-                  }}  
-                  
+                  }}
+
                   InputProps={{
                     inputProps: { min: props.sysInfo.blinkDaylightLowerThresh , max:255},
                   }}
@@ -1257,7 +1285,7 @@ function AirSpecControl(props) {
                 >
                   Gas Settings
                 </MKTypography>
-                
+
                 <MKInput
                   type="number"
                   label="Sample Period (ms)"
@@ -1266,8 +1294,8 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.gasSamplePeriod=event.target.value;
                     setUpdateViz(!updateViz);
-                  }} 
-                  
+                  }}
+
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
@@ -1288,7 +1316,7 @@ function AirSpecControl(props) {
                 >
                   Light Level Settings
                 </MKTypography>
-                
+
                 <MKInput
                   type="number"
                   label="Sample Period (ms)"
@@ -1297,9 +1325,9 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.luxSamplePeriod=event.target.value;
                     setUpdateViz(!updateViz);
-                  }} 
+                  }}
 
-                  
+
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
@@ -1360,7 +1388,7 @@ function AirSpecControl(props) {
                 </Menu>
                 </Stack>
                 </Grid>
-                
+
                 </Stack>
 
 <Stack direction="row" alignItems="left" spacing={1}>
@@ -1422,7 +1450,7 @@ function AirSpecControl(props) {
                 </Menu>
                 </Stack>
                 </Grid>
-                
+
                 </Stack>
 
                 {/* <MKButton
@@ -1433,10 +1461,10 @@ function AirSpecControl(props) {
                   }}
                   variant="gradient"
                   color="dark"
-                >                    
+                >
                   Send Configuraton
                 </MKButton> */}
-                
+
               </Stack>
             ) : null }
 
@@ -1452,7 +1480,7 @@ function AirSpecControl(props) {
                 >
                   Light Color Settings
                 </MKTypography>
-                
+
                 <MKInput
                   type="number"
                   label="Sample Period (ms)"
@@ -1461,9 +1489,9 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.colorSamplePeriod=event.target.value;
                     setUpdateViz(!updateViz);
-            
-                  }} 
-                  
+
+                  }}
+
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
@@ -1477,9 +1505,9 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.colorIntegrationTime=event.target.value;
                     setUpdateViz(!updateViz);
-            
-                  }} 
-                  
+
+                  }}
+
                   InputProps={{
                     inputProps: { min: 0 , max:255},
                   }}
@@ -1493,9 +1521,9 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.colorIntegrationStep=event.target.value;
                     setUpdateViz(!updateViz);
-            
-                  }} 
-                  
+
+                  }}
+
                   InputProps={{
                     inputProps: { min: 0 , max:65534},
                   }}
@@ -1598,7 +1626,7 @@ function AirSpecControl(props) {
                 </Menu>
                 </Stack>
                 </Grid>
-                
+
                 </Stack>
 
               </Stack>
@@ -1616,7 +1644,7 @@ function AirSpecControl(props) {
                 >
                   Humidity Settings
                 </MKTypography>
-                
+
                 <MKInput
                   type="number"
                   label="Sample Period (ms)"
@@ -1625,11 +1653,11 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.humiditySamplePeriod=event.target.value;
                     setUpdateViz(!updateViz);
-                  }} 
+                  }}
 
                   // props.sysInfo.humidityPrecision;
                   // props.sysInfo.humidityHeaterSetting;
-                  
+
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
@@ -1686,7 +1714,7 @@ function AirSpecControl(props) {
                 </Menu>
                 </Stack>
                 </Grid>
-                
+
                 </Stack>
 
                 <Stack direction="row" alignItems="left" spacing={1}>
@@ -1753,11 +1781,11 @@ function AirSpecControl(props) {
                       props.sysInfo.humidityHeaterSetting=6;
                       closeSensorConfigSubMenuDropDown_2();
                   }}> Low Heater (100s) </MenuItem>
-                  
+
                 </Menu>
                 </Stack>
                 </Grid>
-                
+
                 </Stack>
 
               </Stack>
@@ -1775,8 +1803,8 @@ function AirSpecControl(props) {
                 >
                   Microphone Settings
                 </MKTypography>
-                
-                <MKInput
+
+                {/* <MKInput
                   type="number"
                   label="Sample Period (ms)"
                   fullWidth
@@ -1784,12 +1812,75 @@ function AirSpecControl(props) {
                   onChange={(event) => {
                     props.sysInfo.micSampleRate=event.target.value;
                     setUpdateViz(!updateViz);
-                  }} 
-                  
+                  }}
+
+                  InputProps={{
+                    inputProps: { min: 0 , max:65000},
+                  }}
+                /> */}
+
+                <MKButton
+                  variant="gradient"
+                  // color="secondary"
+                  onClick={openSensorConfigSubMenuDropDown_1}
+                >
+                  {GetMicSampleRate(props.sysInfo.micSampleRate)}{" "}
+                  {}{" "}
+                  <Icon sx={dropdownIconStyles}>Mic Sample Rate</Icon>
+                </MKButton>
+
+                <Menu
+                  anchorEl={sensorConfigSubMenuDropDown_1}
+                  open={Boolean(sensorConfigSubMenuDropDown_1)}
+                  onClose={closeSensorConfigSubMenuDropDown_1}
+                >
+
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=8000;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 8 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=11025;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 11.025 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=16000;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 16 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=22050;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 22.05 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=32000;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 32 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=44100;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 44.1 kHz </MenuItem>
+                  <MenuItem onClick={(event) => {
+                      props.sysInfo.micSampleRate=48000;
+                      closeSensorConfigSubMenuDropDown_1();
+                  }}> 48 kHz </MenuItem>
+                </Menu>
+
+                <MKInput
+                  type="number"
+                  label="FFT Sample Period (ms)"
+                  fullWidth
+                  value={props.sysInfo.fftSamplePeriod}
+                  onChange={(event) => {
+                    props.sysInfo.fftSamplePeriod=event.target.value;
+                    setUpdateViz(!updateViz);
+                  }}
+
                   InputProps={{
                     inputProps: { min: 0 , max:65000},
                   }}
                 />
+
+
               </Stack>
             ) : null }
             <div style={{ padding: 2 }}>
@@ -1814,7 +1905,7 @@ function AirSpecControl(props) {
                   <Icon fontSize="small">thumb_up</Icon>&nbsp;
                   Update sent to system!
                 </MKAlert>
-                ) : ( 
+                ) : (
             <MKTypography
                   variant="subtitle2"
                   color="info"
@@ -1830,7 +1921,7 @@ function AirSpecControl(props) {
             </div>
             </Stack>
             ) : null
-            
+
             }
             {specialFuncDropDownAct ? (
               <Stack>
@@ -1975,7 +2066,7 @@ function AirSpecControl(props) {
               Connect
             </MKButton>
           </Stack>
-          {/* <Stack direction="column" alignItems="right" spacing={1}> 
+          {/* <Stack direction="column" alignItems="right" spacing={1}>
             <MKButton onClick={connect} variant="gradient" color="success">
               Start Streaming to Server
             </MKButton>

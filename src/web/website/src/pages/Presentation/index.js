@@ -110,7 +110,6 @@ function Presentation() {
           </Grid>
         </Container>
       </MKBox>
-
       <Card
         sx={{
           p: 2,
