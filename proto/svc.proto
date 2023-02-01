@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+import "message.proto";
+
+message SubmitPackets {
+    repeated SensorPacket sensor_data = 1;
+
+    double epoch = 2;
+}

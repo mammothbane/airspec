@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package airspecs.firmware.sensor;
-
-message SHT {
-    float temperature = 1;
-    float humidity = 2;
-}

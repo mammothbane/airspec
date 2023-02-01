@@ -1,6 +1,0 @@
-syntax = "proto3";
-
-package airspecs.firmware.config;
-
-message LP5523 {
-}

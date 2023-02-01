@@ -1,0 +1,193 @@
+syntax = "proto3";
+
+enum SensorPacketTypes {
+    UNKNOWN_PACKET_TYPE = 0;
+    PPG_RED         = 1;
+    PPG_IR          = 2;
+    SPECTROMETER    = 3;
+    BME             = 4;
+    CO2             = 5;
+    IMU             = 6;
+    THERMOPILE      = 7;
+    LUX             = 8;
+    LIDAR           = 9;
+    MIC             = 10;
+    SHT             = 11;
+    SGP             = 12;
+    BLINK           = 13;
+}
+
+enum Tsl2591Gain{
+    TSL2722_GAIN_1X 	= 0x00;  /// low gain (1x)
+    TSL2722_GAIN_8X 	= 0x01;  /// medium gain (25x)
+    TSL2722_GAIN_16X 	= 0x02; /// medium gain (428x)
+    TSL2722_GAIN_120X = 0x03;  /// max gain (9876x)
+} ;
+
+enum Tsl2591IntegrationTime {
+    TSL2722_INTEGRATIONTIME_600MS 	= 0x00; // 699 millis
+    TSL2722_INTEGRATIONTIME_2_73MS 	= 0xFF; // 2.73 millis
+    TSL2722_INTEGRATIONTIME_27_30MS 	= 0xF6; // 27.3 millis
+    TSL2722_INTEGRATIONTIME_101MS 	= 0xDB; // 101 millis
+    TSL2722_INTEGRATIONTIME_175MS 	= 0xC0; // 175 millis
+} ;
+
+enum Sht45_precision {
+    SHT4X_HIGH_PRECISION = 0;
+    SHT4X_MED_PRECISION = 1;
+    SHT4X_LOW_PRECISION = 2;
+} ;
+
+/** Optional pre-heater configuration setting */
+enum Sht45_heater {
+    SHT4X_NO_HEATER           = 0;
+    SHT4X_HIGH_HEATER_1S      = 1;
+    SHT4X_HIGH_HEATER_100MS   = 2;
+    SHT4X_MED_HEATER_1S       = 3;
+    SHT4X_MED_HEATER_100MS    = 4;
+    SHT4X_LOW_HEATER_1S       = 5;
+    SHT4X_LOW_HEATER_100MS    = 6;
+} ;
+
+message SensorPacketHeader {
+
+    SensorPacketTypes packet_type = 1;
+    uint32 system_uid = 2;
+    uint32 packet_id = 3;
+    uint32 ms_from_start = 4;
+    uint32 epoch = 5;
+    uint32 payload_length = 6;
+}
+
+
+
+message LuxPacket{
+    Tsl2591Gain gain = 1;
+    Tsl2591IntegrationTime integration_time = 2;
+
+    message Payload {
+        uint32 lux = 1;
+        uint32 timestamp = 2;
+    }
+    repeated Payload payload = 3;
+}
+
+message SGPPacket{
+    message Payload {
+        uint32 sraw_voc = 1;
+        uint32 sraw_nox = 2;
+        int32 voc_index_value = 3;
+        int32 nox_index_value = 4;
+        uint32 timestamp = 5;
+    }
+    repeated Payload payload = 1;
+}
+
+message BMEPacket{
+    uint32 sample_period_ms = 1;
+
+    message Payload {
+        fixed64 time_stamp = 1;
+        float signal = 2;
+        uint32 signal_dimensions = 3;
+        uint32 sensor_id = 4;
+        uint32 accuracy = 5;
+    }
+    repeated Payload payload = 2;
+}
+
+message BlinkPacket{
+    uint32 diode_saturation_flag = 1;
+    uint32 blink_sample_rate = 2;
+    uint32 subpacket_index = 3;
+
+    message Payload {
+        bytes sample = 1;
+    }
+    Payload payload = 4;
+}
+
+
+
+message SHTPacket{
+    Sht45_precision precision = 1;
+    Sht45_heater heater = 2;
+
+    message Payload {
+        float temperature = 1;
+        float humidity = 2;
+        uint32 timestamp = 3;
+    }
+    repeated Payload payload = 3;
+}
+
+message SpecPacket{
+    uint32 sample_period = 1;
+
+    message Payload {
+        uint32 _415 = 1;
+        uint32 _445 = 2;
+        uint32 _480 = 3;
+        uint32 _515 = 4;
+        uint32 _clear_1 = 5;
+        uint32 _nir_1 = 6;
+        uint32 _555 = 7;
+        uint32 _590 = 8;
+        uint32 _630 = 9;
+        uint32 _680 = 10;
+        uint32 _clear_2 = 11;
+        uint32 _nir_2 = 12;
+        uint32 flicker = 13;
+    }
+    repeated Payload payload = 2;
+}
+
+message ThermPacket{
+    uint32 sample_period_ms = 1;
+
+    message Payload {
+        uint32 descriptor = 1;
+        uint32 timestamp = 2;
+        uint32 ambient_raw = 3;
+        uint32 object_raw = 4;
+        float ambient_temp = 5;
+        float object_temp = 6;
+    }
+    repeated Payload payload = 2;
+}
+
+message IMUPacket{
+    uint32 sample_period_ms = 1;
+
+    message Payload {
+        bytes sample = 1;
+    }
+    Payload payload = 2;
+}
+
+message MicPacket{
+    uint32 sample_freq = 1;
+    uint32 system_sample_period = 2;
+    uint32 samples_per_fft = 3;
+    float start_frequency = 4;
+    float frequency_spacing = 5;
+
+    message Payload {
+        repeated float sample = 1;
+    }
+    Payload payload = 6;
+}
+
+message SensorPacket {
+    SensorPacketHeader header = 1;
+
+    optional LuxPacket lux_packet = 2;
+    optional SGPPacket sgp_packet = 3;
+    optional BMEPacket bme_packet = 4;
+    optional BlinkPacket blink_packet = 5;
+    optional SHTPacket sht_packet = 6;
+    optional SpecPacket spec_packet = 7;
+    optional ThermPacket therm_packet = 8;
+    optional IMUPacket imu_packet = 9;
+    optional MicPacket mic_packet = 10;
+}
