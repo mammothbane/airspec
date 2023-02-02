@@ -21,7 +21,7 @@ pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
     if id.contains('"') {
         return Err(tide::Error::from_str(
             StatusCode::BadRequest,
-            format!("injection detected: {:?}", id),
+            format!("injection detected: {id:?}"),
         ));
     }
 

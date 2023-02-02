@@ -26,7 +26,7 @@ impl<'a> ToDatapoints for WithHeader<'a, MicPacket> {
             .as_ref()
             .map(|p| &p.sample)
             .unwrap_or_else(|| &EMPTY)
-            .into_iter()
+            .iter()
             .map(|&sample| {
                 self.0
                     .common_fields(DataPoint::builder("mic"))

@@ -29,7 +29,7 @@ impl<'a> ToDatapoints for WithHeader<'a, BlinkPacket> {
 
         let bytes = payload.as_ref().map(|p| &p.sample).unwrap_or(&EMPTY);
 
-        let (b, _) = bincode::decode_from_slice::<Vec<BlinkSample>, _>(&mut &bytes[..], BIN_CONF)?;
+        let (b, _) = bincode::decode_from_slice::<Vec<BlinkSample>, _>(&bytes[..], BIN_CONF)?;
 
         b.into_iter()
             .map(|sample| {

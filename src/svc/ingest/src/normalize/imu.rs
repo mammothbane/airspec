@@ -22,7 +22,7 @@ impl<'a> ToDatapoints for WithHeader<'a, ImuPacket> {
     fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
         let bytes = self.1.payload.as_ref().map(|p| &p.sample).unwrap_or_else(|| &EMPTY);
 
-        let (b, _) = bincode::decode_from_slice::<Vec<ImuSample>, _>(&mut &bytes[..], BIN_CONF)?;
+        let (b, _) = bincode::decode_from_slice::<Vec<ImuSample>, _>(&bytes[..], BIN_CONF)?;
 
         b.into_iter()
             .map(|sample| {
