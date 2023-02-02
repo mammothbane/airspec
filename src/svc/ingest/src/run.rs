@@ -21,7 +21,11 @@ pub struct State {
     pub tx:         channel::Sender<influxdb2::models::DataPoint>,
 }
 
-pub async fn serve(bind: impl ToListener<State>, influx_cfg: opt::Influx) -> eyre::Result<()> {
+pub async fn serve(
+    bind: impl ToListener<State>,
+    influx_cfg: opt::Influx,
+    chunk_cfg: opt::ChunkConfig,
+) -> eyre::Result<()> {
     let (msr_tx, msr_rx) = channel::bounded(4096);
 
     let token = influx_cfg.token_or_env().ok_or(eyre::eyre!("influx token was missing"))?;
@@ -32,6 +36,8 @@ pub async fn serve(bind: impl ToListener<State>, influx_cfg: opt::Influx) -> eyr
     let influx_fwd = async_std::task::spawn(forward::forward_to_influx(
         client.clone(),
         influx_cfg.clone(),
+        chunk_cfg.chunk_size,
+        Duration::from_millis(chunk_cfg.chunk_timeout_millis as u64),
         msr_rx,
     ));
 

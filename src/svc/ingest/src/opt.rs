@@ -22,9 +22,21 @@ impl Influx {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, structopt::StructOpt)]
+pub struct ChunkConfig {
+    #[structopt(long, default_value = "1024 * 16")]
+    pub chunk_size: usize,
+
+    #[structopt(long, default_value = "5000")]
+    pub chunk_timeout_millis: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, structopt::StructOpt)]
 pub struct Opt {
     #[structopt(long, default_value = "0.0.0.0:8080")]
     pub bind: SocketAddr,
+
+    #[structopt(flatten)]
+    pub chunk_config: ChunkConfig,
 
     #[structopt(flatten)]
     pub influx: Influx,

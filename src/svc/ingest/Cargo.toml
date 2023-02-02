@@ -7,7 +7,7 @@ edition = "2021"
 [dependencies]
 async-std = { version = "1.12", features = ["attributes"] }
 async-compat = "0.2"
-futures-batch = { version = "0.6", optional = true }
+futures-batch = "0.6"
 tide = "0.16"
 tap = "1.0"
 
@@ -42,9 +42,6 @@ chrono = { version = "0.4", features = ["serde"] }
 package = "influxdb2_client"
 git = "https://github.com/mammothbane/influxdb_iox"
 rev = "6937d1a2a"
-
-[features]
-chunked = ["futures-batch"]
 
 [dev-dependencies]
 tempdir = "0.3"
