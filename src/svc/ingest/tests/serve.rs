@@ -1,4 +1,9 @@
-use std::time::Duration;
+use std::{
+    io,
+    time::Duration,
+};
+
+use async_std::net::ToSocketAddrs;
 
 use async_compat::CompatExt;
 use influxdb2::models::PostBucketRequest;
@@ -11,6 +16,7 @@ use airspecs_ingest::{
 };
 
 const URL: &str = "http://localhost:8086";
+const SERVER_SOCKETADDR: &str = "127.0.0.1:8181";
 
 fn rand_string() -> String {
     rand::thread_rng()
@@ -18,6 +24,20 @@ fn rand_string() -> String {
         .take(16)
         .map(char::from)
         .collect::<String>()
+}
+
+async fn wait_for_tcp(a: &impl ToSocketAddrs) -> eyre::Result<()> {
+    loop {
+        match async_std::net::TcpStream::connect(a).await {
+            Ok(_) => break,
+            Err(e) if e.kind() == io::ErrorKind::ConnectionRefused => {
+                async_std::task::sleep(Duration::from_millis(50)).await;
+            },
+            Err(e) => return Err(e.into()),
+        }
+    }
+
+    Ok(())
 }
 
 #[async_std::test]
@@ -36,17 +56,15 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
         .compat()
         .await?;
 
-    let server = async_std::task::spawn(airspecs_ingest::run::serve("127.0.0.1:8181", Influx {
+    let server = async_std::task::spawn(airspecs_ingest::run::serve(SERVER_SOCKETADDR, Influx {
         url:    URL.to_string(),
         token:  Some(token),
-        bucket: org_name,
-        org:    bkt_name,
+        bucket: bkt_name,
+        org:    org_name,
     }));
 
-    async_std::task::sleep(Duration::from_secs(1)).await;
-
     let client = surf::Config::new()
-        .set_base_url("http://127.0.0.1:8181".parse()?)
+        .set_base_url(format!("http://{SERVER_SOCKETADDR}").parse()?)
         .set_timeout(Some(Duration::from_millis(1000)))
         .add_header("Authorization", "")
         .unwrap()
@@ -56,6 +74,8 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
     struct DumpReq {
         id: &'static str,
     }
+
+    wait_for_tcp(&SERVER_SOCKETADDR).await?;
 
     let mut resp = client.get("/dump?id=lskjddf").await.map_err(|e| eyre::eyre!("elp: {e}"))?;
 
