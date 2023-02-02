@@ -16,7 +16,7 @@ impl<'a> ToDatapoints for WithHeader<'a, LuxPacket> {
             .iter()
             .map(|sample| {
                 self.0
-                    .common_fields(DataPoint::builder("blink"))
+                    .common_fields(DataPoint::builder("lux"))
                     .field("lux", sample.lux as u64)
                     .field("sample_timestamp", sample.timestamp as f64)
                     .build()

@@ -1,5 +1,3 @@
-
-
 use influxdb2::models::DataPoint;
 
 use crate::{
@@ -29,7 +27,7 @@ impl<'a> ToDatapoints for WithHeader<'a, ImuPacket> {
         b.into_iter()
             .map(|sample| {
                 self.0
-                    .common_fields(DataPoint::builder("blink"))
+                    .common_fields(DataPoint::builder("imu"))
                     .field("dummy", sample.dummy as u64)
                     .field("sample_rate", self.1.sample_period_ms as u64)
                     .build()

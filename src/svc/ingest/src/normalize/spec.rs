@@ -38,7 +38,7 @@ impl<'a> ToDatapoints for WithHeader<'a, SpecPacket> {
                      flicker,
                  }| {
                     self.0
-                        .common_fields(DataPoint::builder("blink"))
+                        .common_fields(DataPoint::builder("spectrometer"))
                         .field("band_415", band_415 as u64)
                         .field("band_445", band_445 as u64)
                         .field("band_480", band_480 as u64)

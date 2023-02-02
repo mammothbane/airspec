@@ -16,7 +16,7 @@ impl<'a> ToDatapoints for WithHeader<'a, BmePacket> {
             .iter()
             .map(|sample| {
                 self.0
-                    .common_fields(DataPoint::builder("blink"))
+                    .common_fields(DataPoint::builder("bme"))
                     .field("accuracy", sample.accuracy as u64)
                     .field("signal", sample.signal as f64)
                     .field("sensor_id", sample.sensor_id as u64)

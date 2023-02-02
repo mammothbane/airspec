@@ -19,7 +19,7 @@ impl<'a> ToDatapoints for WithHeader<'a, SgpPacket> {
             .iter()
             .map(|sample| {
                 self.0
-                    .common_fields(DataPoint::builder("blink"))
+                    .common_fields(DataPoint::builder("sgp"))
                     .field("sraw_nox", sample.sraw_nox as u64)
                     .field("sraw_voc", sample.sraw_voc as u64)
                     .field("sample_timestamp", sample.timestamp as u64)

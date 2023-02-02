@@ -21,7 +21,7 @@ impl<'a> ToDatapoints for WithHeader<'a, ShtPacket> {
             .iter()
             .map(|sample| {
                 self.0
-                    .common_fields(DataPoint::builder("blink"))
+                    .common_fields(DataPoint::builder("sht"))
                     .field("precision", precision as i64)
                     .field("heater", heater as i64)
                     .field("sample_timestamp", sample.timestamp as u64)

@@ -29,7 +29,7 @@ impl<'a> ToDatapoints for WithHeader<'a, MicPacket> {
             .into_iter()
             .map(|&sample| {
                 self.0
-                    .common_fields(DataPoint::builder("blink"))
+                    .common_fields(DataPoint::builder("mic"))
                     .field("value", sample as f64)
                     .field("sample_frequency", sample_freq as u64)
                     .field("frequency_spacing", frequency_spacing as f64)
