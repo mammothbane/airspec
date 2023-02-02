@@ -7,3 +7,8 @@ pub mod opt;
 pub mod run;
 pub mod trace;
 pub mod util;
+
+mod normalize;
+
+#[path = "pb/_.rs"]
+pub mod pb;

@@ -12,6 +12,8 @@ use tide::{
     StatusCode,
 };
 
+use crate::endpoints::ingest_proto;
+
 #[serde_with::serde_as]
 #[derive(serde::Deserialize)]
 struct RemoteDataPoint {
@@ -64,6 +66,10 @@ impl<'de> DeserializeAs<'de, FieldValue> for RemoteFieldValue {
 }
 
 pub async fn ingest(mut req: tide::Request<crate::run::State>) -> tide::Result {
+    if req.content_type().contains(&*ingest_proto::PROTO_MIME) {
+        return ingest_proto(req).await;
+    }
+
     let msrs: Vec<RemoteDataPoint> = crate::util::decode_msgpack_or_json(&mut req).await?;
 
     let state = req.state();
