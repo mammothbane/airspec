@@ -17,46 +17,8 @@ set(SIZE                ${ARCH}size     CACHE STRING "size")
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-# nix/direnv should set this for you. if you're not building with nix, point this at $your_nanopb_src/extra.
-if (DEFINED ENV{NANOPB_CMAKE_MODULE})
-    SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};$ENV{NANOPB_CMAKE_MODULE}")
-endif()
-
 project(airspecs_firmware C CXX ASM)
 
-find_package(Nanopb REQUIRED)
-
-include_directories(${NANOPB_INCLUDE_DIRS})
-
-# find ../../proto -name '*.proto'
-nanopb_generate_cpp(PROTO_SRCS PROTO_HDRS RELPATH ../../proto
-    ../../proto/lib.proto
-    ../../proto/color.proto
-    ../../proto/firmware/config.proto
-    ../../proto/firmware/sensor.proto
-    ../../proto/firmware/sensor/mic.proto
-    ../../proto/firmware/sensor/sgp.proto
-    ../../proto/firmware/sensor/sht.proto
-    ../../proto/firmware/sensor/lux.proto
-    ../../proto/firmware/sensor/blink.proto
-    ../../proto/firmware/sensor/spectrometer.proto
-    ../../proto/firmware/sensor/lp5523.proto
-    ../../proto/firmware/sensor/thermopile.proto
-    ../../proto/firmware/sensor/imu.proto
-    ../../proto/firmware/sensor/bme.proto
-    ../../proto/firmware/config/lux_cfg.proto
-    ../../proto/firmware/config/sgp_cfg.proto
-    ../../proto/firmware/config/sht_cfg.proto
-    ../../proto/firmware/config/thermopile_cfg.proto
-    ../../proto/firmware/config/blink_cfg.proto
-    ../../proto/firmware/config/spectrometer_cfg.proto
-    ../../proto/firmware/config/lp5523_cfg.proto
-    ../../proto/firmware/config/imu_cfg.proto
-    ../../proto/firmware/config/bme_cfg.proto
-    ../../proto/firmware/config/mic_cfg.proto
-    ../../proto/bluetooth/packet.proto
-    ../../proto/bluetooth/sensor_control.proto
-)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
@@ -114,7 +76,7 @@ include_directories(
         Middlewares/gas-index-algorithm/sensirion_gas_index_algorithm
         Middlewares/bsec_2_2_0_0
         Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc
-        Middlewares/arduinojson/src
+        protobuf
 )
 
 add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32WB5Mxx)
@@ -133,6 +95,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
         "Middlewares/Sensirion_Core/*.*"
         "Middlewares/Third_Party/*.*"
         "Middlewares/ST/*.*"
+        "protobuf/*.*"
 )
 
 link_directories(Middlewares/bsec_2_2_0_0/algo/normal_version/bin/gcc/Cortex_M4F/)
@@ -143,7 +106,7 @@ add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR
 add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
 add_link_options(-T ${LINKER_SCRIPT})
 
-add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT} ${PROTO_SRCS} ${PROTO_HDRS})
+add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
 target_link_libraries(${PROJECT_NAME}.elf algobsec)
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
