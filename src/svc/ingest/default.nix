@@ -61,5 +61,5 @@ in crane-lib.buildPackage (commonOptions // {
     clippy
   ];
 
-  cargoExtraArgs = commonOptions.cargoExtraArgs + " --bin server";
+  cargoExtraArgs = commonOptions.cargoExtraArgs + " --bin airspecs_ingest";
 })
