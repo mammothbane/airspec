@@ -125,18 +125,18 @@ message SpecPacket{
     uint32 sample_period = 1;
 
     message Payload {
-        uint32 _415 = 1;
-        uint32 _445 = 2;
-        uint32 _480 = 3;
-        uint32 _515 = 4;
-        uint32 _clear_1 = 5;
-        uint32 _nir_1 = 6;
-        uint32 _555 = 7;
-        uint32 _590 = 8;
-        uint32 _630 = 9;
-        uint32 _680 = 10;
-        uint32 _clear_2 = 11;
-        uint32 _nir_2 = 12;
+        uint32 band_415 = 1;
+        uint32 band_445 = 2;
+        uint32 band_480 = 3;
+        uint32 band_515 = 4;
+        uint32 band_clear_1 = 5;
+        uint32 band_nir_1 = 6;
+        uint32 band_555 = 7;
+        uint32 band_590 = 8;
+        uint32 band_630 = 9;
+        uint32 band_680 = 10;
+        uint32 band_clear_2 = 11;
+        uint32 band_nir_2 = 12;
         uint32 flicker = 13;
     }
     repeated Payload payload = 2;
