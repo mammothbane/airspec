@@ -1,7 +1,11 @@
 use std::sync::Arc;
 
 use async_std::channel;
-use tide::listener::ToListener;
+use tide::{
+    listener::ToListener,
+    utils::After,
+    Response,
+};
 
 use crate::{
     auth,
@@ -39,6 +43,13 @@ pub async fn serve(bind: impl ToListener<State>, influx_cfg: opt::Influx) -> eyr
 
     server
         .with(auth::authenticate)
+        .with(After(|resp: Response| async move {
+            if let Some(e) = resp.error() {
+                tracing::error!(request_error = ?e);
+            }
+
+            Ok(resp)
+        }))
         .at("/dump")
         .get(endpoints::dump)
         .at("/")
