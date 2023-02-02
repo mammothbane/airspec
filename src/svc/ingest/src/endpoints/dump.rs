@@ -43,5 +43,7 @@ pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
         .await
         .status(StatusCode::BadGateway)?;
 
+    tracing::debug!(body = %csv, "requested csv");
+
     Ok(Response::builder(StatusCode::Ok).content_type("text/csv").body(csv).build())
 }

@@ -25,9 +25,12 @@ macro_rules! convert_all {
     };
 }
 
+#[tracing::instrument(skip_all)]
 pub async fn ingest_proto(mut req: tide::Request<crate::run::State>) -> tide::Result {
     let body = req.body_bytes().await?;
+
     let submit_packets = crate::pb::SubmitPackets::decode(body.as_slice())?;
+    tracing::trace!(?submit_packets, "received packets");
 
     let state = req.state();
 
@@ -52,6 +55,7 @@ pub async fn ingest_proto(mut req: tide::Request<crate::run::State>) -> tide::Re
         .collect::<Result<Vec<Vec<DataPoint>>, _>>()?
         .into_iter()
         .flatten()
+        .inspect(|pkt| tracing::trace!(submitting_packet = ?pkt))
         .try_for_each(|x| state.tx.try_send(x))?;
 
     Ok(tide::StatusCode::Accepted.into())

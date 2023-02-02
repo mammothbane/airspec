@@ -65,6 +65,7 @@ impl<'de> DeserializeAs<'de, FieldValue> for RemoteFieldValue {
     }
 }
 
+#[tracing::instrument(skip_all, fields(url = %req.url(), content_type = ?req.content_type().map(|x| x.to_string())))]
 pub async fn ingest(mut req: tide::Request<crate::run::State>) -> tide::Result {
     if req.content_type().contains(&*ingest_proto::PROTO_MIME) {
         return ingest_proto(req).await;
