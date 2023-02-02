@@ -45,3 +45,10 @@ chunked = ["futures-batch"]
 tempdir = "0.3"
 rand = "0.8"
 surf = { version = "2.3", default-features = false, features = ["h1-client-rustls", "middleware-logger", "encoding"] }
+
+[build-dependencies]
+prost-build = "0.11"
+tempfile = "3.3"
+eyre = "0.6"
+dotenv = "0.15"
+walkdir = "2.3"
