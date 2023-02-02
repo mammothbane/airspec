@@ -29,7 +29,9 @@ pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
         r#"
         from(bucket: "{}")
             |> range(start: 0)
-            |> filter(fn: (r) => r.specs == "{}")
+            |> drop(columns: ["_start", "_stop"])
+            |> filter(fn: (r) => r.system_uid == "{}")
+            |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
         "#,
         state.influx_cfg.bucket, id,
     );
