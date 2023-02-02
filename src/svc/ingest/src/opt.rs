@@ -23,7 +23,7 @@ impl Influx {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, structopt::StructOpt)]
 pub struct ChunkConfig {
-    #[structopt(long, default_value = "1024 * 16")]
+    #[structopt(long, default_value = "16384")]
     pub chunk_size: usize,
 
     #[structopt(long, default_value = "5000")]
