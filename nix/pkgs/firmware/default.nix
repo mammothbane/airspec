@@ -16,7 +16,6 @@
   nativeBuildInputs = [
     protobuf
     cmake
-    nanopb
   ];
 
   isProto = path: _type: builtins.match ".*(/proto/.*|.*\.proto)" path != null;
@@ -46,7 +45,6 @@ in cross.stdenv.mkDerivation {
   version = self.rev or "dirty";
 
   cmakeFlags = [
-    "-DCMAKE_MODULE_PATH=${nanopb.src}/extra"
     "-DCMAKE_VERBOSE_MAKEFILE=ON"
     "-DCMAKE_BUILD_TYPE=Release"
   ];
