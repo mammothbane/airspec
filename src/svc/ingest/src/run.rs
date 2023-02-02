@@ -1,4 +1,7 @@
-use std::sync::Arc;
+use std::{
+    sync::Arc,
+    time::Duration,
+};
 
 use async_std::channel;
 use tide::{
@@ -14,7 +17,7 @@ use crate::{
     opt,
 };
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct State {
     pub influx:     Arc<influxdb2::Client>,
     pub influx_cfg: opt::Influx,
@@ -47,19 +50,19 @@ pub async fn serve(
         tx: msr_tx,
     });
 
-    server
-        .with(auth::authenticate)
-        .with(After(|resp: Response| async move {
-            if let Some(e) = resp.error() {
-                tracing::error!(request_error = ?e);
-            }
+    server.with(auth::authenticate).with(After(|resp: Response| async move {
+        if let Some(e) = resp.error() {
+            tracing::error!(request_error = ?e);
+        } else if !resp.status().is_success() {
+            tracing::warn!("error response without error");
+        }
 
-            Ok(resp)
-        }))
-        .at("/dump")
-        .get(endpoints::dump)
-        .at("/")
-        .post(endpoints::ingest);
+        Ok(resp)
+    }));
+
+    server.at("/dump").get(endpoints::dump);
+
+    server.at("/").post(endpoints::ingest);
 
     tracing::info!("starting");
     server.listen(bind).await?;
