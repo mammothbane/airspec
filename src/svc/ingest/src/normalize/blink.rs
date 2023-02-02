@@ -1,5 +1,3 @@
-
-
 use influxdb2::models::DataPoint;
 
 use crate::{
