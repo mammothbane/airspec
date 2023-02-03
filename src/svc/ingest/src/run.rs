@@ -61,7 +61,6 @@ pub async fn serve(
     }));
 
     server.at("/dump").get(endpoints::dump);
-
     server.at("/").post(endpoints::ingest);
 
     tracing::info!("starting");

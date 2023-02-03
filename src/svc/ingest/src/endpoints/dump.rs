@@ -9,8 +9,8 @@ use tide::{
 #[derive(serde::Deserialize)]
 pub struct DumpRequest {
     id:    String,
-    start: usize,
-    end:   usize,
+    start: String,
+    end:   String,
 }
 
 pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
@@ -25,10 +25,6 @@ pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
             StatusCode::BadRequest,
             format!("injection detected: {id:?}"),
         ));
-    }
-
-    if start > end {
-        return Err(tide::Error::from_str(StatusCode::BadRequest, "start > end"));
     }
 
     let state = req.state();
