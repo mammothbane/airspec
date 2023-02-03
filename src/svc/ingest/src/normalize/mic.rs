@@ -2,6 +2,7 @@ use influxdb2::models::DataPoint;
 
 use crate::{
     normalize::{
+        normalize_float,
         Error,
         ToDatapoints,
         WithHeader,
@@ -30,12 +31,12 @@ impl<'a> ToDatapoints for WithHeader<'a, MicPacket> {
             .map(|&sample| {
                 self.0
                     .common_fields(DataPoint::builder("mic"))
-                    .field("value", sample as f64)
+                    .field("value", normalize_float(sample))
                     .field("sample_frequency", sample_freq as u64)
-                    .field("frequency_spacing", frequency_spacing as f64)
+                    .field("frequency_spacing", normalize_float(frequency_spacing))
                     .field("sample_period", system_sample_period as u64)
                     .field("samples_per_fft", samples_per_fft as u64)
-                    .field("start_frequency", start_frequency as f64)
+                    .field("start_frequency", normalize_float(start_frequency))
                     .build()
                     .map_err(Error::from)
             })

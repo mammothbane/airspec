@@ -23,8 +23,6 @@ pub async fn forward_to_influx(
     let mut msrs = msrs.chunks_timeout(chunk_size, chunk_timeout);
 
     while let Some(chunk) = msrs.next().await {
-        // let _span = tracing::debug_span!("sending chunk", size = chunk.len()).entered();
-
         if chunk.is_empty() {
             tracing::trace!("skipping empty chunk");
             continue;

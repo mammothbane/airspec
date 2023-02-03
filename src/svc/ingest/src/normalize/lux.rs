@@ -18,7 +18,7 @@ impl<'a> ToDatapoints for WithHeader<'a, LuxPacket> {
                 self.0
                     .common_fields(DataPoint::builder("lux"))
                     .field("lux", sample.lux as u64)
-                    .field("sample_timestamp", sample.timestamp as f64)
+                    .field("sample_timestamp", sample.timestamp as u64)
                     .build()
                     .map_err(Error::from)
             })

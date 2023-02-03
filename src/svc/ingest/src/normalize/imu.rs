@@ -5,7 +5,6 @@ use crate::{
         Error,
         ToDatapoints,
         WithHeader,
-        BIN_CONF,
     },
     pb::ImuPacket,
 };
@@ -22,7 +21,11 @@ impl<'a> ToDatapoints for WithHeader<'a, ImuPacket> {
     fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
         let bytes = self.1.payload.as_ref().map(|p| &p.sample).unwrap_or_else(|| &EMPTY);
 
-        let (b, _) = bincode::decode_from_slice::<Vec<ImuSample>, _>(&bytes[..], BIN_CONF)?;
+        tracing::info!(payload = ?bytes, packet_id = self.0.packet_id, "imu packet");
+
+        // let (b, _) = bincode::decode_from_slice::<Vec<ImuSample>, _>(&bytes[..], BIN_CONF)?;
+
+        let b: Vec<ImuSample> = vec![];
 
         b.into_iter()
             .map(|sample| {

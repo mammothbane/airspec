@@ -2,6 +2,7 @@ use influxdb2::models::DataPoint;
 
 use crate::{
     normalize::{
+        normalize_float,
         Error,
         ToDatapoints,
         WithHeader,
@@ -18,7 +19,7 @@ impl<'a> ToDatapoints for WithHeader<'a, BmePacket> {
                 self.0
                     .common_fields(DataPoint::builder("bme"))
                     .field("accuracy", sample.accuracy as u64)
-                    .field("signal", sample.signal as f64)
+                    .field("signal", normalize_float(sample.signal))
                     .field("sensor_id", sample.sensor_id as u64)
                     .field("sample_timestamp", sample.time_stamp)
                     .field("signal_dimensions", sample.signal_dimensions as u64)

@@ -5,7 +5,6 @@ use crate::{
         Error,
         ToDatapoints,
         WithHeader,
-        BIN_CONF,
     },
     pb::BlinkPacket,
 };
@@ -16,7 +15,7 @@ struct BlinkSample {
     dummy: u8,
 }
 
-static EMPTY: Vec<u8> = vec![];
+static _EMPTY: Vec<u8> = vec![];
 
 impl<'a> ToDatapoints for WithHeader<'a, BlinkPacket> {
     fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
@@ -25,11 +24,16 @@ impl<'a> ToDatapoints for WithHeader<'a, BlinkPacket> {
             blink_sample_rate,
             subpacket_index,
             ref payload,
+            ..
         } = self.1;
 
-        let bytes = payload.as_ref().map(|p| &p.sample).unwrap_or(&EMPTY);
+        tracing::info!(payload = ?payload, blink_sample_rate, diode_saturation_flag, subpacket_index, "blink packet");
 
-        let (b, _) = bincode::decode_from_slice::<Vec<BlinkSample>, _>(&bytes[..], BIN_CONF)?;
+        // let bytes = payload.as_ref().map(|p| &p.sample).unwrap_or(&EMPTY);
+        //
+        // let (b, _) = bincode::decode_from_slice::<Vec<BlinkSample>, _>(&bytes[..], BIN_CONF)?;
+
+        let b: Vec<BlinkSample> = vec![];
 
         b.into_iter()
             .map(|sample| {

@@ -24,7 +24,7 @@ pub trait ToDatapoints {
     fn to_data_points(&self) -> Result<Vec<DataPoint>, Error>;
 }
 
-const BIN_CONF: bincode::config::Configuration<LittleEndian, Fixint> =
+const _BIN_CONF: bincode::config::Configuration<LittleEndian, Fixint> =
     bincode::config::standard().with_fixed_int_encoding().with_no_limit();
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -46,4 +46,13 @@ pub enum Error {
 
     #[error(transparent)]
     Bincode(#[from] bincode::error::DecodeError),
+}
+
+#[inline]
+fn normalize_float(f: f32) -> f64 {
+    if f.is_nan() || f.is_infinite() {
+        return 0.0;
+    }
+
+    f as f64
 }

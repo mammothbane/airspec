@@ -2,6 +2,7 @@ use influxdb2::models::DataPoint;
 
 use crate::{
     normalize::{
+        normalize_float,
         Error,
         ToDatapoints,
         WithHeader,
@@ -25,8 +26,8 @@ impl<'a> ToDatapoints for WithHeader<'a, ShtPacket> {
                     .field("precision", precision as i64)
                     .field("heater", heater as i64)
                     .field("sample_timestamp", sample.timestamp as u64)
-                    .field("humidity", sample.humidity as f64)
-                    .field("temperature", sample.temperature as f64)
+                    .field("humidity", normalize_float(sample.humidity))
+                    .field("temperature", normalize_float(sample.temperature))
                     .build()
                     .map_err(Error::from)
             })
