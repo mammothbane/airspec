@@ -32,7 +32,7 @@ in {
         };
 
         locations."/api" = {
-          proxyPass = "http://localhost:6666";
+          proxyPass = "http://localhost:6666/";
         };
       };
 
