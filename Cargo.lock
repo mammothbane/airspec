@@ -62,7 +62,6 @@ version = "0.1.0"
 dependencies = [
  "async-compat",
  "async-std",
- "bytes",
  "cfg-if 1.0.0",
  "chrono",
  "csv",
