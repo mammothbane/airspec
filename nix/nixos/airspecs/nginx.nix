@@ -34,6 +34,14 @@ in {
         locations."/api" = {
           proxyPass = "http://localhost:6666/";
         };
+
+        locations."/api/" = {
+          proxyPass = "http://localhost:6666/";
+
+          extraConfig = ''
+            proxy_read_timeout 120;
+          '';
+        };
       };
 
       "default" = {
