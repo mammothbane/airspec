@@ -8,15 +8,17 @@ use tide::{
 
 #[derive(serde::Deserialize)]
 pub struct DumpRequest {
-    id: String,
+    id:    String,
+    start: usize,
+    end:   usize,
 }
 
 pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
     let DumpRequest {
         id,
+        start,
+        end,
     } = req.query::<DumpRequest>()?;
-
-    let state = req.state();
 
     if id.contains('"') {
         return Err(tide::Error::from_str(
@@ -25,15 +27,21 @@ pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
         ));
     }
 
+    if start > end {
+        return Err(tide::Error::from_str(StatusCode::BadRequest, "start > end"));
+    }
+
+    let state = req.state();
+
     let query = format!(
         r#"
         from(bucket: "{}")
-            |> range(start: 0)
+            |> range(start: {start}, stop: {end})
             |> drop(columns: ["_start", "_stop"])
-            |> filter(fn: (r) => r.system_uid == "{}")
+            |> filter(fn: (r) => r.system_uid == "{id}")
             |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
         "#,
-        state.influx_cfg.bucket, id,
+        state.influx_cfg.bucket,
     );
 
     let csv = state
