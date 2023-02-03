@@ -14,8 +14,6 @@ static EMPTY: Vec<f32> = vec![];
 
 impl<'a> ToDatapoints for WithHeader<'a, MicPacket> {
     fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
-        tracing::info!(?self, "mic packet");
-
         let MicPacket {
             sample_freq,
             system_sample_period,

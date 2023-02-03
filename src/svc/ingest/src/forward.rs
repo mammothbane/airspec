@@ -10,7 +10,7 @@ use async_std::prelude::{
 };
 use influxdb2::models::DataPoint;
 
-#[tracing::instrument(skip_all, fields(%chunk_size, ?chunk_timeout))]
+#[tracing::instrument(skip_all, fields(%chunk_size, ?chunk_timeout), level = "debug")]
 pub async fn forward_to_influx(
     client: impl Borrow<influxdb2::Client>,
     influxcfg: crate::opt::Influx,
@@ -23,8 +23,10 @@ pub async fn forward_to_influx(
     let mut msrs = msrs.chunks_timeout(chunk_size, chunk_timeout);
 
     while let Some(chunk) = msrs.next().await {
+        tracing::debug!(len = chunk.len(), "influx chunk");
+
         if chunk.is_empty() {
-            tracing::trace!("skipping empty chunk");
+            tracing::debug!("skipping empty chunk");
             continue;
         }
 

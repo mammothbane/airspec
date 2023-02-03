@@ -55,8 +55,6 @@ impl<'a> ToDatapoints for WithHeader<'a, ImuPacket> {
     fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
         let bytes = self.1.payload.as_ref().map(|p| &p.sample).unwrap_or_else(|| &EMPTY);
 
-        tracing::info!(payload = ?bytes, packet_id = self.0.packet_id, "imu packet");
-
         let b = parse_all(bytes.as_slice());
 
         b.into_iter()

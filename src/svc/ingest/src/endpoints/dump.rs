@@ -1,6 +1,9 @@
 use async_compat::CompatExt;
+use async_std::stream::StreamExt as _;
+use futures::TryStreamExt;
 use influxdb2::models::Query;
 use tide::{
+    Body,
     Response,
     Status,
     StatusCode,
@@ -13,6 +16,7 @@ pub struct DumpRequest {
     end:   String,
 }
 
+#[tracing::instrument(skip_all, level = "debug")]
 pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
     let DumpRequest {
         id,
@@ -40,14 +44,19 @@ pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
         state.influx_cfg.bucket,
     );
 
-    let csv = state
+    let req = state
         .influx
-        .query_raw(&state.influx_cfg.org, Some(Query::new(query)))
+        .query_raw_stream(&state.influx_cfg.org, Some(Query::new(query)))
         .compat()
         .await
-        .status(StatusCode::BadGateway)?;
+        .status(StatusCode::BadGateway)?
+        .map(|x| x.map_err(|e| futures::io::Error::new(futures::io::ErrorKind::BrokenPipe, e)))
+        .into_async_read();
 
-    tracing::debug!(body = %csv, "requested csv");
+    tracing::debug!("requested csv");
 
-    Ok(Response::builder(StatusCode::Ok).content_type("text/csv").body(csv).build())
+    let bufread = async_std::io::BufReader::new(req);
+    let body = Body::from_reader(bufread, None);
+
+    Ok(Response::builder(StatusCode::Ok).content_type("text/csv").body(body).build())
 }

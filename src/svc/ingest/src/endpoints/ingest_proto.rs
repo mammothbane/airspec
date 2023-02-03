@@ -25,7 +25,7 @@ macro_rules! convert_all {
     };
 }
 
-#[tracing::instrument(skip_all)]
+#[tracing::instrument(skip_all, level = "debug")]
 pub async fn ingest_proto(mut req: tide::Request<crate::run::State>) -> tide::Result {
     let body = req.body_bytes().await?;
 

@@ -19,8 +19,6 @@ impl<'a> ToDatapoints for WithHeader<'a, BlinkPacket> {
             ..
         } = self.1;
 
-        tracing::info!(payload = ?payload, blink_sample_rate, diode_saturation_flag, subpacket_index, "blink packet");
-
         payload
             .iter()
             .flat_map(|payload| payload.sample.iter())
