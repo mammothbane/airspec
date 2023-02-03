@@ -1,4 +1,5 @@
 #![feature(option_result_contains)]
+#![feature(exclusive_range_pattern)]
 
 pub mod auth;
 pub mod endpoints;

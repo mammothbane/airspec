@@ -9,14 +9,6 @@ use crate::{
     pb::BlinkPacket,
 };
 
-#[derive(bincode::Decode)]
-struct BlinkSample {
-    // XXX(nathan)
-    dummy: u8,
-}
-
-static _EMPTY: Vec<u8> = vec![];
-
 impl<'a> ToDatapoints for WithHeader<'a, BlinkPacket> {
     fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
         let BlinkPacket {
@@ -29,17 +21,13 @@ impl<'a> ToDatapoints for WithHeader<'a, BlinkPacket> {
 
         tracing::info!(payload = ?payload, blink_sample_rate, diode_saturation_flag, subpacket_index, "blink packet");
 
-        // let bytes = payload.as_ref().map(|p| &p.sample).unwrap_or(&EMPTY);
-        //
-        // let (b, _) = bincode::decode_from_slice::<Vec<BlinkSample>, _>(&bytes[..], BIN_CONF)?;
-
-        let b: Vec<BlinkSample> = vec![];
-
-        b.into_iter()
-            .map(|sample| {
+        payload
+            .iter()
+            .flat_map(|payload| payload.sample.iter())
+            .map(|&sample| {
                 self.0
                     .common_fields(DataPoint::builder("blink"))
-                    .field("dummy", sample.dummy as u64)
+                    .field("value", sample as u64)
                     .field("sample_rate", *blink_sample_rate as u64)
                     .field("diode_saturation", *diode_saturation_flag != 0)
                     .field("subpacket", *subpacket_index as u64)

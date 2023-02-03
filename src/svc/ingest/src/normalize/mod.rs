@@ -1,7 +1,3 @@
-use bincode::config::{
-    Fixint,
-    LittleEndian,
-};
 use influxdb2::models::{
     data_point::{
         DataPointBuilder,
@@ -24,9 +20,6 @@ pub trait ToDatapoints {
     fn to_data_points(&self) -> Result<Vec<DataPoint>, Error>;
 }
 
-const _BIN_CONF: bincode::config::Configuration<LittleEndian, Fixint> =
-    bincode::config::standard().with_fixed_int_encoding().with_no_limit();
-
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct WithHeader<'a, T>(pub &'a crate::pb::SensorPacketHeader, pub &'a T);
 
@@ -43,9 +36,6 @@ impl crate::pb::SensorPacketHeader {
 pub enum Error {
     #[error(transparent)]
     DataPoint(#[from] DataPointError),
-
-    #[error(transparent)]
-    Bincode(#[from] bincode::error::DecodeError),
 }
 
 #[inline]
