@@ -37,25 +37,28 @@
 
   description = "airspec";
 
-  outputs = { self, nixpkgs, flake-utils, ... } @ inputs: (flake-utils.lib.eachDefaultSystem (system:
+  outputs = { self, nixpkgs, flake-utils, ... } @ inputs: let
+    mkPkgs = system: args: import nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+      overlays = [
+        (import inputs.rust-overlay)
+        (final: prev: let
+          local_rust = prev.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+        in {
+          inherit local_rust;
+          crane-lib = (inputs.crane.mkLib final).overrideToolchain local_rust;
+          naersk = prev.callPackage inputs.naersk {
+            cargo = local_rust;
+            rustc = local_rust;
+          };
+        })
+      ];
+    } // args;
+
+  in (flake-utils.lib.eachDefaultSystem (system:
     let
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-        overlays = [
-          (import inputs.rust-overlay)
-          (final: prev: let
-            local_rust = prev.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-          in {
-            inherit local_rust;
-            crane-lib = (inputs.crane.mkLib final).overrideToolchain local_rust;
-            naersk = prev.callPackage inputs.naersk {
-              cargo = local_rust;
-              rustc = local_rust;
-            };
-          })
-        ];
-      };
+      pkgs = mkPkgs system {};
 
       localPackages = pkgs.callPackages ./nix/pkgs {};
 
@@ -206,8 +209,12 @@
     };
 
     nixosConfigurations = let
-      system = modules: {
-        system = "x86_64-linux";
+      mkSystem = system: modules: {
+        inherit system;
+
+        pkgs = mkPkgs system {
+          crossSystem = { config = "x86_64-unknown-linux-gnu"; };
+        };
 
         modules = [
           inputs.sops-nix.nixosModules.sops
@@ -220,7 +227,12 @@
       };
 
     in {
-      airspecs = nixpkgs.lib.nixosSystem (system [
+      airspecs = nixpkgs.lib.nixosSystem (mkSystem "x86_64-linux" [
+        ./nix/nixos/airspecs
+        ./nix/nixos/airspecs/hardware.nix
+      ]);
+
+      airspecs-from-mac = nixpkgs.lib.nixosSystem (mkSystem "aarch64-apple-darwin" [
         ./nix/nixos/airspecs
         ./nix/nixos/airspecs/hardware.nix
       ]);
