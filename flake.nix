@@ -212,10 +212,6 @@
       mkSystem = system: modules: {
         inherit system;
 
-        pkgs = mkPkgs system {
-          crossSystem = { config = "x86_64-unknown-linux-gnu"; };
-        };
-
         modules = [
           inputs.sops-nix.nixosModules.sops
         ] ++ modules;
@@ -228,11 +224,6 @@
 
     in {
       airspecs = nixpkgs.lib.nixosSystem (mkSystem "x86_64-linux" [
-        ./nix/nixos/airspecs
-        ./nix/nixos/airspecs/hardware.nix
-      ]);
-
-      airspecs-from-mac = nixpkgs.lib.nixosSystem (mkSystem "aarch64-apple-darwin" [
         ./nix/nixos/airspecs
         ./nix/nixos/airspecs/hardware.nix
       ]);
