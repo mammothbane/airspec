@@ -21,6 +21,7 @@ rmp-serde = "1.1"
 
 rmpv = { version = "1.0", features = ["with-serde"] }
 csv = "1.1"
+hex = "0.4"
 
 structopt = "0.3"
 itertools = "0.10"
@@ -37,6 +38,10 @@ lazy_static = "1.4"
 chrono = { version = "0.4", features = ["serde"] }
 
 futures = "0.3"
+
+kv = { version = "0.24", features = ["json-value"] }
+
+rand = "0.8"
 
 [dependencies.influxdb2]
 package = "influxdb2_client"

@@ -1,3 +1,4 @@
+pub mod admin;
 mod dump;
 mod ingest;
 mod ingest_proto;

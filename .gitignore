@@ -2,3 +2,4 @@
 /.influxdb2
 /src/pb/
 /.devlinks
+*.db/

@@ -30,6 +30,7 @@
     "chroma-js": "2.1.2",
     "classnames": "^2.3.2",
     "flatpickr": "4.6.9",
+    "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "prop-types": "15.7.2",
     "react": "17.0.2",
@@ -70,6 +71,7 @@
     ]
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.191",
     "eslint": "7.30.0",
     "eslint-config-airbnb": "18.2.1",
     "eslint-config-prettier": "8.3.0",

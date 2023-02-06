@@ -41,8 +41,22 @@ import Icon from "@mui/material/Icon";
 
 // @mui icons
 import GitHubIcon from "@mui/icons-material/GitHub";
+import {Admin} from "./pages/admin";
+import ButtonsBluetooth from "./bluetooth/buttons";
 
 const routes = [
+  {
+    name: "system configurator",
+    route: "/config",
+    component: <ButtonsBluetooth/>,
+    icon: '',
+  },
+  {
+    name: "admin",
+    route: "/admin",
+    component: <Admin/>,
+    icon: '',
+  },
   {
     name: "github",
     icon: <GitHubIcon />,

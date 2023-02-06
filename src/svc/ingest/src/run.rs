@@ -63,6 +63,11 @@ pub async fn serve(
     server.at("/dump").get(endpoints::dump);
     server.at("/").post(endpoints::ingest);
 
+    let mut admin_route = server.at("/admin");
+
+    admin_route.reset_middleware();
+    admin_route.all(endpoints::admin::server("./test.db")?);
+
     tracing::info!("starting");
     server.listen(bind).await?;
     influx_fwd.await;
