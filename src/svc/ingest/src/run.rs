@@ -6,6 +6,7 @@ use std::{
 use async_std::channel;
 use tide::{
     listener::ToListener,
+    security::CorsMiddleware,
     utils::After,
     Response,
 };
@@ -65,11 +66,7 @@ pub async fn serve(
 
     #[cfg(debug_assertions)]
     {
-        server.with(After(|mut resp: Response| async move {
-            resp.insert_header("Access-Control-Allow-Origin", "*");
-
-            Ok(resp)
-        }));
+        server.with(CorsMiddleware::new().allow_credentials(true).allow_origin("*"));
     }
 
     server.at("/dump").get(endpoints::dump);
