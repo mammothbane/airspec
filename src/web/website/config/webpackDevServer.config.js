@@ -103,6 +103,7 @@ module.exports = function (proxy, allowedHost) {
     proxy,
     onBeforeSetupMiddleware(devServer) {
       // Keep `evalSourceMapMiddleware`
+
       // middlewares before `redirectServedPath` otherwise will not have any effect
       // This lets us fetch source contents from webpack for the error overlay
       devServer.app.use(evalSourceMapMiddleware(devServer));
