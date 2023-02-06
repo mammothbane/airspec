@@ -3,6 +3,7 @@
 #![feature(try_blocks)]
 
 pub mod auth;
+pub mod db;
 pub mod endpoints;
 pub mod forward;
 pub mod opt;

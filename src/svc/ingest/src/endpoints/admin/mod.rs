@@ -6,12 +6,10 @@ use std::{
     pin::Pin,
 };
 
-use kv::Json;
+use crate::db;
 use tide::StatusCode;
 
 mod auth_token;
-
-const ADMIN_AUTH_BUCKET: &str = "admin_auth";
 
 #[derive(Debug, Clone)]
 pub struct State {
@@ -21,28 +19,9 @@ pub struct State {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ResponsibleAdmin(pub u64);
 
-#[derive(Clone, Debug, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
-pub struct AdminTokenInfo {
-    id:     u64,
-    name:   String,
-    active: bool,
-}
-
-#[inline]
-fn kv_config(store_path: &Path) -> kv::Config {
-    kv::Config {
-        path:            store_path.to_owned(),
-        temporary:       false,
-        use_compression: false,
-        flush_every_ms:  Some(1000),
-        cache_capacity:  None,
-        segment_size:    None,
-    }
-}
-
 pub fn server(store_path: impl AsRef<Path>) -> eyre::Result<tide::Server<State>> {
     let mut server = tide::with_state(State {
-        store: kv::Store::new(kv_config(store_path.as_ref()))?,
+        store: db::default_store(store_path.as_ref())?,
     });
 
     server.with(admin_auth_middleware);
@@ -76,6 +55,14 @@ fn admin_auth_middleware<'a>(
             })?
             .trim();
 
+        let token = hex::decode(token)?;
+        if token.len() != db::KEY_SIZE {
+            return Err(tide::Error::from_str(
+                StatusCode::BadRequest,
+                "auth token of unexpected size",
+            ));
+        }
+
         let store = &req.state().store;
 
         fn invalid_auth_user() -> tide::Error {
@@ -85,13 +72,9 @@ fn admin_auth_middleware<'a>(
             )
         }
 
-        let admin_info = store
-            .bucket::<String, Json<AdminTokenInfo>>(Some(ADMIN_AUTH_BUCKET))?
-            .get(&token.to_string())?
-            .ok_or_else(|| invalid_auth_user())?
-            .0;
+        let admin_info = db::admin_token::get(store, &token)?.ok_or_else(invalid_auth_user)?;
 
-        if !admin_info.active {
+        if !admin_info.data.active {
             return Err(invalid_auth_user());
         }
 
