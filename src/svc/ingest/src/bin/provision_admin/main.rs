@@ -8,7 +8,7 @@ use airspecs_ingest::{
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, structopt::StructOpt)]
 pub enum Opt {
-    #[structopt(help = "create a new admin token")]
+    #[structopt(about = "create a new admin token")]
     New {
         #[structopt(help = "the name to associate with this admin token (e.g. \"Nathan\")")]
         name: String,
@@ -17,15 +17,15 @@ pub enum Opt {
         inactive: bool,
     },
 
-    #[structopt(help = "list info for current admin tokens")]
+    #[structopt(about = "list info for current admin tokens")]
     List,
 
-    #[structopt(help = "enable the token with the specified id")]
+    #[structopt(about = "enable the token with the specified id")]
     Enable {
         id: u64,
     },
 
-    #[structopt(help = "disable the token with the specified id")]
+    #[structopt(about = "disable the token with the specified id")]
     Disable {
         id: u64,
     },
