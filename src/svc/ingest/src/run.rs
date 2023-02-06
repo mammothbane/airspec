@@ -63,6 +63,15 @@ pub async fn serve(
             Ok(resp)
         }));
 
+    #[cfg(debug_assertions)]
+    {
+        server.with(After(|mut resp: Response| async move {
+            resp.insert_header("Access-Control-Allow-Origin", "*");
+
+            Ok(resp)
+        }));
+    }
+
     server.at("/dump").get(endpoints::dump);
     server.at("/").post(endpoints::ingest);
 
