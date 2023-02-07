@@ -1,3 +1,4 @@
+use async_std::channel::Sender;
 use std::collections::BTreeMap;
 
 use influxdb2::models::{
@@ -13,6 +14,9 @@ use tide::{
 };
 
 use crate::endpoints::ingest_proto;
+
+#[derive(Debug, Clone)]
+pub struct State(pub Sender<DataPoint>);
 
 #[serde_with::serde_as]
 #[derive(serde::Deserialize)]
@@ -65,14 +69,7 @@ impl<'de> DeserializeAs<'de, FieldValue> for RemoteFieldValue {
     }
 }
 
-#[tracing::instrument(
-    skip_all,
-    fields(
-        url = %req.url(),
-        content_type = ?req.content_type().map(|x| x.to_string())
-    )
-)]
-pub async fn ingest(mut req: tide::Request<crate::run::State>) -> tide::Result {
+pub async fn ingest(mut req: tide::Request<State>) -> tide::Result {
     if req.content_type().contains(&*ingest_proto::PROTO_MIME) {
         return ingest_proto(req).await;
     }
@@ -82,7 +79,7 @@ pub async fn ingest(mut req: tide::Request<crate::run::State>) -> tide::Result {
     let state = req.state();
 
     for msr in msrs.into_iter() {
-        state.tx.send(msr.try_into().status(StatusCode::BadRequest)?).await?;
+        state.0.send(msr.try_into().status(StatusCode::BadRequest)?).await?;
     }
 
     Ok(StatusCode::Accepted.into())

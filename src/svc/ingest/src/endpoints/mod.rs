@@ -1,6 +1,6 @@
 pub mod admin;
-mod dump;
-mod ingest;
+pub mod dump;
+pub mod ingest;
 mod ingest_proto;
 
 pub use dump::*;

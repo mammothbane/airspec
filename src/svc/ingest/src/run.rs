@@ -17,17 +17,11 @@ use crate::{
     endpoints,
     forward,
     opt,
+    trace,
 };
 
-#[derive(Clone, Debug)]
-pub struct State {
-    pub influx:     Arc<influxdb2::Client>,
-    pub influx_cfg: opt::Influx,
-    pub tx:         channel::Sender<influxdb2::models::DataPoint>,
-}
-
 pub async fn serve(
-    bind: impl ToListener<State>,
+    bind: impl ToListener<()>,
     influx_cfg: opt::Influx,
     chunk_cfg: opt::ChunkConfig,
 ) -> eyre::Result<()> {
@@ -46,36 +40,39 @@ pub async fn serve(
         msr_rx,
     ));
 
-    let mut server = tide::with_state(State {
-        influx: client.clone(),
-        influx_cfg,
-        tx: msr_tx,
-    });
+    let mut server = tide::new();
 
-    server
-        // .with(auth::authenticate)
-        .with(After(|resp: Response| async move {
-            if let Some(e) = resp.error() {
-                tracing::error!(request_error = ?e);
-            } else if !resp.status().is_success() {
-                tracing::warn!("error response without error");
-            }
+    server.with(trace::middleware).with(After(|resp: Response| async move {
+        if let Some(e) = resp.error() {
+            tracing::error!(request_error = ?e);
+        } else if !resp.status().is_success() {
+            tracing::warn!("error response without error");
+        }
 
-            Ok(resp)
-        }));
+        Ok(resp)
+    }));
 
     #[cfg(debug_assertions)]
     {
         server.with(CorsMiddleware::new().allow_credentials(true).allow_origin("*"));
     }
 
-    server.at("/dump").get(endpoints::dump);
-    server.at("/").post(endpoints::ingest);
+    let mut dump_server = tide::with_state(endpoints::dump::State {
+        influx_cfg,
+        influx: client.clone(),
+    });
 
-    let mut admin_route = server.at("/admin");
+    dump_server.with(auth::authenticate);
+    dump_server.at("/").get(endpoints::dump);
 
-    admin_route.reset_middleware();
-    admin_route.nest(endpoints::admin::server(*DEFAULT_STORE_PATH)?);
+    let mut ingest_server = tide::with_state(endpoints::ingest::State(msr_tx));
+
+    ingest_server.with(auth::authenticate);
+    ingest_server.at("/").post(endpoints::ingest);
+
+    server.at("/dump").nest(dump_server);
+    server.at("/").nest(ingest_server);
+    server.at("/admin").nest(endpoints::admin::server(*DEFAULT_STORE_PATH)?);
 
     tracing::info!("starting");
     server.listen(bind).await?;

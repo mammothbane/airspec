@@ -1,23 +1,36 @@
+use std::sync::Arc;
+
 use async_compat::CompatExt;
 use async_std::stream::StreamExt as _;
 use futures::TryStreamExt;
-use influxdb2::models::Query;
+use influxdb2::{
+    models::Query,
+    Client,
+};
 use tide::{
     Body,
     Response,
     Status,
     StatusCode,
 };
+use tracing::Instrument;
+
+use crate::opt::Influx;
+
+#[derive(Debug, Clone)]
+pub struct State {
+    pub influx_cfg: Influx,
+    pub influx:     Arc<Client>,
+}
 
 #[derive(serde::Deserialize)]
-pub struct DumpRequest {
+struct DumpRequest {
     id:    String,
     start: String,
     end:   String,
 }
 
-#[tracing::instrument(err(Display))]
-pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
+pub async fn dump(req: tide::Request<State>) -> tide::Result {
     let DumpRequest {
         id,
         start,
@@ -44,16 +57,17 @@ pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
         state.influx_cfg.bucket,
     );
 
+    tracing::debug!(%id, %start, %end, %query, "requesting csv");
+
     let req = state
         .influx
         .query_raw_stream(&state.influx_cfg.org, Some(Query::new(query)))
         .compat()
+        .instrument(tracing::debug_span!("influx dump query"))
         .await
         .status(StatusCode::BadGateway)?
         .map(|x| x.map_err(|e| futures::io::Error::new(futures::io::ErrorKind::BrokenPipe, e)))
         .into_async_read();
-
-    tracing::debug!("requested csv");
 
     let bufread = async_std::io::BufReader::new(req);
     let body = Body::from_reader(bufread, None);

@@ -1,4 +1,15 @@
-use std::str::FromStr;
+use std::{
+    future::Future,
+    pin::Pin,
+    str::FromStr,
+};
+
+use itertools::Itertools;
+use tide::{
+    http::Headers,
+    Next,
+};
+use tracing::Instrument;
 
 use tracing_subscriber::{
     fmt::format::FmtSpan,
@@ -40,5 +51,32 @@ fn mk_level_filter() -> EnvFilter {
         };
 
         EnvFilter::from_str(default_str).expect("parsing envfilter default string")
+    })
+}
+
+pub fn middleware<'a, S>(
+    req: tide::Request<S>,
+    next: Next<'a, S>,
+) -> Pin<Box<dyn Future<Output = tide::Result> + Send + 'a>>
+where
+    S: Clone + Send + Sync + 'static,
+{
+    Box::pin(async move {
+        let headers: &Headers = req.as_ref();
+
+        let headers_formatted = headers
+            .iter()
+            .map(|(k, vals)| {
+                if k.as_str().to_lowercase() == "authorization" {
+                    format!("authorization: [{}]", vals.iter().map(|_| "<elided>").join(", "))
+                } else {
+                    format!("{}: [{}]", k, vals.iter().map(|x| x.to_string()).join(", "))
+                }
+            })
+            .join("; ");
+
+        let span = tracing::info_span!("handle request", url = %req.url(), method = %req.method(), headers = %headers_formatted);
+
+        Ok(next.run(req).instrument(span).await)
     })
 }
