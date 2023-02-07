@@ -36,12 +36,9 @@ Coded by www.creative-tim.com
   10. The `rowsPerColumn` key is used to define that how many rows should be in a column.
 */
 
-// @mui material components
-import Icon from "@mui/material/Icon";
-
-// @mui icons
 import GitHubIcon from "@mui/icons-material/GitHub";
-import {Admin} from "./pages/admin";
+
+import { Admin } from "./pages/Admin/index";
 import ButtonsBluetooth from "./bluetooth/buttons";
 
 const routes = [
