@@ -224,6 +224,7 @@ export const Admin = () => {
                             headers: commonHeaders({adminKey}),
                           }
                         );
+                        // lklk
 
                         await doFetch(adminKey, setKeys, setSuccess);
                       }}>
@@ -340,12 +341,19 @@ export const Admin = () => {
             {currentToken}
           </Typography>
 
-          <Button>
+          <Button onClick={async () => {
+            await navigator.clipboard.writeText(currentToken!);
+          }}>
             <ContentCopy/>
           </Button>
         </Box>
-
       </DialogContent>
+
+      <DialogActions>
+        <Button onClick={() => setCurrentToken(null)}>
+          Close
+        </Button>
+      </DialogActions>
     </Dialog>
   </>;
 }
