@@ -1,5 +1,8 @@
 use async_std::channel::Sender;
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    ops::Deref,
+};
 
 use influxdb2::models::{
     data_point::DataPointError,
@@ -69,7 +72,7 @@ impl<'de> DeserializeAs<'de, FieldValue> for RemoteFieldValue {
     }
 }
 
-pub async fn ingest(mut req: tide::Request<State>) -> tide::Result {
+pub async fn ingest(mut req: tide::Request<impl Deref<Target = State>>) -> tide::Result {
     if req.content_type().contains(&*ingest_proto::PROTO_MIME) {
         return ingest_proto(req).await;
     }

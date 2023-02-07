@@ -13,7 +13,8 @@ use tide::{
 
 use crate::{
     auth,
-    db::DEFAULT_STORE_PATH,
+    auth::WithStore,
+    db,
     endpoints,
     forward,
     opt,
@@ -57,22 +58,29 @@ pub async fn serve(
         server.with(CorsMiddleware::new().allow_credentials(true).allow_origin("*"));
     }
 
-    let mut dump_server = tide::with_state(endpoints::dump::State {
-        influx_cfg,
-        influx: client.clone(),
-    });
+    let auth_store = db::default_store(*db::DEFAULT_STORE_PATH)?;
+    let auth_store = Arc::new(auth_store);
+
+    let mut dump_server = tide::with_state(WithStore(
+        endpoints::dump::State {
+            influx_cfg,
+            influx: client.clone(),
+        },
+        auth_store.clone(),
+    ));
 
     dump_server.with(auth::authenticate);
     dump_server.at("/").get(endpoints::dump);
 
-    let mut ingest_server = tide::with_state(endpoints::ingest::State(msr_tx));
+    let mut ingest_server =
+        tide::with_state(WithStore(endpoints::ingest::State(msr_tx), auth_store.clone()));
 
     ingest_server.with(auth::authenticate);
     ingest_server.at("/").post(endpoints::ingest);
 
     server.at("/dump").nest(dump_server);
     server.at("/").nest(ingest_server);
-    server.at("/admin").nest(endpoints::admin::server(*DEFAULT_STORE_PATH)?);
+    server.at("/admin").nest(endpoints::admin::server(auth_store));
 
     tracing::info!("starting");
     server.listen(bind).await?;

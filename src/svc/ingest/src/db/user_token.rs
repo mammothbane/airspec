@@ -37,6 +37,24 @@ fn bucket(store: &Store) -> Result<UserAuthBucket, kv::Error> {
     store.bucket::<Vec<u8>, Json<UserAuthInfo>>(Some(BUCKET_NAME))
 }
 
+pub fn check(store: &Store, token: Vec<u8>) -> Result<bool, kv::Error> {
+    let result = bucket(store)?
+        .get(&token)?
+        .map(|Json(info)| {
+            if !info.data.active {
+                return false;
+            }
+
+            match info.data.expiration {
+                None => true,
+                Some(exp) => Utc::now() <= exp,
+            }
+        })
+        .unwrap_or(false);
+
+    Ok(result)
+}
+
 #[inline]
 pub fn list_tokens(store: &Store) -> Result<Vec<UserAuthInfo>, kv::Error> {
     db::dump_json_values(&bucket(store)?)

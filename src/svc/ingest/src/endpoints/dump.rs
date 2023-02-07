@@ -1,4 +1,7 @@
-use std::sync::Arc;
+use std::{
+    ops::Deref,
+    sync::Arc,
+};
 
 use async_compat::CompatExt;
 use async_std::stream::StreamExt as _;
@@ -30,7 +33,7 @@ struct DumpRequest {
     end:   String,
 }
 
-pub async fn dump(req: tide::Request<State>) -> tide::Result {
+pub async fn dump(req: tide::Request<impl Deref<Target = State>>) -> tide::Result {
     let DumpRequest {
         id,
         start,

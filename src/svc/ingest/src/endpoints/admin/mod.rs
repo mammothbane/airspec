@@ -2,8 +2,8 @@
 
 use std::{
     future::Future,
-    path::Path,
     pin::Pin,
+    sync::Arc,
 };
 
 use crate::db;
@@ -13,15 +13,15 @@ mod auth_token;
 
 #[derive(Debug, Clone)]
 pub struct State {
-    store: kv::Store,
+    store: Arc<kv::Store>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ResponsibleAdmin(pub u64);
 
-pub fn server(store_path: impl AsRef<Path>) -> eyre::Result<tide::Server<State>> {
+pub fn server(store: Arc<kv::Store>) -> tide::Server<State> {
     let mut server = tide::with_state(State {
-        store: db::default_store(store_path.as_ref())?,
+        store,
     });
 
     server.with(admin_auth_middleware);
@@ -32,7 +32,7 @@ pub fn server(store_path: impl AsRef<Path>) -> eyre::Result<tide::Server<State>>
 
     auth_route.at("/:id").post(auth_token::set_enabled);
 
-    Ok(server)
+    server
 }
 
 fn admin_auth_middleware<'a>(

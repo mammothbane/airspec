@@ -1,4 +1,7 @@
-use std::str::FromStr;
+use std::{
+    ops::Deref,
+    str::FromStr,
+};
 
 use influxdb2::models::DataPoint;
 use prost::Message;
@@ -26,7 +29,9 @@ macro_rules! convert_all {
 }
 
 #[tracing::instrument(skip(req), err(Display))]
-pub async fn ingest_proto(mut req: tide::Request<crate::endpoints::ingest::State>) -> tide::Result {
+pub async fn ingest_proto(
+    mut req: tide::Request<impl Deref<Target = crate::endpoints::ingest::State>>,
+) -> tide::Result {
     let body = req.body_bytes().await?;
 
     let submit_packets = crate::pb::SubmitPackets::decode(body.as_slice())?;
