@@ -168,6 +168,7 @@ export const Admin = () => {
                 keys
                   .sort((a, b) => a.id - b.id)
                   .map(key => <TokenRow
+                    key={key.id}
                     info={key}
                     toggleEnabled={async () => {
                       await fetch(

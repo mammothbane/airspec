@@ -1,5 +1,6 @@
 import { Box, Button, ListItem, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
+
 import { UserInfo } from './index';
 
 export type Props = {
@@ -20,7 +21,7 @@ export const TokenRow = ({
 
   const isExpired = expirationDate !== null && expirationDate.valueOf() < Date.now();
 
-  return <ListItem key={info.id} sx={{
+  return <ListItem sx={{
     display: 'flex',
     flexDirection: 'column',
     p: 1,
