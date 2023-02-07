@@ -122,9 +122,8 @@ function Presentation() {
         }}
       >
         <Counters />
-        <DesignBlocks />
 
-        <MKBox pt={18} pb={6}>
+        <MKBox pt={2} pb={6}>
           <Container>
             <Grid container spacing={3}>
               <Grid item xs={12} lg={6} ml="auto" sx={{ textAlign: { xs: "center", lg: "left" } }}>

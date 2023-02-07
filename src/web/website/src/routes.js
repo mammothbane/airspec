@@ -39,13 +39,13 @@ Coded by www.creative-tim.com
 import GitHubIcon from "@mui/icons-material/GitHub";
 
 import { Admin } from "./pages/Admin/index";
-import ButtonsBluetooth from "./bluetooth/buttons";
+import { BluetoothConfig } from "./pages/BluetoothConfig";
 
 const routes = [
   {
     name: "system configurator",
     route: "/config",
-    component: <ButtonsBluetooth/>,
+    component: <BluetoothConfig/>,
     icon: '',
   },
   {

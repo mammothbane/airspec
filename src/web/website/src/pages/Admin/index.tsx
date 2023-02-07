@@ -3,6 +3,8 @@ import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, List, TextField, Typography } from '@mui/material';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
+import DefaultNavbar from '../../examples/Navbars/DefaultNavbar';
+import routes from '../../routes';
 
 import { CopyPaste } from './CopyPaste';
 import { NewToken } from './NewToken';
@@ -98,9 +100,16 @@ export const Admin = () => {
       display: 'flex',
       flexDirection: 'column',
       p: 8,
+      pt: 2,
       maxWidth: '100%',
     }}>
+      <DefaultNavbar
+        routes={routes}
+        relative
+      />
+
       <Box sx={{
+        mt: 4,
         maxWidth: '100%',
         alignItems: 'start',
         justifyContent: 'start',

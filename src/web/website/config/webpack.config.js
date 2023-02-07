@@ -309,7 +309,6 @@ module.exports = function (webpackEnv) {
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
         'react-native': 'react-native-web',
-        '@proto': path.resolve(__dirname, '../../../../proto/'),
         // Allows for better profiling with ReactDevTools
         ...(isEnvProductionProfile && {
           'react-dom$': 'react-dom/profiling',
@@ -354,7 +353,7 @@ module.exports = function (webpackEnv) {
                 loader: require.resolve('protobufjs-loader'),
                 options: {
                   pbts: true,
-                  target: 'static-module'
+                  target: 'static-module',
                 }
               }
             },
