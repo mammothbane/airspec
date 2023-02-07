@@ -7,6 +7,8 @@ use tracing_subscriber::{
 };
 
 pub fn init(pretty: bool) {
+    color_eyre::install().unwrap();
+
     let stderr_layer =
         tracing_subscriber::fmt::layer().with_writer(std::io::stderr).with_target(false);
 
@@ -15,7 +17,7 @@ pub fn init(pretty: bool) {
 
     let s = tracing_subscriber::registry().with(level_filter);
 
-    let span_events = FmtSpan::NEW | FmtSpan::CLOSE;
+    let span_events = FmtSpan::NONE;
 
     if pretty {
         s.with(stderr_layer.pretty().with_span_events(span_events)).init();

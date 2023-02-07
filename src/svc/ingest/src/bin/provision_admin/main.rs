@@ -4,6 +4,7 @@ use structopt::StructOpt;
 use airspecs_ingest::{
     db,
     db::admin_token::AdminTokenData,
+    trace,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, structopt::StructOpt)]
@@ -33,6 +34,7 @@ pub enum Opt {
 
 fn main() -> eyre::Result<()> {
     let opt = Opt::from_args();
+    trace::init(true);
 
     let store = db::default_store(*db::DEFAULT_STORE_PATH)?;
 

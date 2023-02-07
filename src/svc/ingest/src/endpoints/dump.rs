@@ -16,7 +16,7 @@ pub struct DumpRequest {
     end:   String,
 }
 
-#[tracing::instrument(skip_all, level = "debug")]
+#[tracing::instrument(err(Display))]
 pub async fn dump(req: tide::Request<crate::run::State>) -> tide::Result {
     let DumpRequest {
         id,
