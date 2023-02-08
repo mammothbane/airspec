@@ -25,6 +25,11 @@ use rand::Rng;
 use tap::TryConv;
 
 use airspecs_ingest::{
+    db,
+    db::{
+        admin_token::AdminTokenData,
+        user_token::UserAuthData,
+    },
     opt::{
         ChunkConfig,
         Influx,
@@ -71,8 +76,10 @@ async fn request_dump(client: &surf::Client, id: u32) -> eyre::Result<String> {
         id: &'static str,
     }
 
-    let mut resp =
-        client.get(format!("/dump?id={id}")).await.map_err(|e| eyre::eyre!("elp: {e}"))?;
+    let mut resp = client
+        .get(format!("/dump?id={id}&start=-10m&end=-0m"))
+        .await
+        .map_err(|e| eyre::eyre!("elp: {e}"))?;
     if !resp.status().is_success() {
         eyre::bail!("resp status: {}", resp.status());
     }
@@ -85,10 +92,10 @@ async fn request_dump(client: &surf::Client, id: u32) -> eyre::Result<String> {
 pub async fn test_basic_serve() -> eyre::Result<()> {
     trace::init(true);
 
-    let token = std::env::var("AIRSPEC_INFLUX_TOKEN")?;
+    let influx_token = std::env::var("AIRSPEC_INFLUX_TOKEN")?;
     let org_name = std::env::var("AIRSPEC_ORG_ID")?;
 
-    let client = influxdb2::Client::new(URL.to_string(), token.clone());
+    let client = influxdb2::Client::new(URL.to_string(), influx_token.clone());
 
     let bkt_name = rand_string();
     tracing::info!(bkt_name);
@@ -98,28 +105,65 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
         .compat()
         .await?;
 
-    let server = async_std::task::spawn(airspecs_ingest::run::serve(
-        SERVER_SOCKETADDR,
-        Influx {
+    let tmp = tempdir::TempDir::new("airspec_test")?;
+    let auth_db = tmp.path().join("admin.db");
+
+    let admin_token = {
+        let store = db::default_store(&auth_db)?;
+        let (key, _) = db::admin_token::create(&store, AdminTokenData {
+            active: true,
+            name:   "test".to_string(),
+        })?;
+
+        key
+    };
+
+    let admin_token = hex::encode(admin_token);
+
+    let server = async_std::task::spawn(airspecs_ingest::run::serve(airspecs_ingest::opt::Opt {
+        bind:         SERVER_SOCKETADDR.parse()?,
+        auth_db:      Some(auth_db),
+        influx:       Influx {
             url:    URL.to_string(),
-            token:  Some(token),
+            token:  Some(influx_token),
             bucket: bkt_name,
             org:    org_name,
         },
-        ChunkConfig {
+        chunk_config: ChunkConfig {
             chunk_size:           1,
             chunk_timeout_millis: 10,
         },
-    ));
+    }));
+
+    let base_url: tide::http::Url = format!("http://{SERVER_SOCKETADDR}").parse()?;
+
+    wait_for_tcp(&SERVER_SOCKETADDR).await?;
+
+    let user_token = surf::post(base_url.join("/admin/auth_token")?)
+        .body_json(&UserAuthData {
+            active:     true,
+            name:       "test".to_string(),
+            expiration: None,
+        })
+        .map_err(|e| eyre::eyre!(e))?
+        .header("Content-Type", "application/json")
+        .header("Authorization", format!("Bearer {admin_token}"))
+        .await
+        .map_err(|e| eyre::eyre!(e))?
+        .body_string()
+        .await
+        .map_err(|e| eyre::eyre!(e))?;
+
+    let user_token = user_token.trim();
+    tracing::info!(%user_token);
 
     let client = surf::Config::new()
-        .set_base_url(format!("http://{SERVER_SOCKETADDR}").parse()?)
+        .set_base_url(base_url)
         .set_timeout(Some(Duration::from_millis(1000)))
-        .add_header("Authorization", "")
+        .add_header("Authorization", format!("Bearer {user_token}"))
         .unwrap()
         .try_conv::<surf::Client>()?;
 
-    wait_for_tcp(&SERVER_SOCKETADDR).await?;
     request_dump(&client, 12).await?;
 
     let proto = airspecs_ingest::pb::SubmitPackets {
