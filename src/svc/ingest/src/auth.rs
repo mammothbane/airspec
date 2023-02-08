@@ -61,7 +61,14 @@ where
             tracing::warn!(auth_count, "received more than one authorization header, using last");
         }
 
-        let token = hex::decode(auth_values.last().as_str()).status(StatusCode::BadRequest)?;
+        let token = auth_values.last().as_str().strip_prefix("Bearer ").ok_or_else(|| {
+            tide::Error::from_str(
+                StatusCode::BadRequest,
+                "Authorization header malformatted (expects Bearer token)",
+            )
+        })?;
+
+        let token = hex::decode(token).status(StatusCode::BadRequest)?;
 
         fn unauth_token() -> tide::Error {
             tide::Error::from_str(
