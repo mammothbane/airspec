@@ -1,4 +1,5 @@
 use influxdb2::models::DataPoint;
+use tap::Pipe;
 
 use crate::{
     normalize::{
@@ -37,8 +38,8 @@ impl<'a> ToDatapoints for WithHeader<'a, SpecPacket> {
                      band_nir_2,
                      flicker,
                  }| {
-                    self.0
-                        .common_fields(DataPoint::builder("spectrometer"))
+                    DataPoint::builder("spectrometer")
+                        .pipe(|b| self.0.common_fields(b))
                         .field("band_415", band_415 as u64)
                         .field("band_445", band_445 as u64)
                         .field("band_480", band_480 as u64)

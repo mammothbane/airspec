@@ -1,4 +1,5 @@
 use influxdb2::models::DataPoint;
+use tap::Pipe;
 
 use crate::{
     normalize::{
@@ -23,8 +24,8 @@ impl<'a> ToDatapoints for WithHeader<'a, BlinkPacket> {
             .iter()
             .flat_map(|payload| payload.sample.iter())
             .map(|&sample| {
-                self.0
-                    .common_fields(DataPoint::builder("blink"))
+                DataPoint::builder("blink")
+                    .pipe(|b| self.0.common_fields(b))
                     .field("value", sample as u64)
                     .field("sample_rate", *blink_sample_rate as u64)
                     .field("diode_saturation", *diode_saturation_flag != 0)

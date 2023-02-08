@@ -1,4 +1,5 @@
 use influxdb2::models::DataPoint;
+use tap::Pipe;
 
 use crate::{
     normalize::{
@@ -16,8 +17,8 @@ impl<'a> ToDatapoints for WithHeader<'a, BmePacket> {
             .payload
             .iter()
             .map(|sample| {
-                self.0
-                    .common_fields(DataPoint::builder("bme"))
+                DataPoint::builder("bme")
+                    .pipe(|b| self.0.common_fields(b))
                     .field("accuracy", sample.accuracy as u64)
                     .field("signal", normalize_float(sample.signal))
                     .field("sensor_id", sample.sensor_id as u64)

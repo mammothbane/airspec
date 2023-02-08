@@ -1,4 +1,5 @@
 use influxdb2::models::DataPoint;
+use tap::Pipe;
 
 use crate::{
     normalize::{
@@ -20,8 +21,8 @@ impl<'a> ToDatapoints for WithHeader<'a, ThermPacket> {
         payload
             .iter()
             .map(|sample| {
-                self.0
-                    .common_fields(DataPoint::builder("thermopile"))
+                DataPoint::builder("thermopile")
+                    .pipe(|b| self.0.common_fields(b))
                     .tag("descriptor", sample.descriptor.to_string())
                     .field("sample_timestamp", sample.timestamp as u64)
                     .field("ambient_raw", normalize_float(sample.ambient_raw as f32))

@@ -1,4 +1,5 @@
 use influxdb2::models::DataPoint;
+use tap::Pipe;
 
 use crate::{
     normalize::{
@@ -59,8 +60,8 @@ impl<'a> ToDatapoints for WithHeader<'a, ImuPacket> {
 
         b.into_iter()
             .map(|sample| {
-                self.0
-                    .common_fields(DataPoint::builder("imu"))
+                DataPoint::builder("imu")
+                    .pipe(|b| self.0.common_fields(b))
                     .field("accel_x", sample.accel_x as u64)
                     .field("accel_y", sample.accel_y as u64)
                     .field("accel_z", sample.accel_z as u64)

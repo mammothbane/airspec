@@ -21,6 +21,8 @@ impl<'a> ToDatapoints for WithHeader<'a, ShtPacket> {
         payload
             .iter()
             .map(|sample| {
+                DataPoint::builder("sht")
+                    .pipe(|b| self.0.common_fields(b))
                 self.0
                     .common_fields(DataPoint::builder("sht"))
                     .field("precision", precision as i64)

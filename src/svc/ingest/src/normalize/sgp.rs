@@ -1,4 +1,5 @@
 use influxdb2::models::DataPoint;
+use tap::Pipe;
 
 use crate::{
     normalize::{
@@ -18,8 +19,8 @@ impl<'a> ToDatapoints for WithHeader<'a, SgpPacket> {
         payload
             .iter()
             .map(|sample| {
-                self.0
-                    .common_fields(DataPoint::builder("sgp"))
+                DataPoint::builder("sht")
+                    .pipe(|b| self.0.common_fields(b))
                     .field("sraw_nox", sample.sraw_nox as u64)
                     .field("sraw_voc", sample.sraw_voc as u64)
                     .field("sample_timestamp", sample.timestamp as u64)
