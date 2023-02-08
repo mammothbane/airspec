@@ -20,3 +20,4 @@ nav:
     - nix: software/nix.md
     - mkDocs: software/docs.md
     - protobuf: software/proto.md
+    - auth: software/auth.md
