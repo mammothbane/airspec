@@ -4,6 +4,8 @@ The ingest server's API is quite simple. You can submit data and you can query d
 
 ## Endpoints
 
+All requests must be authenticated as described in [auth](auth.md).
+
 ### `POST /api`
 Submit glasses measurements to the database.
 
@@ -25,8 +27,8 @@ Expects messages formatted like an array of influx DataPoints -- which are:
 }
 ```
 
-Please ensure that your "measurement" names align with what is in the database. These messages should also contain a tag
-"system_uid" with the id of the glasses.
+Please ensure that your `measurement` names align with what is in the database. These messages should also contain a tag
+`system_uid` with the id of the glasses.
 
 ### `GET /api/dump`
 Query params (all required):

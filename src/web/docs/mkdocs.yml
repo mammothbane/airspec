@@ -2,6 +2,7 @@ site_name: Airspecs
 site_url: https://airspecs.media.mit.edu
 theme: material
 repo_url: https://github.com/pchwalek/env_glasses
+edit_uri: https://github.com/mammothbane/airspec/edit/master/src/web/docs/docs
 strict: true
 
 markdown_extensions:
@@ -17,7 +18,8 @@ plugins:
 nav:
   - home: index.md
   - software:
+    - api: software/api.md
+    - auth: software/auth.md
+    - protobuf: software/proto.md
     - nix: software/nix.md
     - mkDocs: software/docs.md
-    - protobuf: software/proto.md
-    - auth: software/auth.md
