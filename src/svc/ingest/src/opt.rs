@@ -1,4 +1,7 @@
-use std::net::SocketAddr;
+use std::{
+    net::SocketAddr,
+    path::PathBuf,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, structopt::StructOpt)]
 pub struct Influx {
@@ -34,6 +37,9 @@ pub struct ChunkConfig {
 pub struct Opt {
     #[structopt(long, default_value = "0.0.0.0:8080")]
     pub bind: SocketAddr,
+
+    #[structopt(long)]
+    pub auth_db: Option<PathBuf>,
 
     #[structopt(flatten)]
     pub chunk_config: ChunkConfig,

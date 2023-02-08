@@ -5,7 +5,6 @@ use std::{
 
 use async_std::channel;
 use tide::{
-    listener::ToListener,
     security::CorsMiddleware,
     utils::After,
     Response,
@@ -17,14 +16,17 @@ use crate::{
     db,
     endpoints,
     forward,
-    opt,
+    opt::Opt,
     trace,
 };
 
 pub async fn serve(
-    bind: impl ToListener<()>,
-    influx_cfg: opt::Influx,
-    chunk_cfg: opt::ChunkConfig,
+    Opt {
+        bind,
+        auth_db,
+        influx: influx_cfg,
+        chunk_config: chunk_cfg,
+    }: Opt,
 ) -> eyre::Result<()> {
     let (msr_tx, msr_rx) = channel::bounded(4096);
 
@@ -65,7 +67,7 @@ pub async fn serve(
         );
     }
 
-    let auth_store = db::default_store(*db::DEFAULT_STORE_PATH)?;
+    let auth_store = db::default_store(auth_db.as_deref().unwrap_or(*db::DEFAULT_STORE_PATH))?;
     let auth_store = Arc::new(auth_store);
 
     let mut dump_server = tide::with_state(WithStore(
