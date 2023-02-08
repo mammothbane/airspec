@@ -77,6 +77,37 @@ pub fn create(store: &Store, data: UserAuthData, admin: u64) -> Result<Vec<u8>, 
     Ok(key)
 }
 
+pub fn delete(store: &Store, token_id: u64) -> Result<bool, kv::Error> {
+    let bucket = bucket(store)?;
+
+    let item = bucket.iter().find(|info| {
+        let Ok(item) = info else {
+            return false;
+        };
+
+        let Ok(Json(value)) = item.value::<Json<UserAuthInfo>>() else {
+            return false;
+        };
+
+        value.id == token_id
+    });
+
+    let Some(item) = item else {
+        return Ok(false);
+    };
+
+    let item = item?;
+
+    let token = item.key::<Vec<u8>>()?;
+
+    bucket.remove(&token)?;
+
+    let value = item.value::<Json<UserAuthInfo>>()?.0;
+    tracing::info!(%token_id, token_info = ?value, "token deleted");
+
+    Ok(true)
+}
+
 pub fn set_enabled(store: &Store, id: u64, desired_state: bool) -> Result<(), tide::Error> {
     let bucket = bucket(store)?;
 

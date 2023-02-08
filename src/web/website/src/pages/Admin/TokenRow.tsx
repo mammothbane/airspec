@@ -1,3 +1,4 @@
+import { Delete } from '@mui/icons-material';
 import { Box, Button, ListItem, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 
@@ -6,11 +7,13 @@ import { UserInfo } from './index';
 export type Props = {
   info: UserInfo,
   toggleEnabled: () => Promise<void>,
+  deleteToken: (id: number) => Promise<void>,
   refresh?: () => Promise<void>,
 };
 export const TokenRow = ({
   info,
   toggleEnabled,
+  deleteToken,
   refresh = async () => {},
 }: Props) => {
   let expirationDate: Date | null = null;
@@ -45,6 +48,14 @@ export const TokenRow = ({
       }}>
         {info.name}
       </Typography>
+
+      <Button sx={{
+        minWidth: 0,
+        px: 2,
+        width: '40px',
+      }} onClick={async () => await deleteToken(info.id)}>
+        <Delete/>
+      </Button>
     </Box>
 
     <Stack direction={'row'} spacing={2} sx={{
@@ -77,7 +88,6 @@ export const TokenRow = ({
         </Typography>
         : undefined
       }
-
     </Stack>
   </ListItem>;
 };

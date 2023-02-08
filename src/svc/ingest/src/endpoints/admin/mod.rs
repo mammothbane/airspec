@@ -30,7 +30,7 @@ pub fn server(store: Arc<kv::Store>) -> tide::Server<State> {
 
     auth_route.get(auth_token::list).post(auth_token::create).put(auth_token::create);
 
-    auth_route.at("/:id").post(auth_token::set_enabled);
+    auth_route.at("/:id").post(auth_token::set_enabled).delete(auth_token::delete);
 
     server
 }

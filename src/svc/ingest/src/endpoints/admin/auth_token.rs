@@ -47,3 +47,11 @@ pub async fn set_enabled(req: tide::Request<State>) -> tide::Result {
 
     Ok(StatusCode::Ok.into())
 }
+
+pub async fn delete(req: tide::Request<State>) -> tide::Result {
+    let id = req.param("id")?.parse::<u64>()?;
+
+    user_token::delete(&req.state().store, id)?;
+
+    Ok(StatusCode::Ok.into())
+}

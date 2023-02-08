@@ -55,7 +55,14 @@ pub async fn serve(
 
     #[cfg(debug_assertions)]
     {
-        server.with(CorsMiddleware::new().allow_credentials(true).allow_origin("*"));
+        use tide::http::headers::HeaderValue;
+
+        server.with(
+            CorsMiddleware::new()
+                .allow_credentials(true)
+                .allow_origin("*")
+                .allow_methods("*".parse::<HeaderValue>().unwrap()),
+        );
     }
 
     let auth_store = db::default_store(*db::DEFAULT_STORE_PATH)?;

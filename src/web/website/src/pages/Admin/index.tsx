@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import DefaultNavbar from '../../examples/Navbars/DefaultNavbar';
 import routes from '../../routes';
+import { ConfirmDelete } from './ConfirmDelete';
 
 import { CopyPaste } from './CopyPaste';
 import { NewToken } from './NewToken';
@@ -81,6 +82,7 @@ export const Admin = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const [currentToken, setCurrentToken] = useState<string | null>(null);
+  const [currentDelete, setCurrentDelete] = useState<number | null>(null);
 
   useEffect(() => {
     setSuccess(Success.Pending);
@@ -179,6 +181,9 @@ export const Admin = () => {
                   .map(key => <TokenRow
                     key={key.id}
                     info={key}
+                    deleteToken={async (id) => {
+                      setCurrentDelete(id);
+                    }}
                     toggleEnabled={async () => {
                       await fetch(
                         `${BACKEND}/admin/auth_token/${key.id}?enable=${!key.active}`,
@@ -228,6 +233,31 @@ export const Admin = () => {
 
             setCurrentToken(key);
           });
+        }}
+      />
+      : undefined
+    }
+
+    { currentDelete != null
+      ? <ConfirmDelete
+        title={`deleting token ${currentDelete}`}
+        onConfirm={async () => {
+          await fetch(
+            `${BACKEND}/admin/auth_token/${currentDelete}`,
+            {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                ...commonHeaders({ adminKey })
+              },
+            }
+          );
+
+          await doFetch(adminKey, setKeys, setSuccess);
+          setCurrentDelete(null);
+        }}
+        onCancel={async () => {
+          setCurrentDelete(null);
         }}
       />
       : undefined
