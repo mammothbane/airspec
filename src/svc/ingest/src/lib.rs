@@ -1,6 +1,7 @@
 #![feature(option_result_contains)]
 #![feature(exclusive_range_pattern)]
 #![feature(try_blocks)]
+#![feature(let_chains)]
 
 pub mod auth;
 pub mod db;

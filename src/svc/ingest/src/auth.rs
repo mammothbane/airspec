@@ -1,3 +1,4 @@
+use chrono::Utc;
 use std::{
     future::Future,
     ops::{
@@ -14,6 +15,7 @@ use tide::{
     Status,
     StatusCode,
 };
+use tracing::Instrument;
 
 use crate::db;
 
@@ -61,14 +63,28 @@ where
 
         let token = hex::decode(auth_values.last().as_str()).status(StatusCode::BadRequest)?;
 
-        let store = req.state().as_ref();
-        if !db::user_token::check(store, token)? {
-            return Err(tide::Error::from_str(
+        fn unauth_token() -> tide::Error {
+            tide::Error::from_str(
                 StatusCode::Unauthorized,
                 "token does not exist, is disabled, or has expired",
-            ));
+            )
         }
 
-        Ok(next.run(req).await)
+        let Some(info) = db::user_token::get(req.state().as_ref(), token)? else {
+            return Err(unauth_token());
+        };
+
+        if !info.data.active {
+            return Err(unauth_token());
+        }
+
+        if let Some(expiration) = info.data.expiration && expiration < Utc::now() {
+            return Err(unauth_token());
+        }
+
+        let span = tracing::info_span!("user authenticated", user_info = ?info);
+        req.set_ext(info);
+
+        Ok(next.run(req).instrument(span).await)
     })
 }

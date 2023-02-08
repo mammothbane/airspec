@@ -14,20 +14,20 @@ pub const BUCKET_NAME: &str = "user_tokens";
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct UserAuthData {
-    name:       String,
-    active:     bool,
+    pub name:       String,
+    pub active:     bool,
     #[serde(with = "chrono::serde::ts_nanoseconds_option")]
-    expiration: Option<chrono::DateTime<Utc>>,
+    pub expiration: Option<chrono::DateTime<Utc>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct UserAuthInfo {
     #[serde(flatten)]
-    data:            UserAuthData,
-    id:              u64,
+    pub data:            UserAuthData,
+    pub id:              u64,
     #[serde(with = "chrono::serde::ts_nanoseconds")]
-    issued:          chrono::DateTime<Utc>,
-    issued_by_admin: u64,
+    pub issued:          chrono::DateTime<Utc>,
+    pub issued_by_admin: u64,
 }
 
 type UserAuthBucket<'a> = kv::Bucket<'a, Vec<u8>, Json<UserAuthInfo>>;
@@ -37,20 +37,9 @@ fn bucket(store: &Store) -> Result<UserAuthBucket, kv::Error> {
     store.bucket::<Vec<u8>, Json<UserAuthInfo>>(Some(BUCKET_NAME))
 }
 
-pub fn check(store: &Store, token: Vec<u8>) -> Result<bool, kv::Error> {
-    let result = bucket(store)?
-        .get(&token)?
-        .map(|Json(info)| {
-            if !info.data.active {
-                return false;
-            }
-
-            match info.data.expiration {
-                None => true,
-                Some(exp) => Utc::now() <= exp,
-            }
-        })
-        .unwrap_or(false);
+#[inline]
+pub fn get(store: &Store, token: Vec<u8>) -> Result<Option<UserAuthInfo>, kv::Error> {
+    let result = bucket(store)?.get(&token)?.map(|Json(info)| info);
 
     Ok(result)
 }
@@ -72,6 +61,7 @@ pub fn create(store: &Store, data: UserAuthData, admin: u64) -> Result<Vec<u8>, 
 
     let key = db::gen_key();
 
+    tracing::info!(?info, "creating user token");
     bucket.set(&key, &Json(info))?;
 
     Ok(key)
@@ -137,6 +127,8 @@ pub fn set_enabled(store: &Store, id: u64, desired_state: bool) -> Result<(), ti
     bucket
         .compare_and_swap(&key, Some(&Json(value)), Some(&Json(new)))
         .status(StatusCode::Conflict)?;
+
+    tracing::info!(enabled = ?desired_state, user = id, "set token enablement");
 
     Ok(())
 }

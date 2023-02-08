@@ -6,8 +6,10 @@ use std::{
     sync::Arc,
 };
 
-use crate::db;
 use tide::StatusCode;
+use tracing::Instrument;
+
+use crate::db;
 
 mod auth_token;
 
@@ -15,9 +17,6 @@ mod auth_token;
 pub struct State {
     store: Arc<kv::Store>,
 }
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct ResponsibleAdmin(pub u64);
 
 pub fn server(store: Arc<kv::Store>) -> tide::Server<State> {
     let mut server = tide::with_state(State {
@@ -78,8 +77,10 @@ fn admin_auth_middleware<'a>(
             return Err(invalid_auth_user());
         }
 
-        req.set_ext(ResponsibleAdmin(admin_info.id));
+        let span = tracing::info_span!("admin authenticated", ?admin_info);
 
-        Ok(next.run(req).await)
+        req.set_ext(admin_info);
+
+        Ok(next.run(req).instrument(span).await)
     })
 }

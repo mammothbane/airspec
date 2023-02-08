@@ -2,13 +2,11 @@ use tide::StatusCode;
 
 use crate::{
     db::{
+        admin_token::AdminTokenInfo,
         user_token,
         user_token::UserAuthData,
     },
-    endpoints::admin::{
-        ResponsibleAdmin,
-        State,
-    },
+    endpoints::admin::State,
     util,
 };
 
@@ -22,13 +20,14 @@ pub async fn list(req: tide::Request<State>) -> tide::Result {
 }
 
 pub async fn create(mut req: tide::Request<State>) -> tide::Result {
-    let &admin = req
-        .ext::<ResponsibleAdmin>()
-        .ok_or_else(|| tide::Error::from_str(StatusCode::InternalServerError, "admin unset"))?;
+    let admin_id = req
+        .ext::<AdminTokenInfo>()
+        .ok_or_else(|| tide::Error::from_str(StatusCode::InternalServerError, "admin unset"))?
+        .id;
 
     let data = util::decode_msgpack_or_json::<UserAuthData, _>(&mut req).await?;
 
-    let key = user_token::create(&req.state().store, data, admin.0)?;
+    let key = user_token::create(&req.state().store, data, admin_id)?;
     let key = hex::encode(key);
 
     Ok(key.into())
