@@ -33,6 +33,21 @@ struct DumpRequest {
     end:   String,
 }
 
+lazy_static::lazy_static! {
+    static ref INJECT_OK: regex::Regex = regex::Regex::new(r#"^[a-zA-Z0-9\-_+]*$"#).unwrap();
+}
+
+fn test_inject(s: &str, name: &str) -> Result<(), tide::Error> {
+    if INJECT_OK.is_match(s) {
+        return Ok(());
+    }
+
+    Err(tide::Error::from_str(
+        StatusCode::BadRequest,
+        format!("injection detected in field {name:?}"),
+    ))
+}
+
 pub async fn dump(req: tide::Request<impl Deref<Target = State>>) -> tide::Result {
     let DumpRequest {
         id,
@@ -40,12 +55,9 @@ pub async fn dump(req: tide::Request<impl Deref<Target = State>>) -> tide::Resul
         end,
     } = req.query::<DumpRequest>()?;
 
-    if id.contains('"') {
-        return Err(tide::Error::from_str(
-            StatusCode::BadRequest,
-            format!("injection detected: {id:?}"),
-        ));
-    }
+    test_inject(&id, "id")?;
+    test_inject(&start, "start")?;
+    test_inject(&end, "end")?;
 
     let state = req.state();
 

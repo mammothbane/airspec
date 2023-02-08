@@ -42,6 +42,8 @@ futures = "0.3"
 
 kv = { version = "0.24", features = ["json-value"] }
 
+regex = "1.7"
+
 rand = "0.8"
 
 [dependencies.influxdb2]
