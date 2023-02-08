@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulesPath, ... }: {
+{ flake, config, lib, pkgs, modulesPath, ... }: {
   imports = [
     ./nginx.nix
     ./users.nix
@@ -104,6 +104,8 @@
       nixos-install-tools
 
       wezterm.terminfo
+
+      flake.packages.x86_64-linux.ingest.passthru.provision_admin
     ];
 
     etc.issue = lib.mkOverride 75 {

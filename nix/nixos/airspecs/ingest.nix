@@ -27,6 +27,9 @@
       EnvironmentFile = config.sops.secrets."airspecs_server_env".path;
       Environment = "RUST_BACKTRACE=1";
 
+      StateDirectory = "airspecs_ingest";
+      WorkingDirectory = "/var/lib/airspecs_ingest";
+
       DynamicUser = true;
       User = "airspecs";
       Group = "airspecs";

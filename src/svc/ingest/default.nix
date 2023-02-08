@@ -53,13 +53,20 @@
     cargoClippyExtraArgs = "--all-targets -- --deny warnings";
   });
 
-in crane-lib.buildPackage (commonOptions // {
-  inherit cargoVendorDir cargoArtifacts;
+  mkbin = binary: crane-lib.buildPackage (commonOptions // {
 
-  buildInputs = commonOptions.buildInputs ++ [
-    rustFmt
-    clippy
-  ];
+    inherit cargoVendorDir cargoArtifacts;
 
-  cargoExtraArgs = commonOptions.cargoExtraArgs + " --bin airspecs_ingest";
+    buildInputs = commonOptions.buildInputs ++ [
+      rustFmt
+      clippy
+    ];
+
+    cargoExtraArgs = commonOptions.cargoExtraArgs + " --bin ${binary}";
+  });
+
+in (mkbin "airspecs_ingest").overrideAttrs (final: prev: {
+  passthru = (prev.passthru or {}) // {
+    provision_admin = (mkbin "provision_admin").overrideAttrs (final: prev: { pname = "provision_admin"; });
+  };
 })

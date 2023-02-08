@@ -22,7 +22,7 @@ pub fn default_store(store_path: &Path) -> Result<kv::Store, kv::Error> {
         temporary:       false,
         use_compression: false,
         flush_every_ms:  Some(1000),
-        cache_capacity:  None,
+        cache_capacity:  Some(128 * 1024),
         segment_size:    None,
     };
 

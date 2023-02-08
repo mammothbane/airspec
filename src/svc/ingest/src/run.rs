@@ -5,7 +5,6 @@ use std::{
 
 use async_std::channel;
 use tide::{
-    security::CorsMiddleware,
     utils::After,
     Response,
 };
@@ -57,7 +56,10 @@ pub async fn serve(
 
     #[cfg(debug_assertions)]
     {
-        use tide::http::headers::HeaderValue;
+        use tide::{
+            http::headers::HeaderValue,
+            security::CorsMiddleware,
+        };
 
         server.with(
             CorsMiddleware::new()
