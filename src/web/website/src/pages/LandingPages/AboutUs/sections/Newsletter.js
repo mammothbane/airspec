@@ -32,7 +32,7 @@ function Newsletter() {
     <MKBox component="section" pt={6} my={6}>
       <Container>
         <Grid container alignItems="center">
-          <Grid item sx={12} md={6} sx={{ ml: { xs: 0, lg: 3 }, mb: { xs: 12, md: 0 } }}>
+          <Grid item xs={12} md={6} sx={{ ml: { xs: 0, lg: 3 }, mb: { xs: 12, md: 0 } }}>
             <MKTypography variant="h4">Be the first to see the news</MKTypography>
             <MKTypography variant="body2" color="text" mb={3}>
               Your company may not be in the software business, but eventually, a software company

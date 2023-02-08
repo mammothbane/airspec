@@ -195,6 +195,7 @@
           packages = with pkgs; [
             protobuf
             grpcurl
+            libudev-zero
           ] ++ localPackages.website.passthru.deps;
         });
       };

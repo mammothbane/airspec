@@ -662,9 +662,9 @@ function AirSpecControl(props) {
               ) : null}
             </Stack>
           </Grid>
-          <Grid item justifyContent="left" item xs={12} xm={1} lg={1} />
+          <Grid item justifyContent="left" xs={12} xm={1} lg={1} />
 
-          <Grid item justifyContent="left" item xs={12} xm={6} lg={6}>
+          <Grid item justifyContent="left" xs={12} xm={6} lg={6}>
             {specialBlueGreenFuncDropDownAct ? (
               <Stack direction="column" alignItems="left" spacing={2}>
                 <MKTypography

@@ -15,7 +15,6 @@ const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
-const ESLintPlugin = require('eslint-webpack-plugin');
 const paths = require('./paths');
 const modules = require('./modules');
 const getClientEnvironment = require('./env');
@@ -578,21 +577,21 @@ module.exports = function (webpackEnv) {
             inject: true,
             template: paths.appHtml,
           },
-          isEnvProduction
-            ? {
-                minify: {
-                  removeComments: true,
-                  collapseWhitespace: true,
-                  removeRedundantAttributes: true,
-                  useShortDoctype: true,
-                  removeEmptyAttributes: true,
-                  removeStyleLinkTypeAttributes: true,
-                  keepClosingSlash: true,
-                  minifyJS: true,
-                  minifyCSS: true,
-                  minifyURLs: true,
-                },
-              }
+          isEnvProduction ? undefined
+            // ? {
+            //     minify: {
+            //       removeComments: true,
+            //       collapseWhitespace: true,
+            //       removeRedundantAttributes: true,
+            //       useShortDoctype: true,
+            //       removeEmptyAttributes: true,
+            //       removeStyleLinkTypeAttributes: true,
+            //       keepClosingSlash: true,
+            //       minifyJS: true,
+            //       minifyCSS: true,
+            //       minifyURLs: true,
+            //     },
+            //   }
             : undefined
         )
       ),
