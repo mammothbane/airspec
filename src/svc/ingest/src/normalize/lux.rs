@@ -1,22 +1,25 @@
 use influxdb2::models::DataPoint;
+use tap::Pipe;
 
 use crate::{
     normalize::{
+        AugmentDatapoint,
         Error,
         ToDatapoints,
-        WithHeader,
     },
     pb::LuxPacket,
 };
 
-impl<'a> ToDatapoints for WithHeader<'a, LuxPacket> {
-    fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
-        self.1
-            .payload
+impl ToDatapoints for LuxPacket {
+    fn to_data_points<T>(&self, t: &T) -> Result<Vec<DataPoint>, Error>
+    where
+        T: AugmentDatapoint,
+    {
+        self.payload
             .iter()
             .map(|sample| {
                 DataPoint::builder("lux")
-                    .pipe(|b| self.0.common_fields(b))
+                    .pipe(|b| t.augment_data_point(b))
                     .field("lux", sample.lux as u64)
                     .field("sample_timestamp", sample.timestamp as u64)
                     .build()

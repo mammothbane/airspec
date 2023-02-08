@@ -3,9 +3,9 @@ use tap::Pipe;
 
 use crate::{
     normalize::{
+        AugmentDatapoint,
         Error,
         ToDatapoints,
-        WithHeader,
     },
     pb::ImuPacket,
 };
@@ -52,23 +52,26 @@ fn parse_all(b: &[u8]) -> Vec<ImuSample> {
         .collect()
 }
 
-impl<'a> ToDatapoints for WithHeader<'a, ImuPacket> {
-    fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
-        let bytes = self.1.payload.as_ref().map(|p| &p.sample).unwrap_or_else(|| &EMPTY);
+impl ToDatapoints for ImuPacket {
+    fn to_data_points<T>(&self, t: &T) -> Result<Vec<DataPoint>, Error>
+    where
+        T: AugmentDatapoint,
+    {
+        let bytes = self.payload.as_ref().map(|p| &p.sample).unwrap_or_else(|| &EMPTY);
 
         let b = parse_all(bytes.as_slice());
 
         b.into_iter()
             .map(|sample| {
                 DataPoint::builder("imu")
-                    .pipe(|b| self.0.common_fields(b))
+                    .pipe(|b| t.augment_data_point(b))
                     .field("accel_x", sample.accel_x as u64)
                     .field("accel_y", sample.accel_y as u64)
                     .field("accel_z", sample.accel_z as u64)
                     .field("gyro_x", sample.gyro_x as u64)
                     .field("gyro_y", sample.gyro_y as u64)
                     .field("gyro_z", sample.gyro_z as u64)
-                    .field("sample_rate", self.1.sample_period_ms as u64)
+                    .field("sample_rate", self.sample_period_ms as u64)
                     .build()
                     .map_err(Error::from)
             })

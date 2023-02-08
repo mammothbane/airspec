@@ -4,17 +4,20 @@ use tap::Pipe;
 use crate::{
     normalize::{
         normalize_float,
+        AugmentDatapoint,
         Error,
         ToDatapoints,
-        WithHeader,
     },
     pb::MicPacket,
 };
 
 static EMPTY: Vec<f32> = vec![];
 
-impl<'a> ToDatapoints for WithHeader<'a, MicPacket> {
-    fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
+impl ToDatapoints for MicPacket {
+    fn to_data_points<T>(&self, t: &T) -> Result<Vec<DataPoint>, Error>
+    where
+        T: AugmentDatapoint,
+    {
         let MicPacket {
             sample_freq,
             system_sample_period,
@@ -22,7 +25,7 @@ impl<'a> ToDatapoints for WithHeader<'a, MicPacket> {
             start_frequency,
             frequency_spacing,
             ref payload,
-        } = *self.1;
+        } = *self;
 
         payload
             .as_ref()
@@ -31,7 +34,7 @@ impl<'a> ToDatapoints for WithHeader<'a, MicPacket> {
             .iter()
             .map(|&sample| {
                 DataPoint::builder("mic")
-                    .pipe(|b| self.0.common_fields(b))
+                    .pipe(|b| t.augment_data_point(b))
                     .field("value", normalize_float(sample))
                     .field("sample_frequency", sample_freq as u64)
                     .field("frequency_spacing", normalize_float(frequency_spacing))

@@ -1,30 +1,32 @@
 use influxdb2::models::DataPoint;
+use tap::Pipe;
 
 use crate::{
     normalize::{
         normalize_float,
+        AugmentDatapoint,
         Error,
         ToDatapoints,
-        WithHeader,
     },
     pb::ShtPacket,
 };
 
-impl<'a> ToDatapoints for WithHeader<'a, ShtPacket> {
-    fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
+impl ToDatapoints for ShtPacket {
+    fn to_data_points<T>(&self, t: &T) -> Result<Vec<DataPoint>, Error>
+    where
+        T: AugmentDatapoint,
+    {
         let ShtPacket {
             precision,
             heater,
             ref payload,
-        } = *self.1;
+        } = *self;
 
         payload
             .iter()
             .map(|sample| {
                 DataPoint::builder("sht")
-                    .pipe(|b| self.0.common_fields(b))
-                self.0
-                    .common_fields(DataPoint::builder("sht"))
+                    .pipe(|b| t.augment_data_point(b))
                     .field("precision", precision as i64)
                     .field("heater", heater as i64)
                     .field("sample_timestamp", sample.timestamp as u64)

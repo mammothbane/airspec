@@ -3,9 +3,9 @@ use tap::Pipe;
 
 use crate::{
     normalize::{
+        AugmentDatapoint,
         Error,
         ToDatapoints,
-        WithHeader,
     },
     pb::{
         spec_packet::Payload,
@@ -13,12 +13,15 @@ use crate::{
     },
 };
 
-impl<'a> ToDatapoints for WithHeader<'a, SpecPacket> {
-    fn to_data_points(&self) -> Result<Vec<DataPoint>, Error> {
+impl ToDatapoints for SpecPacket {
+    fn to_data_points<T>(&self, t: &T) -> Result<Vec<DataPoint>, Error>
+    where
+        T: AugmentDatapoint,
+    {
         let SpecPacket {
             sample_period,
             ref payload,
-        } = *self.1;
+        } = *self;
 
         payload
             .iter()
@@ -39,7 +42,7 @@ impl<'a> ToDatapoints for WithHeader<'a, SpecPacket> {
                      flicker,
                  }| {
                     DataPoint::builder("spectrometer")
-                        .pipe(|b| self.0.common_fields(b))
+                        .pipe(|b| t.augment_data_point(b))
                         .field("band_415", band_415 as u64)
                         .field("band_445", band_445 as u64)
                         .field("band_480", band_480 as u64)

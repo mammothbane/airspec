@@ -17,18 +17,43 @@ mod spec;
 mod therm;
 
 pub trait ToDatapoints {
-    fn to_data_points(&self) -> Result<Vec<DataPoint>, Error>;
+    fn to_data_points<T>(&self, additional: &T) -> Result<Vec<DataPoint>, Error>
+    where
+        T: AugmentDatapoint;
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct WithHeader<'a, T>(pub &'a crate::pb::SensorPacketHeader, pub &'a T);
+pub trait AugmentDatapoint {
+    fn augment_data_point(&self, builder: DataPointBuilder) -> DataPointBuilder;
+}
 
-impl crate::pb::SensorPacketHeader {
-    pub fn common_fields(&self, b: DataPointBuilder) -> DataPointBuilder {
-        b.tag("system_uid", self.system_uid.to_string())
+impl AugmentDatapoint for () {
+    #[inline]
+    fn augment_data_point(&self, builder: DataPointBuilder) -> DataPointBuilder {
+        builder
+    }
+}
+
+impl AugmentDatapoint for Vec<&dyn AugmentDatapoint> {
+    fn augment_data_point(&self, builder: DataPointBuilder) -> DataPointBuilder {
+        self.iter().fold(builder, |builder, x| x.augment_data_point(builder))
+    }
+}
+
+impl AugmentDatapoint for crate::pb::SensorPacketHeader {
+    fn augment_data_point(&self, builder: DataPointBuilder) -> DataPointBuilder {
+        builder
+            .tag("system_uid", self.system_uid.to_string())
             .field("epoch_ms", self.epoch as u64)
             .field("uptime_ms", self.ms_from_start as u64)
             .field("packet_id", self.packet_id as u64)
+    }
+}
+
+impl AugmentDatapoint for crate::db::user_token::UserAuthInfo {
+    fn augment_data_point(&self, builder: DataPointBuilder) -> DataPointBuilder {
+        builder
+            .field("submitter_token_id", self.id)
+            .field("submitter_token_name", self.data.name.clone())
     }
 }
 

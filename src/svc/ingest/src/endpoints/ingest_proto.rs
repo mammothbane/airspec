@@ -3,12 +3,14 @@ use std::{
     str::FromStr,
 };
 
+use crate::db::user_token::UserAuthInfo;
 use influxdb2::models::DataPoint;
 use prost::Message;
+use tide::StatusCode;
 
 use crate::normalize::{
+    AugmentDatapoint,
     ToDatapoints,
-    WithHeader,
 };
 
 lazy_static::lazy_static! {
@@ -17,14 +19,14 @@ lazy_static::lazy_static! {
 }
 
 macro_rules! convert_all {
-    ($parent:ident | $x:ident) => {
-        convert_all!($parent:ident | $x:ident,)
+    ($parent:ident, $augments:expr => $x:ident) => {
+        convert_all!($parent, $augments => $x,)
     };
-    ($parent:ident | $x:ident,) => {
-        $parent.$x.iter().map(|z| WithHeader($parent.header.as_ref().unwrap(), z).to_data_points())
+    ($parent:ident, $augments:expr => $x:ident,) => {
+        $parent.$x.iter().map(|z| z.to_data_points($augments))
     };
-    ($parent:ident | $x:ident, $($xs:ident,)+) => {
-        convert_all!($parent | $x,)$(.chain(convert_all!($parent | $xs,)))+
+    ($parent:ident, $augments:expr => $x:ident, $($xs:ident,)+) => {
+        convert_all!($parent, $augments => $x,)$(.chain(convert_all!($parent, $augments => $xs,)))+
     };
 }
 
@@ -39,12 +41,20 @@ pub async fn ingest_proto(
 
     let state = req.state();
 
+    let user_info = req.ext::<UserAuthInfo>().ok_or_else(|| {
+        tide::Error::from_str(StatusCode::InternalServerError, "could not get user auth info")
+    })?;
+
     submit_packets
         .sensor_data
         .into_iter()
         .map(|pkt| {
-            convert_all!(
-                pkt | blink_packet,
+            let header = pkt.header.unwrap();
+
+            let augments: Vec<&dyn AugmentDatapoint> = vec![user_info, &header];
+
+            convert_all!(pkt, &augments =>
+                blink_packet,
                 bme_packet,
                 imu_packet,
                 lux_packet,
@@ -63,5 +73,5 @@ pub async fn ingest_proto(
         .inspect(|pkt| tracing::trace!(submitting_packet = ?pkt))
         .try_for_each(|x| state.0.try_send(x))?;
 
-    Ok(tide::StatusCode::Accepted.into())
+    Ok(StatusCode::Accepted.into())
 }

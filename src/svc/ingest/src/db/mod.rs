@@ -51,10 +51,7 @@ where
     Ok(items)
 }
 
+#[inline]
 fn gen_key() -> Vec<u8> {
-    let key = rand::thread_rng()
-        .sample_iter(rand::distributions::Standard)
-        .take(KEY_SIZE)
-        .collect::<Vec<u8>>();
-    key
+    rand::thread_rng().sample_iter(rand::distributions::Standard).take(KEY_SIZE).collect()
 }
