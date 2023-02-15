@@ -55,6 +55,11 @@ const routes = [
     icon: '',
   },
   {
+    name: "docs",
+    icon: '',
+    href: '/docs',
+  },
+  {
     name: "github",
     icon: <GitHubIcon />,
     href: "https://github.com/pchwalek/env_glasses",
