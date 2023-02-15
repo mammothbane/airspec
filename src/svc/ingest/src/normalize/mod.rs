@@ -45,7 +45,6 @@ impl AugmentDatapoint for crate::pb::SensorPacketHeader {
             .tag("system_uid", self.system_uid.to_string())
             .field("epoch_ms", self.epoch as u64)
             .field("uptime_ms", self.ms_from_start as u64)
-            .field("packet_id", self.packet_id as u64)
     }
 }
 

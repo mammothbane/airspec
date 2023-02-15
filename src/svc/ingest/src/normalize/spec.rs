@@ -19,7 +19,11 @@ impl ToDatapoints for SpecPacket {
         T: AugmentDatapoint,
     {
         let SpecPacket {
+            packet_index,
             sample_period,
+            integration_time,
+            integration_step,
+            gain,
             ref payload,
         } = *self;
 
@@ -57,6 +61,10 @@ impl ToDatapoints for SpecPacket {
                         .field("band_nir_2", band_nir_2 as u64)
                         .field("flicker", flicker as u64)
                         .field("sample_period_ms", sample_period as u64)
+                        .field("packet_index", packet_index as u64)
+                        .field("integration_time", integration_time as u64)
+                        .field("integration_step", integration_step as u64)
+                        .field("gain", gain as i64)
                         .build()
                         .map_err(Error::from)
                 },

@@ -8,7 +8,10 @@ use crate::{
         Error,
         ToDatapoints,
     },
-    pb::ThermPacket,
+    pb::{
+        therm_packet,
+        ThermPacket,
+    },
 };
 
 impl ToDatapoints for ThermPacket {
@@ -17,25 +20,38 @@ impl ToDatapoints for ThermPacket {
         T: AugmentDatapoint,
     {
         let ThermPacket {
-            sample_period_ms,
+            packet_index,
+            sample_period,
             ref payload,
         } = *self;
 
         payload
             .iter()
-            .map(|sample| {
-                DataPoint::builder("thermopile")
-                    .pipe(|b| t.augment_data_point(b))
-                    .tag("descriptor", sample.descriptor.to_string())
-                    .field("sample_timestamp", sample.timestamp as u64)
-                    .field("ambient_raw", normalize_float(sample.ambient_raw as f32))
-                    .field("object_raw", normalize_float(sample.object_raw as f32))
-                    .field("object", normalize_float(sample.object_temp))
-                    .field("ambient", normalize_float(sample.ambient_temp))
-                    .field("sample_period_ms", sample_period_ms as u64)
-                    .build()
-                    .map_err(Error::from)
-            })
+            .map(
+                |&therm_packet::Payload {
+                     descriptor,
+                     timestamp_unix,
+                     timestamp_ms_from_start,
+                     ambient_raw,
+                     object_raw,
+                     ambient_temp,
+                     object_temp,
+                 }| {
+                    DataPoint::builder("thermopile")
+                        .pipe(|b| t.augment_data_point(b))
+                        .tag("descriptor", descriptor.to_string())
+                        .field("timestamp_unix", timestamp_unix as u64)
+                        .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)
+                        .field("packet_index", packet_index as u64)
+                        .field("ambient_raw", normalize_float(ambient_raw as f32))
+                        .field("object_raw", normalize_float(object_raw as f32))
+                        .field("object", normalize_float(object_temp))
+                        .field("ambient", normalize_float(ambient_temp))
+                        .field("sample_period", sample_period as u64)
+                        .build()
+                        .map_err(Error::from)
+                },
+            )
             .collect()
     }
 }

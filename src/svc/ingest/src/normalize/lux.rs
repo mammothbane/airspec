@@ -7,7 +7,10 @@ use crate::{
         Error,
         ToDatapoints,
     },
-    pb::LuxPacket,
+    pb::{
+        lux_packet,
+        LuxPacket,
+    },
 };
 
 impl ToDatapoints for LuxPacket {
@@ -15,16 +18,35 @@ impl ToDatapoints for LuxPacket {
     where
         T: AugmentDatapoint,
     {
-        self.payload
+        let LuxPacket {
+            packet_index,
+            sample_period,
+            gain,
+            integration_time,
+            ref payload,
+        } = *self;
+
+        payload
             .iter()
-            .map(|sample| {
-                DataPoint::builder("lux")
-                    .pipe(|b| t.augment_data_point(b))
-                    .field("lux", sample.lux as u64)
-                    .field("sample_timestamp", sample.timestamp as u64)
-                    .build()
-                    .map_err(Error::from)
-            })
+            .map(
+                |&lux_packet::Payload {
+                     lux,
+                     timestamp_unix,
+                     timestamp_ms_from_start,
+                 }| {
+                    DataPoint::builder("lux")
+                        .pipe(|b| t.augment_data_point(b))
+                        .field("lux", lux as u64)
+                        .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)
+                        .field("timestamp_unix", timestamp_unix as u64)
+                        .field("gain", gain as i64)
+                        .field("integration_time", integration_time as i64)
+                        .field("packet_index", packet_index as u64)
+                        .field("sample_period", sample_period as u64)
+                        .build()
+                        .map_err(Error::from)
+                },
+            )
             .collect()
     }
 }

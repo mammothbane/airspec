@@ -23,10 +23,13 @@ macro_rules! convert_all {
         convert_all!($parent, $augments => $x,)
     };
     ($parent:ident, $augments:expr => $x:ident,) => {
-        $parent.$x.iter().map(|z| z.to_data_points($augments))
+        match $parent.payload {
+            Some(crate::pb::sensor_packet::Payload::$x(ref inner)) => Some(inner.to_data_points($augments)),
+            _ => None,
+        }
     };
     ($parent:ident, $augments:expr => $x:ident, $($xs:ident,)+) => {
-        convert_all!($parent, $augments => $x,)$(.chain(convert_all!($parent, $augments => $xs,)))+
+        convert_all!($parent, $augments => $x,)$(.or(convert_all!($parent, $augments => $xs,)))+
     };
 }
 
@@ -54,18 +57,17 @@ pub async fn ingest_proto(
             let augments: Vec<&dyn AugmentDatapoint> = vec![user_info, &header];
 
             convert_all!(pkt, &augments =>
-                blink_packet,
-                bme_packet,
-                imu_packet,
-                lux_packet,
-                mic_packet,
-                sgp_packet,
-                sht_packet,
-                spec_packet,
-                therm_packet,
+                BlinkPacket,
+                BmePacket,
+                ImuPacket,
+                LuxPacket,
+                MicPacket,
+                SgpPacket,
+                ShtPacket,
+                SpecPacket,
+                ThermPacket,
             )
-            .collect::<Result<Vec<Vec<DataPoint>>, _>>()
-            .map(|v| v.into_iter().flatten().collect::<Vec<DataPoint>>())
+            .unwrap()
         })
         .collect::<Result<Vec<Vec<DataPoint>>, _>>()?
         .into_iter()

@@ -36,11 +36,9 @@ use airspecs_ingest::{
     },
     pb::{
         lux_packet,
-        sgp_packet,
         LuxPacket,
         SensorPacket,
         SensorPacketHeader,
-        SgpPacket,
     },
     trace,
 };
@@ -168,38 +166,24 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
 
     let proto = airspecs_ingest::pb::SubmitPackets {
         sensor_data: vec![SensorPacket {
-            header:       Some(SensorPacketHeader {
-                packet_type:    37,
-                system_uid:     37,
-                packet_id:      37,
-                ms_from_start:  37,
-                epoch:          37,
-                payload_length: 37,
+            header:  Some(SensorPacketHeader {
+                system_uid:    37,
+                ms_from_start: 37,
+                epoch:         37,
             }),
-            lux_packet:   Some(LuxPacket {
+            payload: Some(airspecs_ingest::pb::sensor_packet::Payload::LuxPacket(LuxPacket {
+                packet_index:  0,
+                sample_period: 0,
+
                 gain:             1,
                 integration_time: 2,
-                payload:          vec![lux_packet::Payload {
-                    lux:       20,
-                    timestamp: 193,
+
+                payload: vec![lux_packet::Payload {
+                    lux:                     20,
+                    timestamp_ms_from_start: 1238,
+                    timestamp_unix:          193,
                 }],
-            }),
-            sgp_packet:   Some(SgpPacket {
-                payload: vec![sgp_packet::Payload {
-                    sraw_voc:        10923,
-                    sraw_nox:        19029,
-                    voc_index_value: 12375,
-                    nox_index_value: 1203,
-                    timestamp:       1238,
-                }],
-            }),
-            bme_packet:   None,
-            blink_packet: None,
-            sht_packet:   None,
-            spec_packet:  None,
-            therm_packet: None,
-            imu_packet:   None,
-            mic_packet:   None,
+            })),
         }],
         epoch:       129354.,
     };

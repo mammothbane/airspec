@@ -7,7 +7,10 @@ use crate::{
         Error,
         ToDatapoints,
     },
-    pb::SgpPacket,
+    pb::{
+        sgp_packet,
+        SgpPacket,
+    },
 };
 
 impl ToDatapoints for SgpPacket {
@@ -16,22 +19,36 @@ impl ToDatapoints for SgpPacket {
         T: AugmentDatapoint,
     {
         let SgpPacket {
+            packet_index,
+            sample_period,
             ref payload,
-        } = self;
+        } = *self;
 
         payload
             .iter()
-            .map(|sample| {
-                DataPoint::builder("sht")
-                    .pipe(|b| t.augment_data_point(b))
-                    .field("sraw_nox", sample.sraw_nox as u64)
-                    .field("sraw_voc", sample.sraw_voc as u64)
-                    .field("sample_timestamp", sample.timestamp as u64)
-                    .field("nox_index", sample.nox_index_value as i64)
-                    .field("voc_index", sample.voc_index_value as i64)
-                    .build()
-                    .map_err(Error::from)
-            })
+            .map(
+                |&sgp_packet::Payload {
+                     timestamp_unix,
+                     timestamp_ms_from_start,
+                     sraw_voc,
+                     sraw_nox,
+                     voc_index_value,
+                     nox_index_value,
+                 }| {
+                    DataPoint::builder("sht")
+                        .pipe(|b| t.augment_data_point(b))
+                        .field("sraw_nox", sraw_nox as u64)
+                        .field("sraw_voc", sraw_voc as u64)
+                        .field("timestamp_unix", timestamp_unix as u64)
+                        .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)
+                        .field("nox_index", nox_index_value as i64)
+                        .field("voc_index", voc_index_value as i64)
+                        .field("packet_index", packet_index as i64)
+                        .field("sample_period", sample_period as i64)
+                        .build()
+                        .map_err(Error::from)
+                },
+            )
             .collect()
     }
 }

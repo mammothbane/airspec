@@ -8,7 +8,10 @@ use crate::{
         Error,
         ToDatapoints,
     },
-    pb::ShtPacket,
+    pb::{
+        sht_packet,
+        ShtPacket,
+    },
 };
 
 impl ToDatapoints for ShtPacket {
@@ -17,6 +20,8 @@ impl ToDatapoints for ShtPacket {
         T: AugmentDatapoint,
     {
         let ShtPacket {
+            packet_index,
+            sample_period,
             precision,
             heater,
             ref payload,
@@ -24,17 +29,27 @@ impl ToDatapoints for ShtPacket {
 
         payload
             .iter()
-            .map(|sample| {
-                DataPoint::builder("sht")
-                    .pipe(|b| t.augment_data_point(b))
-                    .field("precision", precision as i64)
-                    .field("heater", heater as i64)
-                    .field("sample_timestamp", sample.timestamp as u64)
-                    .field("humidity", normalize_float(sample.humidity))
-                    .field("temperature", normalize_float(sample.temperature))
-                    .build()
-                    .map_err(Error::from)
-            })
+            .map(
+                |&sht_packet::Payload {
+                     timestamp_unix,
+                     timestamp_ms_from_start,
+                     temperature,
+                     humidity,
+                 }| {
+                    DataPoint::builder("sht")
+                        .pipe(|b| t.augment_data_point(b))
+                        .field("precision", precision as i64)
+                        .field("heater", heater as i64)
+                        .field("packet_index", packet_index as u64)
+                        .field("sample_period", sample_period as u64)
+                        .field("timestamp_unix", timestamp_unix as u64)
+                        .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)
+                        .field("humidity", normalize_float(humidity))
+                        .field("temperature", normalize_float(temperature))
+                        .build()
+                        .map_err(Error::from)
+                },
+            )
             .collect()
     }
 }
