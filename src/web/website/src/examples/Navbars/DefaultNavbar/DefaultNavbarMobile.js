@@ -38,7 +38,7 @@ function DefaultNavbarMobile({ routes, open }) {
   const handleSetCollapse = (name) => (collapse === name ? setCollapse(false) : setCollapse(name));
 
   const renderNavbarItems = routes.map(
-    ({ name, icon, collapse: routeCollapses, href, route, collapse: navCollapse }) => (
+    ({ name, icon, collapse: routeCollapses, href, route }) => (
       <DefaultNavbarDropdown
         key={name}
         name={name}
@@ -47,7 +47,7 @@ function DefaultNavbarMobile({ routes, open }) {
         onClick={() => handleSetCollapse(name)}
         href={href}
         route={route}
-        collapse={Boolean(navCollapse)}
+        collapse={Boolean(routeCollapses)}
       >
         <MKBox sx={{ height: "15rem", maxHeight: "15rem", overflowY: "scroll" }}>
           {routeCollapses &&
