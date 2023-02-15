@@ -95,32 +95,35 @@ export const Admin = () => {
 
   return <>
     <Box sx={{
+      my: 2,
+      mx: 1,
+    }}>
+      <DefaultNavbar
+        routes={routes}
+        relative
+      />
+    </Box>
+
+    <Box sx={{
       alignItems: 'center',
       justifyContent: 'start',
       width: '100%',
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      p: 8,
-      pt: 2,
+      p: 3,
       maxWidth: '100%',
     }}>
-      <DefaultNavbar
-        routes={routes}
-        relative
-      />
-
       <Box sx={{
-        mt: 4,
-        maxWidth: '100%',
+        maxWidth: '450px',
         alignItems: 'start',
         justifyContent: 'start',
         display: 'flex',
         flexDirection: 'column',
         background: '#e9e9e9',
-        p: 4,
+        p: 2,
+        width: '100%',
         borderRadius: 2,
-        minWidth: 480,
       }}>
         <Typography variant={'h1'} sx={{mb: 4}}>
           Admin
