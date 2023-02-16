@@ -12,9 +12,7 @@
 
       settings = {
         server = {
-          root_url = "https://airspecs.media.mit.edu/grafana";
-          serve_from_sub_path = true;
-
+          root_url = "https://grafana.airspecs.resenv.org";
           enable_gzip = true;
         };
 

@@ -80,12 +80,13 @@
             --no-link \
             $(git rev-parse --show-toplevel)#nixosConfigurations.airspecs.config.system.build.toplevel
 
-          echo "deploying to $username@airspecs.media.mit.edu"
+          echo "deploying to $username@airspecs.resenv.org"
           sudo ${pkgs.nixos-rebuild}/bin/nixos-rebuild \
             --flake $(git rev-parse --show-toplevel)#airspecs \
-            --target-host $username@airspecs.media.mit.edu \
+            --target-host $username@airspecs.resenv.org \
             switch
         '';
+#
 
       in {
         type = "app";

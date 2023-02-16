@@ -12,7 +12,7 @@ import { NewToken } from './NewToken';
 import { TokenRow } from './TokenRow';
 
 export const BACKEND = window.location.href.startsWith('https://')
-  ? '/api'
+  ? 'https://api.airspecs.resenv.org'
   : 'http://localhost:8080';
 
 enum Success {

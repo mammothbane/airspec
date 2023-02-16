@@ -16,7 +16,11 @@ in {
     resolver.addresses = ["1.1.1.1:53"];
 
     virtualHosts = {
-      "airspecs.media.mit.edu" = commonOptions // {
+      "airspecs.resenv.org" = commonOptions // {
+        serverAliases = [
+          "airspec.resenv.org"
+        ];
+
         locations."/" = {
           root = flake.packages.x86_64-linux.website;
         };
@@ -26,18 +30,35 @@ in {
         locations."/docs/" = {
           alias = "${flake.packages.x86_64-linux.docs-site}/";
         };
+      };
 
-        locations."/grafana" = {
-          proxyPass = "http://localhost:${builtins.toString config.services.grafana.settings.server.http_port}";
+      "influx.airspecs.resenv.org" = commonOptions // {
+        serverAliases = [
+          "influx.airspec.resenv.org"
+        ];
+
+        locations."/" = {
+          proxyPass = "http://localhost:${builtins.toString 8086}/";
         };
+      };
 
-        locations."/api" = {
-          proxyPass = "http://localhost:6666/";
+      "grafana.airspecs.resenv.org" = commonOptions // {
+        serverAliases = [
+          "grafana.airspec.resenv.org"
+        ];
+
+        locations."/" = {
+          proxyPass = "http://localhost:${builtins.toString config.services.grafana.settings.server.http_port}/";
         };
+      };
 
-        locations."/api/" = {
+      "api.airspecs.resenv.org" = commonOptions // {
+        serverAliases = [
+          "api.airspec.resenv.org"
+        ];
+
+        locations."/" = {
           proxyPass = "http://localhost:6666/";
-
           extraConfig = ''
             proxy_read_timeout 120;
           '';

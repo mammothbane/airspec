@@ -24,7 +24,7 @@
     openssh = {
       enable = true;
 
-      permitRootLogin = "no";
+      permitRootLogin = lib.mkForce "no";
       openFirewall = true;
 
       extraConfig = ''
@@ -49,10 +49,8 @@
   networking = {
     useDHCP = true;
 
-    # nb: hostname _must_ be set properly if continuing to deploy onto necsys VMs, as they do dns by self-reported
-    # hostname
     hostName = "airspecs";
-    domain = "media.mit.edu";
+    domain = "resenv.org";
 
     firewall = {
       enable = true;

@@ -1,9 +1,4 @@
 {
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/airspecs_rootfs";
-    fsType = "ext4";
-  };
-
   swapDevices = [
     {
       device = "/swap";
