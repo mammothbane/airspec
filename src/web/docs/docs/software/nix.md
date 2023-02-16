@@ -4,7 +4,7 @@
 
 We use it to build:
 
-- The server our code is deployed on (`airspecs.media.mit.edu`)
+- The server our code is deployed on (`airspecs.resenv.org`)
     - nginx
     - datastore (influxdb)
     - dataviz (grafana)

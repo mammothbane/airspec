@@ -16,7 +16,7 @@ These can only create user tokens. They _do not_ have API access to any part of 
 
 ### Token Generation
 Tokens are 32 random bytes encoded as a hex string. You can generate a new user token at
-<https://airspecs.media.mit.edu/admin> if you have an admin token. Please proactively set
+<https://airspecs.resenv.org/#/admin> if you have an admin token. Please proactively set
 token expirations, and disable or delete tokens that are no longer in use.
 
 Admin tokens must be provisioned on the command-line while SSHed into the airspecs box with:
@@ -41,7 +41,7 @@ An example authenticated `curl`:
 # fetch data from 5 minutes ago to 1 minute ago for glasses with id $ID
 $ curl \
   -H "Authorization: $TOKEN" \
-  "https://airspecs.media.mit.edu/dump?id=$ID&start=-5m&end=-1m"
+  "https://api.airspecs.resenv.org/dump?id=$ID&start=-5m&end=-1m"
 ```
 
 ## Caveats

@@ -1,5 +1,5 @@
 site_name: Airspecs
-site_url: https://airspecs.media.mit.edu
+site_url: https://airspecs.resenv.org
 theme: material
 repo_url: https://github.com/pchwalek/env_glasses
 edit_uri: https://github.com/mammothbane/airspec/edit/master/src/web/docs/docs
