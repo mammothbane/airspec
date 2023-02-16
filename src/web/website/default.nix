@@ -3,6 +3,7 @@
   lib,
   nodejs-16_x,
   yarn,
+  fd,
   ...
 }: let
   yarn' = yarn.override { nodejs = nodejs-16_x; };
@@ -37,9 +38,16 @@ in mkYarnPackage {
     popd
 
     ${yarn'}/bin/yarn --offline build
+
+    ${fd}/bin/fd -g '*.js.LICENSE.txt' deps/AirSpec/build/static | xargs rm
   '';
 
+  outputs = [ "out" "debug" ];
+
   installPhase = ''
+    mkdir -p $debug
+    ${fd}/bin/fd -uuu -t f -g '*.js.map' deps/AirSpec/build | xargs -i mv '{}' $debug
+
     mkdir -p $out
     cp --reflink=auto -r deps/AirSpec/build/* $out
   '';
