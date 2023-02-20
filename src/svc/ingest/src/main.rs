@@ -7,5 +7,5 @@ async fn main() -> eyre::Result<()> {
     let opt: opt::Opt = opt::Opt::from_args();
     trace::init(true);
 
-    run::serve(opt).await
+    run::serve(opt, None).await
 }

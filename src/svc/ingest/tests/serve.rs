@@ -118,20 +118,23 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
 
     let admin_token = hex::encode(admin_token);
 
-    let server = async_std::task::spawn(airspecs_ingest::run::serve(airspecs_ingest::opt::Opt {
-        bind:         SERVER_SOCKETADDR.parse()?,
-        auth_db:      Some(auth_db),
-        influx:       Influx {
-            url:    URL.to_string(),
-            token:  Some(influx_token),
-            bucket: bkt_name,
-            org:    org_name,
+    let server = async_std::task::spawn(airspecs_ingest::run::serve(
+        airspecs_ingest::opt::Opt {
+            bind:         SERVER_SOCKETADDR.parse()?,
+            auth_db:      Some(auth_db),
+            influx:       Influx {
+                url:    URL.to_string(),
+                token:  Some(influx_token),
+                bucket: bkt_name,
+                org:    org_name,
+            },
+            chunk_config: ChunkConfig {
+                chunk_size:           1,
+                chunk_timeout_millis: 10,
+            },
         },
-        chunk_config: ChunkConfig {
-            chunk_size:           1,
-            chunk_timeout_millis: 10,
-        },
-    }));
+        None,
+    ));
 
     let base_url: tide::http::Url = format!("http://{SERVER_SOCKETADDR}").parse()?;
 

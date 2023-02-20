@@ -6,6 +6,8 @@ use std::{
 use crate::db::user_token::UserAuthInfo;
 use influxdb2::models::DataPoint;
 use prost::Message;
+use smol::stream::StreamExt;
+use tap::Pipe;
 use tide::StatusCode;
 
 use crate::normalize::{
@@ -72,8 +74,13 @@ pub async fn ingest_proto(
         .collect::<Result<Vec<Vec<DataPoint>>, _>>()?
         .into_iter()
         .flatten()
-        .inspect(|pkt| tracing::trace!(submitting_packet = ?pkt))
-        .try_for_each(|x| state.0.try_send(x))?;
+        .pipe(async_std::stream::from_iter)
+        .then(|x| async move {
+            tracing::trace!(submitting_packet = ?x);
+            state.0.send(x).await
+        })
+        .try_collect()
+        .await?;
 
     Ok(StatusCode::Accepted.into())
 }

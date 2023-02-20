@@ -2,3 +2,6 @@
 members = [
     "src/svc/ingest"
 ]
+
+[profile.release]
+lto = true

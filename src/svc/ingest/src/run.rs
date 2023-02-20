@@ -3,7 +3,10 @@ use std::{
     time::Duration,
 };
 
-use async_std::channel;
+use async_std::{
+    channel,
+    channel::Sender,
+};
 use tide::{
     http::headers::HeaderValue,
     security::CorsMiddleware,
@@ -28,6 +31,7 @@ pub async fn serve(
         influx: influx_cfg,
         chunk_config: chunk_cfg,
     }: Opt,
+    empty_marker: Option<Sender<()>>,
 ) -> eyre::Result<()> {
     let channel_size: usize = chunk_cfg.chunk_size * 8;
     tracing::debug!(%channel_size);
@@ -45,6 +49,7 @@ pub async fn serve(
         chunk_cfg.chunk_size,
         Duration::from_millis(chunk_cfg.chunk_timeout_millis as u64),
         msr_rx,
+        empty_marker,
     ));
 
     let mut server = tide::new();
