@@ -86,7 +86,6 @@
             --target-host $username@airspecs.resenv.org \
             switch
         '';
-#
 
       in {
         type = "app";

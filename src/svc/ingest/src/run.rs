@@ -29,7 +29,10 @@ pub async fn serve(
         chunk_config: chunk_cfg,
     }: Opt,
 ) -> eyre::Result<()> {
-    let (msr_tx, msr_rx) = channel::bounded(4096);
+    let channel_size: usize = chunk_cfg.chunk_size * 8;
+    tracing::debug!(%channel_size);
+
+    let (msr_tx, msr_rx) = channel::bounded(channel_size);
 
     let token = influx_cfg.token_or_env().ok_or(eyre::eyre!("influx token was missing"))?;
 
