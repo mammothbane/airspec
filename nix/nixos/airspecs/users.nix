@@ -1,4 +1,7 @@
-let
+{
+  pkgs,
+  ...
+}: let
   adminGroups = [
     "wheel"
     "sudo"
@@ -21,6 +24,7 @@ in {
 
   users = {
     mutableUsers = false;
+    defaultUserShell = pkgs.zsh;
 
     users = {
       root.hashedPassword = ''$6$d59cUd31u4j$LGIlTS.qmV60wYBt2ZvNX0p5SAQCplYTxwg3u8E359pHOq.ycP3zGbarD/.AN5IN.sUacHBleb8C3p3DDa2M5.'';
