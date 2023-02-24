@@ -320,23 +320,6 @@ message MicPacket{
 
 
 
-message SensorPacket {
-    SensorPacketHeader header = 1;
-
-    oneof payload {
-        LuxPacket lux_packet = 2;
-        SGPPacket sgp_packet = 3;
-        BMEPacket bme_packet = 4;
-        BlinkPacket blink_packet = 5;
-        SHTPacket sht_packet = 6;
-        SpecPacket spec_packet = 7;
-        ThermPacket therm_packet = 8;
-        IMUPacket imu_packet = 9;
-        MicPacket mic_packet = 10;
-    }
-
-}
-
 /* defining AirSpec incoming packet structure */
 
 message AirSpecColors{
@@ -367,6 +350,9 @@ message SensorControl{
     bool sht = 8;
     bool sgp = 9;
     bool blink = 10;
+    bool synchronize_windows = 11;
+    uint32 window_size_ms = 12;
+    uint32 window_period_ms = 13;
 }
 
 message LuxSensorConfig{
@@ -405,8 +391,9 @@ message BlinkSensorConfig{
     uint32 daylightCompensationUpperThresh = 3;
     uint32 daylightCompensationLowerThresh = 4;
     uint32 enable_windowing = 5;
-    uint32 window_size_ms = 6;
-    uint32 window_period_ms = 7;
+    uint32 enable_windowing_sync = 6;
+    uint32 window_size_ms = 7;
+    uint32 window_period_ms = 8;
 }
 
 message MicSensorConfig{
@@ -424,8 +411,9 @@ message IMU_SensorConfig{
     IMU_Accel_Settings accel_settings = 1;
     IMU_Gyro_Settings gyro_settings = 2;
     uint32 enable_windowing = 3;
-    uint32 window_size_ms = 4;
-    uint32 window_period_ms = 5;
+    uint32 enable_windowing_sync = 4;
+    uint32 window_size_ms = 5;
+    uint32 window_period_ms = 6;
 }
 
 message SensorConfig{
@@ -481,8 +469,46 @@ message AirSpecConfigPacket {
     }
 }
 
+
 message systemState {
     uint32 firmware_version = 1;
     SensorControl control = 2;
     SensorConfig  config = 3;
+}
+
+
+
+message appSurveyDataPayload {
+    int32 q_index = 1;
+    string q_choice = 2;
+}
+
+message appSurveyDataPacket {
+    uint32 UID_phone = 1;
+    repeated appSurveyDataPayload payload = 2;
+}
+
+message appMetaDataPacket {
+    uint32 UID_phone = 1;
+    string payload = 2;
+}
+
+
+message SensorPacket {
+    SensorPacketHeader header = 1;
+
+    oneof payload {
+        LuxPacket lux_packet = 2;
+        SGPPacket sgp_packet = 3;
+        BMEPacket bme_packet = 4;
+        BlinkPacket blink_packet = 5;
+        SHTPacket sht_packet = 6;
+        SpecPacket spec_packet = 7;
+        ThermPacket therm_packet = 8;
+        IMUPacket imu_packet = 9;
+        MicPacket mic_packet = 10;
+        appSurveyDataPacket survey_packet = 11;
+        appMetaDataPacket meta_data_packet = 12;
+    }
+
 }
