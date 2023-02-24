@@ -7,10 +7,12 @@ edition = "2021"
 [dependencies]
 async-std = { version = "1.12", features = ["attributes"] }
 async-compat = "0.2"
-futures-batch = "0.6"
-tide = "0.16"
+pin-utils = "0.1"
+futures-timer = "3.0"
 tap = "1.0"
 smol = "1.3"
+
+tide = "0.16"
 
 prost = "0.11"
 

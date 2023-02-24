@@ -17,3 +17,7 @@ mod normalize;
 #[rustfmt::skip]
 #[path = "pb/_.rs"]
 pub mod pb;
+
+mod batch;
+
+pub use batch::*;
