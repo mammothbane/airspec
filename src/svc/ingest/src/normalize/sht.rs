@@ -38,6 +38,7 @@ impl ToDatapoints for ShtPacket {
                  }| {
                     DataPoint::builder("sht")
                         .pipe(|b| t.augment_data_point(b))
+                        .timestamp(timestamp_unix as i64 * 1_000_000_000)
                         .field("precision", precision as i64)
                         .field("heater", heater as i64)
                         .field("packet_index", packet_index as u64)

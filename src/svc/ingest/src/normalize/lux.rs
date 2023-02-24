@@ -36,6 +36,7 @@ impl ToDatapoints for LuxPacket {
                  }| {
                     DataPoint::builder("lux")
                         .pipe(|b| t.augment_data_point(b))
+                        .timestamp(timestamp_unix as i64 * 1_000_000_000)
                         .field("lux", lux as u64)
                         .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)
                         .field("timestamp_unix", timestamp_unix as u64)

@@ -37,6 +37,7 @@ impl ToDatapoints for SgpPacket {
                  }| {
                     DataPoint::builder("sgp")
                         .pipe(|b| t.augment_data_point(b))
+                        .timestamp(timestamp_unix as i64 * 1_000_000_000)
                         .field("sraw_nox", sraw_nox as u64)
                         .field("sraw_voc", sraw_voc as u64)
                         .field("timestamp_unix", timestamp_unix as u64)

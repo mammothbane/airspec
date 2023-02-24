@@ -21,6 +21,7 @@ impl ToDatapoints for BmePacket {
             .map(|sample| {
                 DataPoint::builder("bme")
                     .pipe(|b| augment.augment_data_point(b))
+                    .timestamp(sample.timestamp_unix as i64 * 1_000_000_000)
                     .field("accuracy", sample.accuracy as u64)
                     .field("signal", normalize_float(sample.signal))
                     .field("sensor_id", sample.sensor_id as u64)
