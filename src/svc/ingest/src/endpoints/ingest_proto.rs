@@ -68,6 +68,8 @@ pub async fn ingest_proto(
                 ShtPacket,
                 SpecPacket,
                 ThermPacket,
+                SurveyPacket,
+                MetaDataPacket,
             )
             .unwrap()
         })

@@ -6,6 +6,7 @@ use influxdb2::models::{
     DataPoint,
 };
 
+mod app_metadata;
 mod blink;
 mod bme;
 mod imu;
@@ -14,6 +15,7 @@ mod mic;
 mod sgp;
 mod sht;
 mod spec;
+mod survey;
 mod therm;
 
 pub trait ToDatapoints {
