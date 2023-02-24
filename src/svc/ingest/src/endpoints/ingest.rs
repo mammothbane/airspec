@@ -1,9 +1,9 @@
-use async_std::channel::Sender;
 use std::{
     collections::BTreeMap,
     ops::Deref,
 };
 
+use async_std::channel::Sender;
 use influxdb2::models::{
     data_point::DataPointError,
     DataPoint,
@@ -19,7 +19,7 @@ use tide::{
 use crate::endpoints::ingest_proto;
 
 #[derive(Debug, Clone)]
-pub struct State(pub Sender<DataPoint>);
+pub struct State(pub Sender<Vec<DataPoint>>);
 
 #[serde_with::serde_as]
 #[derive(serde::Deserialize)]
@@ -78,12 +78,13 @@ pub async fn ingest(mut req: tide::Request<impl Deref<Target = State>>) -> tide:
     }
 
     let msrs: Vec<RemoteDataPoint> = crate::util::decode_msgpack_or_json(&mut req).await?;
+    let msrs = msrs
+        .into_iter()
+        .map(|x| x.try_into().status(StatusCode::BadRequest))
+        .collect::<Result<Vec<_>, _>>()?;
 
     let state = req.state();
-
-    for msr in msrs.into_iter() {
-        state.0.send(msr.try_into().status(StatusCode::BadRequest)?).await?;
-    }
+    state.0.send(msrs).await?;
 
     Ok(StatusCode::Accepted.into())
 }

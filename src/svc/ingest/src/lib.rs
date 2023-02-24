@@ -12,6 +12,9 @@ pub mod run;
 pub mod trace;
 pub mod util;
 
+#[cfg(any(test, feature = "bench"))]
+pub mod test;
+
 mod normalize;
 
 #[rustfmt::skip]

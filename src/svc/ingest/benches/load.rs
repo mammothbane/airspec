@@ -1,26 +1,32 @@
 #![feature(duration_constants)]
 
 use std::{
-    io,
+    ffi::c_int,
+    path::Path,
+    thread,
     time::Duration,
 };
 
 use async_compat::CompatExt;
-use async_std::net::ToSocketAddrs;
 use criterion::{
+    profiler::Profiler,
     BatchSize,
     Criterion,
     Throughput,
 };
+use futures::StreamExt;
 use influxdb2::models::PostBucketRequest;
+use pprof::ProfilerGuard;
 use prost::Message;
 use rand::{
     distributions::Standard,
     thread_rng,
     Rng,
-    RngCore,
 };
-use tap::TryConv;
+use tap::{
+    Pipe,
+    TryConv,
+};
 
 use airspecs_ingest::{
     db,
@@ -32,62 +38,43 @@ use airspecs_ingest::{
         ChunkConfig,
         Influx,
     },
-    pb::{
-        lux_packet,
-        LuxPacket,
-        SensorPacket,
-        SensorPacketHeader,
-    },
     trace,
 };
 
 const URL: &str = "http://localhost:8086";
 const SERVER_SOCKETADDR: &str = "127.0.0.1:8181";
 
-fn rand_string() -> String {
-    thread_rng()
-        .sample_iter(&rand::distributions::Alphanumeric)
-        .take(16)
-        .map(char::from)
-        .collect::<String>()
+pub struct FlamegraphProfiler<'a> {
+    frequency:       usize,
+    active_profiler: Option<ProfilerGuard<'a>>,
 }
 
-async fn wait_for_tcp(a: &impl ToSocketAddrs) -> eyre::Result<()> {
-    loop {
-        match async_std::net::TcpStream::connect(a).await {
-            Ok(_) => break,
-            Err(e) if e.kind() == io::ErrorKind::ConnectionRefused => {
-                async_std::task::sleep(Duration::from_millis(50)).await;
-            },
-            Err(e) => return Err(e.into()),
-        }
+impl<'a> Profiler for FlamegraphProfiler<'a> {
+    fn start_profiling(&mut self, _benchmark_id: &str, _benchmark_dir: &Path) {
+        tracing::info!("profiling!");
+        self.active_profiler = Some(ProfilerGuard::new(self.frequency as c_int).unwrap())
     }
 
-    Ok(())
-}
+    fn stop_profiling(&mut self, benchmark_id: &str, benchmark_dir: &Path) {
+        std::fs::create_dir_all(benchmark_dir).unwrap();
 
-fn gen_packet(i: i32) -> SensorPacket {
-    let mut rng = thread_rng();
+        let benchmark_id = benchmark_id.replace('/', "_");
+        let flamegraph_path = benchmark_dir.join(format!("flamegraph_{benchmark_id}.svg"));
 
-    SensorPacket {
-        header:  Some(SensorPacketHeader {
-            system_uid:    0,
-            ms_from_start: i as u32,
-            epoch:         i as u32,
-        }),
-        payload: Some(airspecs_ingest::pb::sensor_packet::Payload::LuxPacket(LuxPacket {
-            packet_index:  rng.next_u32(),
-            sample_period: rng.next_u32(),
+        tracing::info!(?flamegraph_path, ?benchmark_dir, "stop profiling");
 
-            gain:             rng.next_u32() as i32,
-            integration_time: rng.next_u32() as i32,
-
-            payload: vec![lux_packet::Payload {
-                lux:                     rng.next_u32(),
-                timestamp_ms_from_start: rng.next_u32(),
-                timestamp_unix:          rng.next_u32(),
-            }],
-        })),
+        let flamegraph_file = std::fs::File::create(flamegraph_path)
+            .expect("File system error while creating flamegraph");
+        if let Some(profiler) = self.active_profiler.take() {
+            profiler
+                .report()
+                .build()
+                .unwrap()
+                .flamegraph(flamegraph_file)
+                .expect("Error writing flamegraph");
+        } else {
+            tracing::warn!("no profiler was active");
+        }
     }
 }
 
@@ -100,7 +87,7 @@ fn bench(c: &mut Criterion) {
     let org_name = std::env::var("AIRSPEC_ORG_ID").unwrap();
 
     let client = influxdb2::Client::new(URL.to_string(), influx_token.clone());
-    let bkt_name = rand_string();
+    let bkt_name = airspecs_ingest::test::rand_string();
 
     let tmp = tempdir::TempDir::new("airspec_test").unwrap();
     let auth_db = tmp.path().join("admin.db");
@@ -129,7 +116,7 @@ fn bench(c: &mut Criterion) {
     })
     .unwrap();
 
-    let (tx, rx) = async_std::channel::unbounded();
+    let (tx, rx) = async_std::channel::bounded(1);
 
     async_std::task::spawn(airspecs_ingest::run::serve(
         airspecs_ingest::opt::Opt {
@@ -143,7 +130,7 @@ fn bench(c: &mut Criterion) {
             },
             chunk_config: ChunkConfig {
                 chunk_size:           16384,
-                chunk_timeout_millis: 100,
+                chunk_timeout_millis: 3,
             },
         },
         Some(tx),
@@ -153,7 +140,7 @@ fn bench(c: &mut Criterion) {
         let base_url = base_url.clone();
 
         async move {
-            wait_for_tcp(&SERVER_SOCKETADDR).await?;
+            airspecs_ingest::test::wait_for_tcp(&SERVER_SOCKETADDR).await?;
 
             let user_token = surf::post(base_url.join("/admin/auth_token")?)
                 .body_json(&UserAuthData {
@@ -183,57 +170,87 @@ fn bench(c: &mut Criterion) {
         .try_conv::<surf::Client>()
         .unwrap();
 
-    for size in [16, 128, 384, 512, 768, 1024, 16384, 16384 * 4] {
-        group.throughput(Throughput::Elements(size));
+    for batch_size in [16, 128, 384, 512, 768, 1024, 4192] {
+        for num_batches in [1, 2, 4, 8, 16, 32, 64, 128] {
+            group.throughput(Throughput::Elements(batch_size * num_batches));
 
-        group.bench_with_input(format!("{size}"), &size, |b, &size| {
-            b.to_async(criterion::async_executor::AsyncStdExecutor).iter_batched(
-                || {
-                    let proto = airspecs_ingest::pb::SubmitPackets {
-                        sensor_data: (0..size).map(|i| gen_packet(i as i32)).collect(),
-                        meta:        Some(airspecs_ingest::pb::submit_packets::Meta {
-                            epoch:     thread_rng().sample::<f64, _>(Standard),
-                            phone_uid: None,
-                        }),
-                    };
+            group.bench_with_input(
+                format!("{batch_size}x{num_batches}"),
+                &(batch_size, num_batches),
+                |b, &(size, num_batches)| {
+                    b.to_async(criterion::async_executor::AsyncStdExecutor).iter_batched(
+                        || {
+                            let reqs = (0..num_batches)
+                                .map(|n| {
+                                    let proto = airspecs_ingest::pb::SubmitPackets {
+                                        sensor_data: (0..size)
+                                            .map(|i| {
+                                                airspecs_ingest::test::gen_packet(
+                                                    (1_000_000 * n + i) as i32,
+                                                )
+                                            })
+                                            .collect(),
+                                        meta:        Some(
+                                            airspecs_ingest::pb::submit_packets::Meta {
+                                                epoch:     thread_rng().sample::<f64, _>(Standard),
+                                                phone_uid: None,
+                                            },
+                                        ),
+                                    };
 
-                    let req = client
-                        .post("/")
-                        .body_bytes(proto.encode_to_vec())
-                        .content_type("application/protobuf")
-                        .build();
+                                    client
+                                        .post("/")
+                                        .body_bytes(proto.encode_to_vec())
+                                        .content_type("application/protobuf")
+                                        .build()
+                                })
+                                .collect::<Vec<_>>();
 
-                    let rx = &rx;
-                    async_std::task::block_on(async move {
-                        wait_for_tcp(&SERVER_SOCKETADDR).await?;
+                            let rx = &rx;
+                            async_std::task::block_on(async move {
+                                airspecs_ingest::test::wait_for_tcp(&SERVER_SOCKETADDR).await?;
 
-                        while rx.try_recv().is_ok() {}
+                                while rx.try_recv().is_ok() {}
 
-                        Ok(()) as eyre::Result<()>
-                    })
-                    .unwrap();
+                                Ok(()) as eyre::Result<()>
+                            })
+                            .unwrap();
 
-                    req
+                            reqs
+                        },
+                        |reqs| {
+                            let client = &client;
+                            let rx = &rx;
+
+                            async move {
+                                reqs.into_iter()
+                                    .pipe(async_std::stream::from_iter)
+                                    .for_each(|req| {
+                                        let client = &client;
+
+                                        async move {
+                                            client.send(req).await.unwrap();
+                                        }
+                                    })
+                                    .await;
+
+                                rx.recv().await.unwrap();
+                            }
+                        },
+                        BatchSize::LargeInput,
+                    );
                 },
-                |req| {
-                    let client = &client;
-                    let rx = &rx;
-
-                    async move {
-                        client.send(req).await.unwrap();
-
-                        println!("awaiting recv");
-                        rx.recv().await.unwrap();
-                        println!("recv");
-                    }
-                },
-                BatchSize::LargeInput,
             );
-        });
+        }
     }
 
     group.finish();
 }
 
-criterion::criterion_group!(benches, bench);
+criterion::criterion_group! {
+    name = benches;
+    config = Criterion::default().with_profiler(FlamegraphProfiler { frequency: 512, active_profiler: None });
+    targets = bench
+}
+
 criterion::criterion_main!(benches);

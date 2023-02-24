@@ -16,13 +16,16 @@ pub async fn forward_to_influx(
     influxcfg: crate::opt::Influx,
     chunk_size: usize,
     chunk_timeout: Duration,
-    datapoints: impl Stream<Item = DataPoint> + Unpin + Send + Sync + 'static,
+    datapoints: impl Stream<Item = Vec<DataPoint>> + Unpin + Send + Sync + 'static,
     empty_marker: Option<async_std::channel::Sender<()>>,
 ) {
-    use futures_batch::ChunksTimeoutStreamExt;
+    use crate::ChunksTimeoutStreamExt;
 
-    let mut datapoints = datapoints.chunks_timeout(chunk_size, chunk_timeout);
-    let mut last_empty = false;
+    let mut datapoints = datapoints
+        .flat_map(async_std::stream::from_iter)
+        .chunks_timeout(Some(chunk_size), chunk_timeout);
+
+    let mut was_empty = false;
 
     while let Some(chunk) = datapoints.next().await {
         tracing::debug!(len = chunk.len(), "influx chunk");
@@ -30,18 +33,17 @@ pub async fn forward_to_influx(
         if chunk.is_empty() {
             tracing::debug!("skipping empty chunk");
 
-            if !last_empty && let Some(ref x) = empty_marker {
+            if !was_empty && let Some(ref x) = empty_marker {
                 if let Err(e) = x.try_send(()) {
                     tracing::warn!(error = %e, "tried to notify about empty chunk");
                 }
             }
 
-            last_empty = true;
+            was_empty = true;
 
             continue;
         }
-
-        last_empty = false;
+        was_empty = false;
 
         if let Err(e) = client
             .borrow()

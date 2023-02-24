@@ -11,17 +11,11 @@
 //! new bucket every time you run this test, maybe create another org to test in and then delete it
 //! when you want to clean it out.
 
-use std::{
-    io,
-    time::Duration,
-};
-
-use async_std::net::ToSocketAddrs;
+use std::time::Duration;
 
 use async_compat::CompatExt;
 use influxdb2::models::PostBucketRequest;
 use prost::Message;
-use rand::Rng;
 use tap::TryConv;
 
 use airspecs_ingest::{
@@ -34,39 +28,11 @@ use airspecs_ingest::{
         ChunkConfig,
         Influx,
     },
-    pb::{
-        lux_packet,
-        LuxPacket,
-        SensorPacket,
-        SensorPacketHeader,
-    },
     trace,
 };
 
 const URL: &str = "http://localhost:8086";
 const SERVER_SOCKETADDR: &str = "127.0.0.1:8181";
-
-fn rand_string() -> String {
-    rand::thread_rng()
-        .sample_iter(&rand::distributions::Alphanumeric)
-        .take(16)
-        .map(char::from)
-        .collect::<String>()
-}
-
-async fn wait_for_tcp(a: &impl ToSocketAddrs) -> eyre::Result<()> {
-    loop {
-        match async_std::net::TcpStream::connect(a).await {
-            Ok(_) => break,
-            Err(e) if e.kind() == io::ErrorKind::ConnectionRefused => {
-                async_std::task::sleep(Duration::from_millis(50)).await;
-            },
-            Err(e) => return Err(e.into()),
-        }
-    }
-
-    Ok(())
-}
 
 async fn request_dump(client: &surf::Client, id: u32) -> eyre::Result<String> {
     #[derive(serde::Serialize)]
@@ -95,7 +61,7 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
 
     let client = influxdb2::Client::new(URL.to_string(), influx_token.clone());
 
-    let bkt_name = rand_string();
+    let bkt_name = airspecs_ingest::test::rand_string();
     tracing::info!(bkt_name);
 
     client
@@ -138,7 +104,7 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
 
     let base_url: tide::http::Url = format!("http://{SERVER_SOCKETADDR}").parse()?;
 
-    wait_for_tcp(&SERVER_SOCKETADDR).await?;
+    airspecs_ingest::test::wait_for_tcp(&SERVER_SOCKETADDR).await?;
 
     let user_token = surf::post(base_url.join("/admin/auth_token")?)
         .body_json(&UserAuthData {
@@ -167,30 +133,7 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
 
     request_dump(&client, 12).await?;
 
-    let proto = airspecs_ingest::pb::SubmitPackets {
-        sensor_data: vec![SensorPacket {
-            header:  Some(SensorPacketHeader {
-                system_uid:    37,
-                ms_from_start: 37,
-                epoch:         37,
-            }),
-            payload: Some(airspecs_ingest::pb::sensor_packet::Payload::LuxPacket(LuxPacket {
-                packet_index:  0,
-                sample_period: 0,
-
-                gain:             1,
-                integration_time: 2,
-
-                payload: vec![lux_packet::Payload {
-                    lux:                     20,
-                    timestamp_ms_from_start: 1238,
-                    timestamp_unix:          193,
-                }],
-            })),
-        }],
-        epoch:       129354.,
-    };
-
+    let proto = airspecs_ingest::test::gen_packet(1);
     let proto_body = proto.encode_to_vec();
 
     let resp = client

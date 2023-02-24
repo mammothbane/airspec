@@ -49,6 +49,9 @@ regex = "1.7"
 
 rand = "0.8"
 
+[features]
+bench = []
+
 [dependencies.influxdb2]
 package = "influxdb2_client"
 git = "https://github.com/mammothbane/influxdb_iox"
@@ -59,6 +62,7 @@ tempdir = "0.3"
 rand = "0.8"
 surf = { version = "2.3", default-features = false, features = ["h1-client-rustls", "middleware-logger", "encoding"] }
 criterion = { version = "0.4", features = ["async", "async_std"] }
+pprof = { version = "0.11", features = ["flamegraph"] }
 
 [build-dependencies]
 prost-build = "0.11"

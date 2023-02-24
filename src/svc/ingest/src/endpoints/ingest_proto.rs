@@ -1,6 +1,7 @@
 use std::{
     ops::Deref,
     str::FromStr,
+    time::Instant,
 };
 
 use crate::db::user_token::UserAuthInfo;
@@ -85,7 +86,6 @@ pub async fn ingest_proto(
         })
         .collect::<Result<Vec<Vec<DataPoint>>, _>>()?
         .into_iter()
-        .flatten()
         .pipe(async_std::stream::from_iter)
         .then(|x| async move {
             tracing::trace!(submitting_packet = ?x);
