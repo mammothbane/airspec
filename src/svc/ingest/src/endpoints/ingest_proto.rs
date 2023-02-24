@@ -54,9 +54,15 @@ pub async fn ingest_proto(
         .sensor_data
         .into_iter()
         .map(|pkt| {
-            let header = pkt.header.unwrap();
+            let mut augments: Vec<&dyn AugmentDatapoint> = vec![user_info];
 
-            let augments: Vec<&dyn AugmentDatapoint> = vec![user_info, &header];
+            if let Some(ref meta) = submit_packets.meta {
+                augments.push(meta);
+            }
+
+            if let Some(ref header) = pkt.header {
+                augments.push(header);
+            }
 
             convert_all!(pkt, &augments =>
                 BlinkPacket,

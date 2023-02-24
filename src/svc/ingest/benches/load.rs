@@ -191,7 +191,10 @@ fn bench(c: &mut Criterion) {
                 || {
                     let proto = airspecs_ingest::pb::SubmitPackets {
                         sensor_data: (0..size).map(|i| gen_packet(i as i32)).collect(),
-                        epoch:       thread_rng().sample::<f64, _>(Standard),
+                        meta:        Some(airspecs_ingest::pb::submit_packets::Meta {
+                            epoch:     thread_rng().sample::<f64, _>(Standard),
+                            phone_uid: None,
+                        }),
                     };
 
                     let req = client

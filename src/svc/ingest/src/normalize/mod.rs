@@ -5,6 +5,7 @@ use influxdb2::models::{
     },
     DataPoint,
 };
+use std::time::Duration;
 
 mod app_metadata;
 mod blink;
@@ -45,8 +46,24 @@ impl AugmentDatapoint for crate::pb::SensorPacketHeader {
     fn augment_data_point(&self, builder: DataPointBuilder) -> DataPointBuilder {
         builder
             .tag("system_uid", self.system_uid.to_string())
-            .field("epoch_ms", self.epoch as u64)
+            .timestamp((self.epoch as i64) * 1_000_000_000)
+            .field("epoch_seconds", self.epoch as u64)
             .field("uptime_ms", self.ms_from_start as u64)
+    }
+}
+
+impl AugmentDatapoint for crate::pb::submit_packets::Meta {
+    fn augment_data_point(&self, mut builder: DataPointBuilder) -> DataPointBuilder {
+        let epoch = Duration::from_secs_f64(self.epoch);
+        let epoch_nanos = epoch.as_secs() * 1_000_000_000 + epoch.subsec_nanos() as u64;
+
+        builder = builder.timestamp(epoch_nanos as i64).field("submit_epoch_sec", self.epoch);
+
+        if let Some(phone_id) = self.phone_uid {
+            builder = builder.tag("phone_uid", phone_id.to_string());
+        }
+
+        builder
     }
 }
 
