@@ -3,7 +3,6 @@
 use std::{
     ffi::c_int,
     path::Path,
-    thread,
     time::Duration,
 };
 

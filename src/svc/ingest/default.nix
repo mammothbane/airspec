@@ -24,7 +24,7 @@
     nativeBuildInputs = [
     ];
 
-    cargoExtraArgs = "-p airspecs_ingest";
+    cargoExtraArgs = "-p airspecs_ingest --features bench";
 
     inherit NANOPB_PROTO;
   };
@@ -36,7 +36,6 @@
   cargoArtifacts = crane-lib.buildDepsOnly (commonOptions // {
     pname = "airspecs-global";
     inherit cargoVendorDir;
-
   });
 
   rustFmt = crane-lib.cargoFmt (commonOptions // {
@@ -46,6 +45,7 @@
       echo -ne '\n' > src/svc/ingest/src/pb.rs
     '';
 
+    cargoExtraArgs = "";
   });
 
   clippy = crane-lib.cargoClippy (commonOptions // {

@@ -23,6 +23,8 @@ impl ToDatapoints for BmePacket {
         self.payload
             .iter()
             .map(|sample| {
+                tracing::info!(sensor_id = ?sample.sensor_id);
+
                 DataPoint::builder("bme")
                     .pipe(|b| augment.augment_data_point(b))
                     .timestamp(sample.timestamp_unix as i64 * 1_000_000_000)

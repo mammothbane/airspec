@@ -1,19 +1,20 @@
 use std::{
     ops::Deref,
     str::FromStr,
-    time::Instant,
 };
 
-use crate::db::user_token::UserAuthInfo;
 use influxdb2::models::DataPoint;
 use prost::Message;
 use smol::stream::StreamExt;
 use tap::Pipe;
 use tide::StatusCode;
 
-use crate::normalize::{
-    AugmentDatapoint,
-    ToDatapoints,
+use crate::{
+    db::user_token::UserAuthInfo,
+    normalize::{
+        AugmentDatapoint,
+        ToDatapoints,
+    },
 };
 
 lazy_static::lazy_static! {

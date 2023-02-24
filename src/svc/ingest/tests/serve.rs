@@ -28,6 +28,10 @@ use airspecs_ingest::{
         ChunkConfig,
         Influx,
     },
+    pb::{
+        submit_packets::Meta,
+        SubmitPackets,
+    },
     trace,
 };
 
@@ -133,7 +137,15 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
 
     request_dump(&client, 12).await?;
 
-    let proto = airspecs_ingest::test::gen_packet(1);
+    let pkt = airspecs_ingest::test::gen_packet(1);
+    let proto = SubmitPackets {
+        sensor_data: vec![pkt],
+        meta:        Some(Meta {
+            epoch:     1024.0,
+            phone_uid: None,
+        }),
+    };
+
     let proto_body = proto.encode_to_vec();
 
     let resp = client
