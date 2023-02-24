@@ -23,7 +23,6 @@ impl ToDatapoints for AppSurveyDataPacket {
         T: AugmentDatapoint,
     {
         let AppSurveyDataPacket {
-            uid_phone,
             ref payload,
         } = *self;
 
@@ -38,7 +37,6 @@ impl ToDatapoints for AppSurveyDataPacket {
                         .pipe(|b| augment.augment_data_point(b))
                         .field("q_choice", q_choice.clone())
                         .field("q_index", *q_index as i64)
-                        .tag("phone_uid", uid_phone.to_string())
                         .build()
                         .map_err(Error::from)
                 },
