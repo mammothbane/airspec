@@ -26,7 +26,11 @@ macro_rules! convert_all {
     };
     ($parent:ident, $augments:expr => $x:ident,) => {
         match $parent.payload {
-            Some(crate::pb::sensor_packet::Payload::$x(ref inner)) => Some(inner.to_data_points($augments)),
+            Some(crate::pb::sensor_packet::Payload::$x(ref inner)) => {
+                let timestamp = $parent.header.as_ref().and_then(|hdr| chrono::NaiveDateTime::from_timestamp_millis(hdr.epoch as i64 * 1000));
+
+                Some(inner.to_data_points(timestamp, $augments))
+            },
             _ => None,
         }
     };

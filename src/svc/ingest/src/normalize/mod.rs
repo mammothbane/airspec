@@ -20,7 +20,11 @@ mod survey;
 mod therm;
 
 pub trait ToDatapoints {
-    fn to_data_points<T>(&self, additional: &T) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(
+        &self,
+        packet_epoch: Option<chrono::NaiveDateTime>,
+        augment: &T,
+    ) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint;
 }
@@ -79,6 +83,12 @@ impl AugmentDatapoint for crate::db::user_token::UserAuthInfo {
 pub enum Error {
     #[error(transparent)]
     DataPoint(#[from] DataPointError),
+
+    #[error("expected sample groups of size {modulus}, but got total len {len} (remainder: {})", modulus % len)]
+    UnevenCount {
+        modulus: usize,
+        len:     usize,
+    },
 }
 
 #[inline]

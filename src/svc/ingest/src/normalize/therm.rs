@@ -15,7 +15,11 @@ use crate::{
 };
 
 impl ToDatapoints for ThermPacket {
-    fn to_data_points<T>(&self, t: &T) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(
+        &self,
+        _packet_epoch: Option<chrono::NaiveDateTime>,
+        augment: &T,
+    ) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
@@ -38,7 +42,7 @@ impl ToDatapoints for ThermPacket {
                      object_temp,
                  }| {
                     DataPoint::builder("thermopile")
-                        .pipe(|b| t.augment_data_point(b))
+                        .pipe(|b| augment.augment_data_point(b))
                         .timestamp(timestamp_unix as i64 * 1_000_000_000)
                         .tag("descriptor", descriptor.to_string())
                         .field("timestamp_unix", timestamp_unix as u64)

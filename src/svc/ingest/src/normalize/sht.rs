@@ -15,7 +15,11 @@ use crate::{
 };
 
 impl ToDatapoints for ShtPacket {
-    fn to_data_points<T>(&self, t: &T) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(
+        &self,
+        _packet_epoch: Option<chrono::NaiveDateTime>,
+        augment: &T,
+    ) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
@@ -37,7 +41,7 @@ impl ToDatapoints for ShtPacket {
                      humidity,
                  }| {
                     DataPoint::builder("sht")
-                        .pipe(|b| t.augment_data_point(b))
+                        .pipe(|b| augment.augment_data_point(b))
                         .timestamp(timestamp_unix as i64 * 1_000_000_000)
                         .field("precision", precision as i64)
                         .field("heater", heater as i64)

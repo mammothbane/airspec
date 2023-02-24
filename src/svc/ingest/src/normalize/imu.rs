@@ -75,33 +75,41 @@ fn settings(
 }
 
 impl ToDatapoints for ImuPacket {
-    fn to_data_points<T>(&self, t: &T) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(
+        &self,
+        packet_epoch: Option<chrono::NaiveDateTime>,
+        augment: &T,
+    ) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
-        // TODO: timestamps
-
         let ImuPacket {
-            packet_index: _packet_index,
+            packet_index,
             ref accel_settings,
             ref gyro_settings,
             ref payload,
         } = *self;
+
+        // TODO: sync about what this actually means
+        let sample_period = chrono::Duration::seconds(1) / 1000;
 
         let bytes = payload.as_ref().map(|p| &p.sample).unwrap_or_else(|| &EMPTY);
 
         let b = parse_all(bytes.as_slice());
 
         b.into_iter()
-            .map(|sample| {
+            .enumerate()
+            .map(|(i, sample)| {
                 let mut builder = DataPoint::builder("imu")
-                    .pipe(|b| t.augment_data_point(b))
+                    .pipe(|b| augment.augment_data_point(b))
                     .field("accel_x", sample.accel_x as u64)
                     .field("accel_y", sample.accel_y as u64)
                     .field("accel_z", sample.accel_z as u64)
                     .field("gyro_x", sample.gyro_x as u64)
                     .field("gyro_y", sample.gyro_y as u64)
-                    .field("gyro_z", sample.gyro_z as u64);
+                    .field("gyro_z", sample.gyro_z as u64)
+                    .field("packet_index", packet_index as u64)
+                    .field("subpacket_seq", i as u64);
 
                 if let Some(set) = accel_settings.as_ref() {
                     builder =
@@ -110,6 +118,11 @@ impl ToDatapoints for ImuPacket {
                 if let Some(set) = gyro_settings.as_ref() {
                     builder =
                         settings(builder, "gyro", set.cutoff, set.range, set.sample_rate_divisor);
+                }
+
+                if let Some(base_ts) = packet_epoch {
+                    let packet_ts = base_ts + sample_period * (i as i32);
+                    builder = builder.timestamp(packet_ts.timestamp_nanos());
                 }
 
                 builder.build().map_err(Error::from)

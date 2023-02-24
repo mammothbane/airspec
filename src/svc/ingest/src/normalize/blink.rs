@@ -18,18 +18,22 @@ use crate::{
 };
 
 impl ToDatapoints for BlinkPacket {
-    fn to_data_points<T>(&self, augment: &T) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(
+        &self,
+        packet_epoch: Option<chrono::NaiveDateTime>,
+        augment: &T,
+    ) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
-        // TODO: timestamps
-
         let BlinkPacket {
             ref saturation_settings,
             sample_rate,
-            packet_index: _packet_index,
+            packet_index,
             ref payload,
         } = *self;
+
+        let sample_period = chrono::Duration::seconds(1) / sample_rate as i32;
 
         payload
             .iter()
@@ -41,11 +45,19 @@ impl ToDatapoints for BlinkPacket {
                     sample,
                 }) => sample.iter().zip(iter::repeat("high_res")),
             })
-            .map(|(&sample, name)| {
+            .enumerate()
+            .map(|(i, (&sample, name))| {
                 let mut builder = DataPoint::builder("blink")
                     .pipe(|b| augment.augment_data_point(b))
                     .field(name, sample as u64)
-                    .field("sample_rate", sample_rate as u64);
+                    .field("sample_rate", sample_rate as u64)
+                    .field("packet_index", packet_index as u64)
+                    .field("subpacket_seq", i as u64);
+
+                if let Some(base_ts) = packet_epoch {
+                    let packet_ts = base_ts + sample_period * (i as i32);
+                    builder = builder.timestamp(packet_ts.timestamp_nanos());
+                }
 
                 if let Some(&BlinkSaturationSettings {
                     diode_turned_off,

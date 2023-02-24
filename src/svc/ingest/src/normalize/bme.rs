@@ -12,7 +12,11 @@ use crate::{
 };
 
 impl ToDatapoints for BmePacket {
-    fn to_data_points<T>(&self, augment: &T) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(
+        &self,
+        _packet_epoch: Option<chrono::NaiveDateTime>,
+        augment: &T,
+    ) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
@@ -30,6 +34,7 @@ impl ToDatapoints for BmePacket {
                     .field("timestamp_sensor", sample.timestamp_sensor)
                     .field("timestamp_unix", sample.timestamp_unix as u64)
                     .field("timestamp_ms_from_start", sample.timestamp_ms_from_start as u64)
+                    .field("packet_index", self.packet_index as u64)
                     .build()
                     .map_err(Error::from)
             })

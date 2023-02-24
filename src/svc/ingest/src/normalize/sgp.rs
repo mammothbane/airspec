@@ -14,7 +14,11 @@ use crate::{
 };
 
 impl ToDatapoints for SgpPacket {
-    fn to_data_points<T>(&self, t: &T) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(
+        &self,
+        _packet_epoch: Option<chrono::NaiveDateTime>,
+        augment: &T,
+    ) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
@@ -36,7 +40,7 @@ impl ToDatapoints for SgpPacket {
                      nox_index_value,
                  }| {
                     DataPoint::builder("sgp")
-                        .pipe(|b| t.augment_data_point(b))
+                        .pipe(|b| augment.augment_data_point(b))
                         .timestamp(timestamp_unix as i64 * 1_000_000_000)
                         .field("sraw_nox", sraw_nox as u64)
                         .field("sraw_voc", sraw_voc as u64)

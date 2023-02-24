@@ -14,7 +14,11 @@ use crate::{
 };
 
 impl ToDatapoints for AppSurveyDataPacket {
-    fn to_data_points<T>(&self, augment: &T) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(
+        &self,
+        _packet_epoch: Option<chrono::NaiveDateTime>,
+        augment: &T,
+    ) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
