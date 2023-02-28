@@ -18,12 +18,12 @@ const IMU_PKT_SIZE: usize = 12;
 static EMPTY: Vec<u8> = vec![];
 
 struct ImuSample {
-    accel_x: u16,
-    accel_y: u16,
-    accel_z: u16,
-    gyro_x:  u16,
-    gyro_y:  u16,
-    gyro_z:  u16,
+    accel_x: i16,
+    accel_y: i16,
+    accel_z: i16,
+    gyro_x:  i16,
+    gyro_y:  i16,
+    gyro_z:  i16,
 }
 
 fn parse_all(b: &[u8]) -> Vec<ImuSample> {
@@ -44,12 +44,12 @@ fn parse_all(b: &[u8]) -> Vec<ImuSample> {
             let gyro_z: [u8; 2] = chunk[10..12].try_into().unwrap();
 
             ImuSample {
-                accel_x: u16::from_be_bytes(accel_x),
-                accel_y: u16::from_be_bytes(accel_y),
-                accel_z: u16::from_be_bytes(accel_z),
-                gyro_x:  u16::from_be_bytes(gyro_x),
-                gyro_y:  u16::from_be_bytes(gyro_y),
-                gyro_z:  u16::from_be_bytes(gyro_z),
+                accel_x: i16::from_be_bytes(accel_x),
+                accel_y: i16::from_be_bytes(accel_y),
+                accel_z: i16::from_be_bytes(accel_z),
+                gyro_x:  i16::from_be_bytes(gyro_x),
+                gyro_y:  i16::from_be_bytes(gyro_y),
+                gyro_z:  i16::from_be_bytes(gyro_z),
             }
         })
         .collect()
@@ -102,12 +102,12 @@ impl ToDatapoints for ImuPacket {
             .map(|(i, sample)| {
                 let mut builder = DataPoint::builder("imu")
                     .pipe(|b| augment.augment_data_point(b))
-                    .field("accel_x", sample.accel_x as u64)
-                    .field("accel_y", sample.accel_y as u64)
-                    .field("accel_z", sample.accel_z as u64)
-                    .field("gyro_x", sample.gyro_x as u64)
-                    .field("gyro_y", sample.gyro_y as u64)
-                    .field("gyro_z", sample.gyro_z as u64)
+                    .field("accel_xs", sample.accel_x as i64)
+                    .field("accel_ys", sample.accel_y as i64)
+                    .field("accel_zs", sample.accel_z as i64)
+                    .field("gyro_xs", sample.gyro_x as i64)
+                    .field("gyro_ys", sample.gyro_y as i64)
+                    .field("gyro_zs", sample.gyro_z as i64)
                     .field("packet_index", packet_index as u64)
                     .field("subpacket_seq", i as u64);
 
