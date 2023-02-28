@@ -228,6 +228,11 @@
         ./nix/nixos/airspecs
         ./nix/nixos/airspecs/hardware.nix
       ]);
+
+      media = nixpkgs.lib.nixosSystem (mkSystem "x86_64-linux" [
+        ./nix/nixos/media
+        ./nix/nixos/media/hardware.nix
+      ]);
     };
   };
 }
