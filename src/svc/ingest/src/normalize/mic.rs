@@ -46,37 +46,39 @@ impl ToDatapoints for MicPacket {
         elems
             .chunks_exact(samples_per_fft as usize)
             .enumerate()
-            .flat_map(|(chunk_idx, chunk)| {
-                let chunk_ts = packet_epoch.as_ref().map(|&base_ts| {
-                    let packet_ts = base_ts + sample_period * (chunk_idx as i32);
-                    packet_ts.timestamp_nanos()
-                });
+            .map(|(chunk_idx, chunk)| {
+                let builder = DataPoint::builder("mic")
+                    .pipe(|b| augment.augment_data_point(b))
+                    .field("sample_frequency", mic_sample_freq as u64)
+                    .field("frequency_spacing", normalize_float(frequency_spacing))
+                    .field("sample_period", sample_period.num_milliseconds() as u64)
+                    .field("samples_per_fft", samples_per_fft as u64)
+                    .field("start_frequency", normalize_float(start_frequency))
+                    .field("packet_index", packet_index as u64)
+                    .field("fft_chunk_idx", chunk_idx as u64)
+                    .field("nfreq", chunk.len() as u64);
 
-                chunk.iter().enumerate().filter(|(_, x)| !x.is_nan() && !x.is_infinite()).map(
-                    move |(i, &sample)| {
-                        let mut builder = DataPoint::builder("mic")
-                            .pipe(|b| augment.augment_data_point(b))
-                            .field("value", normalize_float(sample))
+                let builder = if let Some(ref base_ts) = packet_epoch {
+                    let packet_ts = *base_ts + sample_period * (chunk_idx as i32);
+                    builder.timestamp(packet_ts.timestamp_nanos())
+                } else {
+                    builder
+                };
+
+                let builder = chunk
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, x)| !x.is_nan() && !x.is_infinite())
+                    .fold(builder, move |builder, (i, &sample)| {
+                        builder
                             .field(
-                                "frequency",
+                                format!("frequency_{i}"),
                                 normalize_float(start_frequency + (i as f32) * frequency_spacing),
                             )
-                            .field("sample_frequency", mic_sample_freq as u64)
-                            .field("frequency_spacing", normalize_float(frequency_spacing))
-                            .field("sample_period", sample_period.num_milliseconds() as u64)
-                            .field("samples_per_fft", samples_per_fft as u64)
-                            .field("start_frequency", normalize_float(start_frequency))
-                            .field("packet_index", packet_index as u64)
-                            .field("fft_chunk_idx", chunk_idx as u64)
-                            .field("fft_freq_idx", i as u64);
+                            .field(format!("value_{i}"), normalize_float(sample))
+                    });
 
-                        if let Some(ts) = chunk_ts {
-                            builder = builder.timestamp(ts);
-                        }
-
-                        builder.build().map_err(Error::from)
-                    },
-                )
+                builder.build().map_err(Error::from)
             })
             .collect()
     }
