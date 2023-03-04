@@ -8,14 +8,17 @@
 
   nix.settings.max-jobs = 1;
 
+  fileSystems."/" = {
+    device = "/dev/disk/by-label/nixos";
+    fsType = "ext4";
+  };
+
   boot = {
     loader.grub = {
       efiSupport = false;
       devices = [
-        "/dev/sda"
+        "/dev/xvda"
       ];
     };
   };
-
-  virtualisation.vmware.guest.enable = true;
 }

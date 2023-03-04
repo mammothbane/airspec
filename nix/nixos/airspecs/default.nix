@@ -3,7 +3,6 @@
     ./nginx.nix
     ./users.nix
     ./influx.nix
-    ./image.nix
     ./ingest.nix
     ./secrets.nix
     ./sshguard.nix
