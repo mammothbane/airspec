@@ -2,6 +2,7 @@
 #![feature(exclusive_range_pattern)]
 #![feature(try_blocks)]
 #![feature(let_chains)]
+#![feature(duration_constants)]
 
 pub mod auth;
 pub mod db;

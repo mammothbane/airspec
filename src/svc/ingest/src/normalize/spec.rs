@@ -3,6 +3,7 @@ use tap::Pipe;
 
 use crate::{
     normalize::{
+        rescale_timestamp,
         AugmentDatapoint,
         Error,
         ToDatapoints,
@@ -57,6 +58,7 @@ impl ToDatapoints for SpecPacket {
                 )| {
                     DataPoint::builder("spectrometer")
                         .pipe(|b| augment.augment_data_point(b))
+                        .timestamp(rescale_timestamp(timestamp_unix))
                         .field("band_415", band_415 as u64)
                         .field("band_445", band_445 as u64)
                         .field("band_480", band_480 as u64)
@@ -75,7 +77,7 @@ impl ToDatapoints for SpecPacket {
                         .field("integration_time", integration_time as u64)
                         .field("integration_step", integration_step as u64)
                         .field("gain", gain as i64)
-                        .field("timestamp_unix", timestamp_unix as u64)
+                        .field("timestamp_unix", timestamp_unix)
                         .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)
                         .field("subpacket_seq", i as u64)
                         .build()

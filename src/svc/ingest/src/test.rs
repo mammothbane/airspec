@@ -46,7 +46,7 @@ pub fn gen_packet(i: i32) -> SensorPacket {
         header:  Some(SensorPacketHeader {
             system_uid:    0,
             ms_from_start: i as u32,
-            epoch:         i as u32,
+            epoch:         i as u64,
         }),
         payload: Some(crate::pb::sensor_packet::Payload::LuxPacket(LuxPacket {
             packet_index:  rng.next_u32(),
@@ -58,7 +58,7 @@ pub fn gen_packet(i: i32) -> SensorPacket {
             payload: vec![lux_packet::Payload {
                 lux:                     rng.next_u32(),
                 timestamp_ms_from_start: rng.next_u32(),
-                timestamp_unix:          rng.next_u32(),
+                timestamp_unix:          rng.next_u64(),
             }],
         })),
     }

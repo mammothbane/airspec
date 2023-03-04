@@ -3,6 +3,7 @@ use tap::Pipe;
 
 use crate::{
     normalize::{
+        rescale_timestamp,
         AugmentDatapoint,
         Error,
         ToDatapoints,
@@ -41,10 +42,10 @@ impl ToDatapoints for SgpPacket {
                  }| {
                     DataPoint::builder("sgp")
                         .pipe(|b| augment.augment_data_point(b))
-                        .timestamp(timestamp_unix as i64 * 1_000_000_000)
+                        .timestamp(rescale_timestamp(timestamp_unix))
                         .field("sraw_nox", sraw_nox as u64)
                         .field("sraw_voc", sraw_voc as u64)
-                        .field("timestamp_unix", timestamp_unix as u64)
+                        .field("timestamp_unix", timestamp_unix)
                         .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)
                         .field("nox_index", nox_index_value as i64)
                         .field("voc_index", voc_index_value as i64)
