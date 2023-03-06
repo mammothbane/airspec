@@ -90,8 +90,7 @@ impl ToDatapoints for ImuPacket {
             ref payload,
         } = *self;
 
-        // TODO: sync about what this actually means
-        let sample_period = chrono::Duration::seconds(1) / 1000;
+        let sample_period = chrono::Duration::milliseconds(1);
 
         let bytes = payload.as_ref().map(|p| &p.sample).unwrap_or_else(|| &EMPTY);
 
