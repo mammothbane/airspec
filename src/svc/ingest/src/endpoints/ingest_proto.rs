@@ -7,7 +7,10 @@ use influxdb2::models::DataPoint;
 use prost::Message;
 use smol::stream::StreamExt;
 use tap::Pipe;
-use tide::StatusCode;
+use tide::{
+    Status,
+    StatusCode,
+};
 
 use crate::{
     db::user_token::UserAuthInfo,
@@ -47,7 +50,14 @@ pub async fn ingest_proto(
 ) -> tide::Result {
     let body = req.body_bytes().await?;
 
-    let submit_packets = crate::pb::SubmitPackets::decode(body.as_slice())?;
+    let submit_packets = match crate::pb::SubmitPackets::decode(body.as_slice()) {
+        Ok(pkts) => pkts,
+        Err(e) => {
+            tracing::error!(body = hex::encode(&body));
+            return Err(e).status(StatusCode::BadRequest);
+        },
+    };
+
     tracing::trace!(?submit_packets, "received packets");
 
     let state = req.state();
