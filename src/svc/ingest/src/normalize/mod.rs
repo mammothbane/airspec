@@ -1,3 +1,7 @@
+use chrono::{
+    TimeZone,
+    Utc,
+};
 use influxdb2::models::{
     data_point::{
         DataPointBuilder,
@@ -103,5 +107,22 @@ fn normalize_float(f: f32) -> f64 {
 
 #[inline]
 fn rescale_timestamp(epoch_millis: u64) -> i64 {
+    lazy_static::lazy_static! {
+        static ref START_2023: chrono::DateTime<Utc> = Utc.from_utc_datetime(&chrono::NaiveDate::from_ymd_opt(2023, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap());
+        static ref START_2030: chrono::DateTime<Utc> = Utc.from_utc_datetime(&chrono::NaiveDate::from_ymd_opt(2030, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap());
+
+        static ref START_2023_MS: u64 = START_2023.timestamp_millis() as u64;
+        static ref START_2030_MS: u64 = START_2030.timestamp_millis() as u64;
+    }
+
+    if epoch_millis < *START_2023_MS || epoch_millis > *START_2030_MS {
+        let dt: Option<chrono::DateTime<Utc>> = try {
+            let dt = chrono::NaiveDateTime::from_timestamp_millis(epoch_millis as i64)?;
+            Utc.from_utc_datetime(&dt)
+        };
+
+        tracing::warn!(%epoch_millis, ?dt, "timestamp out of range");
+    }
+
     epoch_millis as i64 * Duration::MILLISECOND.as_nanos() as i64
 }
