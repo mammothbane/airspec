@@ -59,12 +59,14 @@ impl ToDatapoints for MicPacket {
             .enumerate()
             .filter(|(_, x)| !x.is_nan() && !x.is_infinite())
             .fold(builder, |builder, (i, &sample)| {
+                let index = fft_index as usize + i;
+
                 builder
                     .field(
-                        format!("frequency_{i}"),
+                        format!("frequency_{index}"),
                         normalize_float(start_frequency + (i as f32) * frequency_spacing),
                     )
-                    .field(format!("value_{i}"), normalize_float(sample))
+                    .field(format!("value_{index}"), normalize_float(sample))
             });
 
         builder.build().map(|b| vec![b]).map_err(Error::from)
