@@ -24,11 +24,7 @@ mod survey;
 mod therm;
 
 pub trait ToDatapoints {
-    fn to_data_points<T>(
-        &self,
-        packet_epoch: Option<chrono::NaiveDateTime>,
-        augment: &T,
-    ) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(&self, augment: &T) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint;
 }
@@ -89,11 +85,11 @@ pub enum Error {
     #[error(transparent)]
     DataPoint(#[from] DataPointError),
 
-    #[error("expected sample groups of size {modulus}, but got total len {len} (remainder: {})", modulus % len)]
-    UnevenCount {
-        modulus: usize,
-        len:     usize,
-    },
+    #[error(transparent)]
+    ChronoOutOfRange(#[from] chrono::OutOfRangeError),
+
+    #[error("high-precision data point had no intrinsic timestamp")]
+    NoTimestamp,
 }
 
 #[inline]

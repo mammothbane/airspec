@@ -15,11 +15,7 @@ use crate::{
 };
 
 impl ToDatapoints for SpecPacket {
-    fn to_data_points<T>(
-        &self,
-        _packet_epoch: Option<chrono::NaiveDateTime>,
-        augment: &T,
-    ) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(&self, augment: &T) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
@@ -29,6 +25,7 @@ impl ToDatapoints for SpecPacket {
             integration_time,
             integration_step,
             gain,
+            sensor_id,
             ref payload,
         } = *self;
 
@@ -59,6 +56,7 @@ impl ToDatapoints for SpecPacket {
                     DataPoint::builder("spectrometer")
                         .pipe(|b| augment.augment_data_point(b))
                         .timestamp(rescale_timestamp(timestamp_unix))
+                        .tag("sensor_id", sensor_id.to_string())
                         .field("band_415", band_415 as u64)
                         .field("band_445", band_445 as u64)
                         .field("band_480", band_480 as u64)

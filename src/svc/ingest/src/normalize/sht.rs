@@ -16,11 +16,7 @@ use crate::{
 };
 
 impl ToDatapoints for ShtPacket {
-    fn to_data_points<T>(
-        &self,
-        _packet_epoch: Option<chrono::NaiveDateTime>,
-        augment: &T,
-    ) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(&self, augment: &T) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
@@ -29,6 +25,7 @@ impl ToDatapoints for ShtPacket {
             sample_period,
             precision,
             heater,
+            sensor_id,
             ref payload,
         } = *self;
 
@@ -44,6 +41,7 @@ impl ToDatapoints for ShtPacket {
                     DataPoint::builder("sht")
                         .pipe(|b| augment.augment_data_point(b))
                         .timestamp(rescale_timestamp(timestamp_unix))
+                        .tag("sensor_id", sensor_id.to_string())
                         .field("precision", precision as i64)
                         .field("heater", heater as i64)
                         .field("packet_index", packet_index as u64)

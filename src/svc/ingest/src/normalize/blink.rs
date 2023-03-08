@@ -18,11 +18,7 @@ use crate::{
 };
 
 impl ToDatapoints for BlinkPacket {
-    fn to_data_points<T>(
-        &self,
-        packet_epoch: Option<chrono::NaiveDateTime>,
-        augment: &T,
-    ) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(&self, augment: &T) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
@@ -30,10 +26,15 @@ impl ToDatapoints for BlinkPacket {
             ref saturation_settings,
             sample_rate,
             packet_index,
+            timestamp_unix,
+            timestamp_ms_from_start,
             ref payload,
         } = *self;
 
         let sample_period = chrono::Duration::seconds(1) / sample_rate as i32;
+
+        let base_ts = chrono::NaiveDateTime::from_timestamp_millis(timestamp_unix as i64)
+            .ok_or(Error::NoTimestamp)?;
 
         payload
             .iter()
@@ -49,15 +50,16 @@ impl ToDatapoints for BlinkPacket {
             .map(|(i, (&sample, name))| {
                 let mut builder = DataPoint::builder("blink")
                     .pipe(|b| augment.augment_data_point(b))
+                    .timestamp({
+                        let packet_ts = base_ts + sample_period * (i as i32);
+                        packet_ts.timestamp_nanos()
+                    })
                     .field(name, sample as u64)
                     .field("sample_rate", sample_rate as u64)
                     .field("packet_index", packet_index as u64)
-                    .field("subpacket_seq", i as u64);
-
-                if let Some(base_ts) = packet_epoch {
-                    let packet_ts = base_ts + sample_period * (i as i32);
-                    builder = builder.timestamp(packet_ts.timestamp_nanos());
-                }
+                    .field("subpacket_seq", i as u64)
+                    .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)
+                    .field("timestamp_unix", timestamp_unix);
 
                 if let Some(&BlinkSaturationSettings {
                     diode_turned_off,

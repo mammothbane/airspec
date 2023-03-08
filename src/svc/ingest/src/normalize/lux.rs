@@ -15,11 +15,7 @@ use crate::{
 };
 
 impl ToDatapoints for LuxPacket {
-    fn to_data_points<T>(
-        &self,
-        _packet_epoch: Option<chrono::NaiveDateTime>,
-        augment: &T,
-    ) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(&self, augment: &T) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
@@ -28,6 +24,7 @@ impl ToDatapoints for LuxPacket {
             sample_period,
             gain,
             integration_time,
+            sensor_id,
             ref payload,
         } = *self;
 
@@ -42,6 +39,7 @@ impl ToDatapoints for LuxPacket {
                     DataPoint::builder("lux")
                         .pipe(|b| augment.augment_data_point(b))
                         .timestamp(rescale_timestamp(timestamp_unix))
+                        .tag("sensor_id", sensor_id.to_string())
                         .field("lux", lux as u64)
                         .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)
                         .field("timestamp_unix", timestamp_unix)

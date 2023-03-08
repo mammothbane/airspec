@@ -55,6 +55,8 @@ pub fn gen_packet(i: i32) -> SensorPacket {
             gain:             rng.next_u32() as i32,
             integration_time: rng.next_u32() as i32,
 
+            sensor_id: 0,
+
             payload: vec![lux_packet::Payload {
                 lux:                     rng.next_u32(),
                 timestamp_ms_from_start: rng.next_u32(),

@@ -9,36 +9,53 @@ use crate::{
         Error,
         ToDatapoints,
     },
-    pb::BmePacket,
+    pb::{
+        bme_packet,
+        BmePacket,
+    },
 };
 
 impl ToDatapoints for BmePacket {
-    fn to_data_points<T>(
-        &self,
-        _packet_epoch: Option<chrono::NaiveDateTime>,
-        augment: &T,
-    ) -> Result<Vec<DataPoint>, Error>
+    fn to_data_points<T>(&self, augment: &T) -> Result<Vec<DataPoint>, Error>
     where
         T: AugmentDatapoint,
     {
-        self.payload
+        let &BmePacket {
+            packet_index,
+            sample_period,
+            sensor_id: main_sensor_id,
+            ref payload,
+        } = self;
+
+        payload
             .iter()
-            .map(|sample| {
-                DataPoint::builder("bme")
-                    .pipe(|b| augment.augment_data_point(b))
-                    .timestamp(rescale_timestamp(sample.timestamp_unix))
-                    .tag("sensor_id", sample.sensor_id.to_string())
-                    .field("accuracy", sample.accuracy as u64)
-                    .field("signal", normalize_float(sample.signal))
-                    .field("signal_dimensions", sample.signal_dimensions as u64)
-                    .field("sample_period", self.sample_period as u64)
-                    .field("timestamp_sensor", sample.timestamp_sensor)
-                    .field("timestamp_unix", sample.timestamp_unix)
-                    .field("timestamp_ms_from_start", sample.timestamp_ms_from_start as u64)
-                    .field("packet_index", self.packet_index as u64)
-                    .build()
-                    .map_err(Error::from)
-            })
+            .map(
+                |&bme_packet::Payload {
+                     timestamp_sensor,
+                     timestamp_unix,
+                     timestamp_ms_from_start,
+                     signal,
+                     signal_dimensions,
+                     sensor_id,
+                     accuracy,
+                 }| {
+                    DataPoint::builder("bme")
+                        .pipe(|b| augment.augment_data_point(b))
+                        .timestamp(rescale_timestamp(timestamp_unix))
+                        .tag("sensor_id", sensor_id.to_string())
+                        .tag("main_sensor_id", main_sensor_id.to_string())
+                        .field("accuracy", accuracy as u64)
+                        .field("signal", normalize_float(signal))
+                        .field("signal_dimensions", signal_dimensions as u64)
+                        .field("sample_period", sample_period as u64)
+                        .field("timestamp_sensor", timestamp_sensor)
+                        .field("timestamp_unix", timestamp_unix)
+                        .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)
+                        .field("packet_index", packet_index as u64)
+                        .build()
+                        .map_err(Error::from)
+                },
+            )
             .collect()
     }
 }
