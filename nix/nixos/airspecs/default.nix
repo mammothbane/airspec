@@ -6,6 +6,7 @@
     ./ingest.nix
     ./secrets.nix
     ./sshguard.nix
+    ./prometheus.nix
   ];
 
   system.stateVersion = "22.11";

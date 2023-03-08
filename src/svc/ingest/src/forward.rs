@@ -10,6 +10,12 @@ use async_std::prelude::{
 };
 use influxdb2::models::DataPoint;
 
+lazy_static::lazy_static! {
+    static ref CHUNKS_SUBMITTED: prometheus::IntCounter = prometheus::register_int_counter!("chunks_submitted", "chunks submitted to influx").unwrap();
+    static ref CHUNKS_SUBMITTED_LEN: prometheus::Histogram = prometheus::register_histogram!("chunks_submitted_len", "lengths of chunks submitted to influx").unwrap();
+    static ref SUBMIT_ERRORS: prometheus::IntCounter = prometheus::register_int_counter!("chunk_submit_errors", "errors submitting chunks to influx").unwrap();
+}
+
 #[tracing::instrument(skip_all, fields(%chunk_size, ?chunk_timeout))]
 pub async fn forward_to_influx(
     client: impl Borrow<influxdb2::Client>,
@@ -45,12 +51,16 @@ pub async fn forward_to_influx(
         }
         was_empty = false;
 
+        CHUNKS_SUBMITTED.inc();
+        CHUNKS_SUBMITTED_LEN.observe(chunk.len() as f64);
+
         if let Err(e) = client
             .borrow()
             .write(&influxcfg.org, &influxcfg.bucket, async_std::stream::from_iter(chunk))
             .compat()
             .await
         {
+            SUBMIT_ERRORS.inc();
             tracing::error!(%e, "submitting batch to influx");
         }
     }

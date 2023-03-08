@@ -36,6 +36,7 @@ use airspecs_ingest::{
     opt::{
         ChunkConfig,
         Influx,
+        Prometheus,
     },
     trace,
 };
@@ -130,6 +131,9 @@ fn bench(c: &mut Criterion) {
             chunk_config: ChunkConfig {
                 chunk_size:           16384,
                 chunk_timeout_millis: 3,
+            },
+            prometheus:   Prometheus {
+                prometheus_bind: "127.0.0.1:0".parse().unwrap(),
             },
         },
         Some(tx),

@@ -10,8 +10,6 @@ use async_std::{
 use tide::{
     http::headers::HeaderValue,
     security::CorsMiddleware,
-    utils::After,
-    Response,
 };
 
 use crate::{
@@ -22,6 +20,7 @@ use crate::{
     forward,
     opt::Opt,
     trace,
+    util,
 };
 
 pub async fn serve(
@@ -30,6 +29,7 @@ pub async fn serve(
         auth_db,
         influx: influx_cfg,
         chunk_config: chunk_cfg,
+        prometheus,
     }: Opt,
     empty_marker: Option<Sender<()>>,
 ) -> eyre::Result<()> {
@@ -52,17 +52,12 @@ pub async fn serve(
         empty_marker,
     ));
 
+    let prometheus =
+        async_std::task::spawn(crate::prometheus::serve_prometheus(prometheus.prometheus_bind));
+
     let mut server = tide::new();
 
-    server.with(trace::middleware).with(After(|resp: Response| async move {
-        if let Some(e) = resp.error() {
-            tracing::error!(request_error = ?e);
-        } else if !resp.status().is_success() {
-            tracing::warn!("error response without error");
-        }
-
-        Ok(resp)
-    }));
+    server.with(trace::middleware).with(util::error_middleware);
 
     server.with(
         CorsMiddleware::new()
@@ -70,6 +65,8 @@ pub async fn serve(
             .allow_origin("*")
             .allow_methods("*".parse::<HeaderValue>().unwrap()),
     );
+
+    server.with(crate::prometheus::middleware);
 
     let auth_store = db::default_store(auth_db.as_deref().unwrap_or(*db::DEFAULT_STORE_PATH))?;
     let auth_store = Arc::new(auth_store);
@@ -97,7 +94,9 @@ pub async fn serve(
 
     tracing::info!("starting");
     server.listen(bind).await?;
+
     influx_fwd.await;
+    prometheus.cancel().await;
 
     Ok(())
 }

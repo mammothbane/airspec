@@ -1,3 +1,7 @@
+use std::{
+    future::Future,
+    pin::Pin,
+};
 use tide::{
     Status,
     StatusCode,
@@ -15,4 +19,24 @@ where
     };
 
     Ok(result)
+}
+
+pub fn error_middleware<State>(
+    req: tide::Request<State>,
+    next: tide::Next<'_, State>,
+) -> Pin<Box<dyn Future<Output = tide::Result> + Send + '_>>
+where
+    State: Clone + Send + Sync + 'static,
+{
+    Box::pin(async move {
+        let resp = next.run(req).await;
+
+        if let Some(e) = resp.error() {
+            tracing::error!(request_error = ?e);
+        } else if !resp.status().is_success() {
+            tracing::warn!("error response without error");
+        }
+
+        Ok(resp)
+    })
 }

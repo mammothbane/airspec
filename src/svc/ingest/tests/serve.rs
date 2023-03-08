@@ -27,6 +27,7 @@ use airspecs_ingest::{
     opt::{
         ChunkConfig,
         Influx,
+        Prometheus,
     },
     pb::{
         submit_packets::Meta,
@@ -101,6 +102,9 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
             chunk_config: ChunkConfig {
                 chunk_size:           1,
                 chunk_timeout_millis: 10,
+            },
+            prometheus:   Prometheus {
+                prometheus_bind: "127.0.0.1:0".parse().unwrap(),
             },
         },
         None,

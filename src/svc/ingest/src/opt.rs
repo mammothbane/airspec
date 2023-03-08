@@ -34,6 +34,12 @@ pub struct ChunkConfig {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, structopt::StructOpt)]
+pub struct Prometheus {
+    #[structopt(long, default_value = "0.0.0.0:8081")]
+    pub prometheus_bind: SocketAddr,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, structopt::StructOpt)]
 pub struct Opt {
     #[structopt(long, default_value = "0.0.0.0:8080")]
     pub bind: SocketAddr,
@@ -46,4 +52,7 @@ pub struct Opt {
 
     #[structopt(flatten)]
     pub influx: Influx,
+
+    #[structopt(flatten)]
+    pub prometheus: Prometheus,
 }

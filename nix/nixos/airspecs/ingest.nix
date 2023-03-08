@@ -23,7 +23,7 @@
       Type = "exec";
 
       # token is passed through environment so it can't be read through /proc
-      ExecStart = "${flake.packages.x86_64-linux.ingest}/bin/airspecs_ingest -b $BUCKET -o $ORG --bind 127.0.0.1:6666";
+      ExecStart = "${flake.packages.x86_64-linux.ingest}/bin/airspecs_ingest -b $BUCKET -o $ORG --bind 127.0.0.1:6666 --prometheus-bind 127.0.0.1:47823";
       EnvironmentFile = config.sops.secrets."airspecs_server_env".path;
       Environment = "RUST_BACKTRACE=1";
 

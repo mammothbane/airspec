@@ -9,6 +9,7 @@ pub mod db;
 pub mod endpoints;
 pub mod forward;
 pub mod opt;
+pub mod prometheus;
 pub mod run;
 pub mod trace;
 pub mod util;
