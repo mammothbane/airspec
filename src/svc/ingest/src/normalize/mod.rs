@@ -17,6 +17,7 @@ mod bme;
 mod imu;
 mod lux;
 mod mic;
+mod mic_level;
 mod sgp;
 mod sht;
 mod spec;
