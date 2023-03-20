@@ -165,15 +165,13 @@ fn rescale_timestamp(epoch_millis: u64) -> i64 {
 
         static ref START_2023_MS: u64 = START_2023.timestamp_millis() as u64;
         static ref START_2030_MS: u64 = START_2030.timestamp_millis() as u64;
+
+        static ref TIMESTAMP_OUT_OF_SANITY_RANGE: prometheus::IntCounter
+            = prometheus::register_int_counter!("timestamp_insane", "timestamps before 2023 or after 2030").unwrap();
     }
 
     if epoch_millis < *START_2023_MS || epoch_millis > *START_2030_MS {
-        let dt: Option<chrono::DateTime<Utc>> = try {
-            let dt = chrono::NaiveDateTime::from_timestamp_millis(epoch_millis as i64)?;
-            Utc.from_utc_datetime(&dt)
-        };
-
-        tracing::warn!(%epoch_millis, ?dt, "timestamp out of range");
+        TIMESTAMP_OUT_OF_SANITY_RANGE.inc();
     }
 
     epoch_millis as i64 * Duration::MILLISECOND.as_nanos() as i64
