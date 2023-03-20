@@ -46,6 +46,13 @@ lazy_static::lazy_static! {
             &["sensor"],
             make_time_bins(),
         ).unwrap();
+
+    static ref TIMESTAMP_FUTURE: prometheus::IntCounterVec
+        = prometheus::register_int_counter_vec!(
+            "timestamp_in_future",
+            "timestamps over 5m in the future",
+            &["sensor"],
+        ).unwrap();
 }
 
 #[inline]
@@ -60,6 +67,14 @@ pub fn inspect_ts_error(now: chrono::DateTime<Utc>, sensor: &str, ts: i64) -> i6
             "sensor" => sensor,
         })
         .observe(secs_diff);
+
+    if diff < -5 * MINUTE.as_nanos() as i64 {
+        TIMESTAMP_FUTURE
+            .with(&prometheus::labels! {
+                "sensor" => sensor,
+            })
+            .inc();
+    }
 
     ts
 }
