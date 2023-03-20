@@ -4,7 +4,6 @@ use tap::Pipe;
 use crate::{
     normalize::{
         normalize_float,
-        rescale_timestamp,
         AugmentDatapoint,
         Error,
         ToDatapoints,
@@ -40,7 +39,10 @@ impl ToDatapoints for ThermPacket {
                  }| {
                     DataPoint::builder("thermopile")
                         .pipe(|b| augment.augment_data_point(b))
-                        .timestamp(rescale_timestamp(timestamp_unix))
+                        .timestamp(crate::normalize::inspect_and_rescale(
+                            "thermopile",
+                            timestamp_unix,
+                        ))
                         .tag("descriptor", descriptor.to_string())
                         .field("timestamp_unix", timestamp_unix)
                         .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)

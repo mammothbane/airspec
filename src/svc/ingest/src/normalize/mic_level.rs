@@ -4,7 +4,6 @@ use tap::Pipe;
 use crate::{
     normalize::{
         normalize_float,
-        rescale_timestamp,
         AugmentDatapoint,
         Error,
         ToDatapoints,
@@ -38,7 +37,10 @@ impl ToDatapoints for MicLevelPacket {
                  }| {
                     DataPoint::builder("mic_level")
                         .pipe(|b| augment.augment_data_point(b))
-                        .timestamp(rescale_timestamp(timestamp_unix))
+                        .timestamp(crate::normalize::inspect_and_rescale(
+                            "mic_level",
+                            timestamp_unix,
+                        ))
                         .field("sample_frequency", mic_sample_freq as u64)
                         .field("sample_period", sample_period as u64)
                         .field("packet_index", packet_index as u64)

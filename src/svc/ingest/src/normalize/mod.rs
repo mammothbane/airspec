@@ -24,6 +24,46 @@ mod spec;
 mod survey;
 mod therm;
 
+const MINUTE: Duration = Duration::from_secs(60);
+const HOUR: Duration = Duration::from_secs(MINUTE.as_secs() * 60);
+const DAY: Duration = Duration::from_secs(HOUR.as_secs() * 24);
+const MONTH: Duration = Duration::from_secs(DAY.as_secs() * 30);
+const YEAR: Duration = Duration::from_secs(MONTH.as_secs() * 365);
+
+const TIME_BINS: &[Duration] = &[Duration::SECOND, MINUTE, HOUR, DAY, MONTH, YEAR];
+
+fn make_time_bins() -> Vec<f64> {
+    let as_f64 = TIME_BINS.iter().map(|x| x.as_secs_f64());
+
+    as_f64.clone().rev().map(|x| -x).chain(std::iter::once(0.)).chain(as_f64).collect()
+}
+
+lazy_static::lazy_static! {
+    static ref TIMESTAMP_ERROR: prometheus::HistogramVec
+        = prometheus::register_histogram_vec!(
+            "timestamp_error",
+            "sensor reading timestamp error compared to current server time (seconds)",
+            &["sensor"],
+            make_time_bins(),
+        ).unwrap();
+}
+
+#[inline]
+pub fn inspect_ts_error(now: chrono::DateTime<Utc>, sensor: &str, ts: i64) -> i64 {
+    let now = now.timestamp();
+
+    let diff = now - ts;
+    let secs_diff = Duration::from_nanos(diff.unsigned_abs()).as_secs_f64() * diff.signum() as f64;
+
+    TIMESTAMP_ERROR
+        .with(&prometheus::labels! {
+            "sensor" => sensor,
+        })
+        .observe(secs_diff);
+
+    ts
+}
+
 pub trait ToDatapoints {
     fn to_data_points<T>(&self, augment: &T) -> Result<Vec<DataPoint>, Error>
     where
@@ -122,4 +162,11 @@ fn rescale_timestamp(epoch_millis: u64) -> i64 {
     }
 
     epoch_millis as i64 * Duration::MILLISECOND.as_nanos() as i64
+}
+
+#[inline]
+pub fn inspect_and_rescale(sensor: &str, epoch_millis: u64) -> i64 {
+    let now = Utc::now();
+
+    inspect_ts_error(now, sensor, rescale_timestamp(epoch_millis))
 }

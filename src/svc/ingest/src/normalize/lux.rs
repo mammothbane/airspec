@@ -3,7 +3,6 @@ use tap::Pipe;
 
 use crate::{
     normalize::{
-        rescale_timestamp,
         AugmentDatapoint,
         Error,
         ToDatapoints,
@@ -38,7 +37,7 @@ impl ToDatapoints for LuxPacket {
                  }| {
                     DataPoint::builder("lux")
                         .pipe(|b| augment.augment_data_point(b))
-                        .timestamp(rescale_timestamp(timestamp_unix))
+                        .timestamp(crate::normalize::inspect_and_rescale("lux", timestamp_unix))
                         .tag("sensor_id", sensor_id.to_string())
                         .field("lux", lux as u64)
                         .field("timestamp_ms_from_start", timestamp_ms_from_start as u64)

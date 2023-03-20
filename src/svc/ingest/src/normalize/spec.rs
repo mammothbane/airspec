@@ -3,7 +3,6 @@ use tap::Pipe;
 
 use crate::{
     normalize::{
-        rescale_timestamp,
         AugmentDatapoint,
         Error,
         ToDatapoints,
@@ -55,7 +54,10 @@ impl ToDatapoints for SpecPacket {
                 )| {
                     DataPoint::builder("spectrometer")
                         .pipe(|b| augment.augment_data_point(b))
-                        .timestamp(rescale_timestamp(timestamp_unix))
+                        .timestamp(crate::normalize::inspect_and_rescale(
+                            "spectrometer",
+                            timestamp_unix,
+                        ))
                         .tag("sensor_id", sensor_id.to_string())
                         .field("band_415", band_415 as u64)
                         .field("band_445", band_445 as u64)

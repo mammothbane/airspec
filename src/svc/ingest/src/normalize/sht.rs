@@ -4,7 +4,6 @@ use tap::Pipe;
 use crate::{
     normalize::{
         normalize_float,
-        rescale_timestamp,
         AugmentDatapoint,
         Error,
         ToDatapoints,
@@ -40,7 +39,7 @@ impl ToDatapoints for ShtPacket {
                  }| {
                     DataPoint::builder("sht")
                         .pipe(|b| augment.augment_data_point(b))
-                        .timestamp(rescale_timestamp(timestamp_unix))
+                        .timestamp(crate::normalize::inspect_and_rescale("sht", timestamp_unix))
                         .tag("sensor_id", sensor_id.to_string())
                         .field("precision", precision as i64)
                         .field("heater", heater as i64)

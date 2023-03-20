@@ -39,10 +39,11 @@ impl ToDatapoints for MicPacket {
             .ok_or(Error::NoTimestamp)?;
 
         let ts = ts.timestamp_nanos();
+        let now = chrono::Utc::now();
 
         let builder = DataPoint::builder("mic")
             .pipe(|b| augment.augment_data_point(b))
-            .timestamp(ts)
+            .timestamp(crate::normalize::inspect_ts_error(now, "mic", ts))
             .field("sample_frequency", mic_sample_freq as u64)
             .field("frequency_spacing", normalize_float(frequency_spacing))
             .field("sample_period", sample_period.num_milliseconds() as u64)

@@ -3,7 +3,6 @@ use tap::Pipe;
 
 use crate::{
     normalize::{
-        rescale_timestamp,
         AugmentDatapoint,
         Error,
         ToDatapoints,
@@ -23,7 +22,7 @@ impl ToDatapoints for AppMetaDataPacket {
         } = *self;
 
         let result = DataPoint::builder("app_metadata")
-            .timestamp(rescale_timestamp(timestamp_unix))
+            .timestamp(crate::normalize::inspect_and_rescale("app_metadata", timestamp_unix))
             .pipe(|b| augment.augment_data_point(b))
             .field("payload", payload.clone())
             .field("type", r#type as u64)

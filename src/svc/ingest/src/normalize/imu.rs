@@ -98,6 +98,7 @@ impl ToDatapoints for ImuPacket {
         let bytes = payload.as_ref().map(|p| &p.sample).unwrap_or_else(|| &EMPTY);
 
         let b = parse_all(bytes.as_slice());
+        let now = chrono::Utc::now();
 
         b.into_iter()
             .enumerate()
@@ -106,7 +107,7 @@ impl ToDatapoints for ImuPacket {
                     .pipe(|b| augment.augment_data_point(b))
                     .timestamp({
                         let packet_ts = base_ts + sample_period * (i as i32);
-                        packet_ts.timestamp_nanos()
+                        crate::normalize::inspect_ts_error(now, "imu", packet_ts.timestamp_nanos())
                     })
                     .field("accel_xs", sample.accel_x as i64)
                     .field("accel_ys", sample.accel_y as i64)

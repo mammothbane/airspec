@@ -4,7 +4,6 @@ use tap::Pipe;
 use crate::{
     normalize::{
         normalize_float,
-        rescale_timestamp,
         AugmentDatapoint,
         Error,
         ToDatapoints,
@@ -41,7 +40,7 @@ impl ToDatapoints for BmePacket {
                  }| {
                     DataPoint::builder("bme")
                         .pipe(|b| augment.augment_data_point(b))
-                        .timestamp(rescale_timestamp(timestamp_unix))
+                        .timestamp(crate::normalize::inspect_and_rescale("bme", timestamp_unix))
                         .tag("sensor_id", sensor_id.to_string())
                         .tag("main_sensor_id", main_sensor_id.to_string())
                         .field("accuracy", accuracy as u64)

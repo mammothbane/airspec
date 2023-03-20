@@ -36,6 +36,8 @@ impl ToDatapoints for BlinkPacket {
         let base_ts = chrono::NaiveDateTime::from_timestamp_millis(timestamp_unix as i64)
             .ok_or(Error::NoTimestamp)?;
 
+        let now = chrono::Utc::now();
+
         payload
             .iter()
             .flat_map(|payload| match payload {
@@ -52,7 +54,11 @@ impl ToDatapoints for BlinkPacket {
                     .pipe(|b| augment.augment_data_point(b))
                     .timestamp({
                         let packet_ts = base_ts + sample_period * (i as i32);
-                        packet_ts.timestamp_nanos()
+                        crate::normalize::inspect_ts_error(
+                            now,
+                            "blink",
+                            packet_ts.timestamp_nanos(),
+                        )
                     })
                     .field(name, sample as u64)
                     .field("sample_rate", sample_rate as u64)
