@@ -45,7 +45,7 @@ pub struct Opt {
     pub bind: SocketAddr,
 
     #[structopt(long)]
-    pub auth_db: Option<PathBuf>,
+    pub db: Option<PathBuf>,
 
     #[structopt(flatten)]
     pub chunk_config: ChunkConfig,

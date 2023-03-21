@@ -1,6 +1,7 @@
 use std::{
     collections::BTreeMap,
     ops::Deref,
+    sync::Arc,
 };
 
 use async_std::channel::Sender;
@@ -19,7 +20,10 @@ use tide::{
 use crate::endpoints::ingest_proto;
 
 #[derive(Debug, Clone)]
-pub struct State(pub Sender<Vec<DataPoint>>);
+pub struct State {
+    pub tx:    Sender<Vec<DataPoint>>,
+    pub store: Arc<kv::Store>,
+}
 
 #[serde_with::serde_as]
 #[derive(serde::Deserialize)]
@@ -84,7 +88,7 @@ pub async fn ingest(mut req: tide::Request<impl Deref<Target = State>>) -> tide:
         .collect::<Result<Vec<_>, _>>()?;
 
     let state = req.state();
-    state.0.send(msrs).await?;
+    state.tx.send(msrs).await?;
 
     Ok(StatusCode::Accepted.into())
 }

@@ -7,6 +7,7 @@ use async_std::{
     channel,
     channel::Sender,
 };
+use tap::Conv;
 use tide::{
     http::headers::HeaderValue,
     security::CorsMiddleware,
@@ -26,7 +27,7 @@ use crate::{
 pub async fn serve(
     Opt {
         bind,
-        auth_db,
+        db,
         influx: influx_cfg,
         chunk_config: chunk_cfg,
         prometheus,
@@ -68,29 +69,41 @@ pub async fn serve(
 
     server.with(crate::prometheus::middleware);
 
-    let auth_store = db::default_store(auth_db.as_deref().unwrap_or(*db::DEFAULT_STORE_PATH))?;
-    let auth_store = Arc::new(auth_store);
+    let db_path = db
+        .as_deref()
+        .map(|x| x.conv::<&async_std::path::Path>())
+        .unwrap_or(*db::DEFAULT_STORE_PATH);
+
+    db::try_migrate(db_path).await?;
+
+    let store = db::default_store(db_path)?;
+    let store = Arc::new(store);
 
     let mut dump_server = tide::with_state(WithStore(
         endpoints::dump::State {
             influx_cfg,
             influx: client.clone(),
         },
-        auth_store.clone(),
+        store.clone(),
     ));
 
     dump_server.with(auth::authenticate);
     dump_server.at("/").get(endpoints::dump);
 
-    let mut ingest_server =
-        tide::with_state(WithStore(endpoints::ingest::State(msr_tx), auth_store.clone()));
+    let mut ingest_server = tide::with_state(WithStore(
+        endpoints::ingest::State {
+            tx:    msr_tx,
+            store: store.clone(),
+        },
+        store.clone(),
+    ));
 
     ingest_server.with(auth::authenticate);
     ingest_server.at("/").post(endpoints::ingest);
 
     server.at("/dump").nest(dump_server);
     server.at("/").nest(ingest_server);
-    server.at("/admin").nest(endpoints::admin::server(auth_store));
+    server.at("/admin").nest(endpoints::admin::server(store));
 
     tracing::info!("starting");
     server.listen(bind).await?;

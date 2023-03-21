@@ -16,7 +16,10 @@ use std::time::Duration;
 use async_compat::CompatExt;
 use influxdb2::models::PostBucketRequest;
 use prost::Message;
-use tap::TryConv;
+use tap::{
+    Conv,
+    TryConv,
+};
 
 use airspecs_ingest::{
     db,
@@ -75,7 +78,7 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
         .await?;
 
     let tmp = tempdir::TempDir::new("airspec_test")?;
-    let auth_db = tmp.path().join("admin.db");
+    let auth_db = tmp.path().join("admin.db").conv::<async_std::path::PathBuf>();
 
     let admin_token = {
         let store = db::default_store(&auth_db)?;
@@ -92,7 +95,7 @@ pub async fn test_basic_serve() -> eyre::Result<()> {
     let server = async_std::task::spawn(airspecs_ingest::run::serve(
         airspecs_ingest::opt::Opt {
             bind:         SERVER_SOCKETADDR.parse()?,
-            auth_db:      Some(auth_db),
+            db:           Some(auth_db.into()),
             influx:       Influx {
                 url:    URL.to_string(),
                 token:  Some(influx_token),

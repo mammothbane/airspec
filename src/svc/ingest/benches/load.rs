@@ -23,6 +23,7 @@ use rand::{
     Rng,
 };
 use tap::{
+    Conv,
     Pipe,
     TryConv,
 };
@@ -90,7 +91,7 @@ fn bench(c: &mut Criterion) {
     let bkt_name = airspecs_ingest::test::rand_string();
 
     let tmp = tempdir::TempDir::new("airspec_test").unwrap();
-    let auth_db = tmp.path().join("admin.db");
+    let auth_db = tmp.path().join("admin.db").conv::<async_std::path::PathBuf>();
 
     let admin_token = {
         let store = db::default_store(&auth_db).unwrap();
@@ -121,7 +122,7 @@ fn bench(c: &mut Criterion) {
     async_std::task::spawn(airspecs_ingest::run::serve(
         airspecs_ingest::opt::Opt {
             bind:         SERVER_SOCKETADDR.parse().unwrap(),
-            auth_db:      Some(auth_db),
+            db:           Some(auth_db.into()),
             influx:       Influx {
                 url:    URL.to_string(),
                 token:  Some(influx_token),

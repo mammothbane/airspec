@@ -1,24 +1,46 @@
+use async_std::{
+    fs,
+    io,
+    path::Path,
+};
 use kv::{
     Bucket,
     Json,
     Key,
 };
 use rand::Rng;
-use std::path::Path;
 
 pub mod admin_token;
+pub mod bad_packet;
 pub mod user_token;
 
 pub const KEY_SIZE: usize = 32;
 
 lazy_static::lazy_static! {
-    pub static ref DEFAULT_STORE_PATH: &'static Path = Path::new("auth.db");
+    pub static ref DEFAULT_STORE_PATH: &'static Path = Path::new("airspecs.db");
+    pub static ref OLD_STORE_PATH: &'static Path = Path::new("auth.db");
+}
+
+#[tracing::instrument(skip_all, fields(from = %OLD_STORE_PATH.display(), to = %store_path.display()))]
+pub async fn try_migrate(store_path: &Path) -> io::Result<()> {
+    tracing::info!("attempting db migration");
+
+    if !OLD_STORE_PATH.exists().await || store_path.exists().await {
+        tracing::info!("no migration required");
+        return Ok(());
+    }
+
+    fs::rename(&*OLD_STORE_PATH, store_path).await?;
+
+    tracing::info!("database migrated");
+
+    Ok(())
 }
 
 #[inline]
 pub fn default_store(store_path: &Path) -> Result<kv::Store, kv::Error> {
     let conf = kv::Config {
-        path:            store_path.to_owned(),
+        path:            store_path.to_path_buf().into(),
         temporary:       false,
         use_compression: false,
         flush_every_ms:  Some(1000),

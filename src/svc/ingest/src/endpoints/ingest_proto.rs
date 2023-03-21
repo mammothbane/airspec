@@ -86,6 +86,8 @@ pub async fn ingest_proto(
     let body = req.body_bytes().await?;
     BODY_SIZE.observe(body.len() as f64);
 
+    let state = req.state();
+
     let submit_packets = match crate::pb::SubmitPackets::decode(body.as_slice()) {
         Ok(pkts) => pkts,
         Err(e) => {
@@ -95,7 +97,10 @@ pub async fn ingest_proto(
                 })
                 .inc();
 
-            tracing::error!(body = hex::encode(&body));
+            if let Err(e) = crate::db::bad_packet::save(state.store.as_ref(), &body) {
+                tracing::error!(error = %e, "storing body to db");
+            }
+
             return Err(e).status(StatusCode::BadRequest);
         },
     };
@@ -107,8 +112,6 @@ pub async fn ingest_proto(
             "auth_token_id" => user_id.as_str(),
         })
         .observe(submit_packets.sensor_data.len() as f64);
-
-    let state = req.state();
 
     let timer_hist = SENSOR_CONVERT_TIME.start_timer();
 
@@ -147,7 +150,7 @@ pub async fn ingest_proto(
         .pipe(async_std::stream::from_iter)
         .then(|x| async move {
             tracing::trace!(submitting_packet = ?x);
-            state.0.send(x).await
+            state.tx.send(x).await
         })
         .try_collect()
         .await?;
