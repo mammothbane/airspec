@@ -7,16 +7,10 @@
     ./secrets.nix
     ./sshguard.nix
     ./prometheus.nix
+    ./aws_support.nix
   ];
 
   system.stateVersion = "22.11";
-
-  boot.loader.timeout = 1;
-  boot.loader.grub = {
-    enable = true;
-    version = 2;
-    configurationLimit = 2;
-  };
 
   services = {
     xserver.enable = false;

@@ -4,6 +4,9 @@
       enable = true;
 
       settings = {
+        query-concurrency = 2;
+        query-max-memory-bytes = 1024 * 1024 * 512;
+        reporting-disabled = true;
       };
     };
 
