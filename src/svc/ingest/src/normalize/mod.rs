@@ -57,7 +57,7 @@ lazy_static::lazy_static! {
 
 #[inline]
 pub fn inspect_ts_error(now: chrono::DateTime<Utc>, sensor: &str, ts: i64) -> i64 {
-    let now = now.timestamp();
+    let now = now.timestamp_nanos();
 
     let diff = now - ts;
     let secs_diff = Duration::from_nanos(diff.unsigned_abs()).as_secs_f64() * diff.signum() as f64;
