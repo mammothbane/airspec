@@ -34,10 +34,10 @@ pub async fn forward_to_influx(
     let mut was_empty = false;
 
     while let Some(chunk) = datapoints.next().await {
-        tracing::debug!(len = chunk.len(), "influx chunk");
+        tracing::trace!(len = chunk.len(), "influx chunk");
 
         if chunk.is_empty() {
-            tracing::debug!("skipping empty chunk");
+            tracing::trace!("skipping empty chunk");
 
             if !was_empty && let Some(ref x) = empty_marker {
                 if let Err(e) = x.try_send(()) {

@@ -34,7 +34,7 @@ where
         if let Some(e) = resp.error() {
             tracing::error!(request_error = ?e);
         } else if !resp.status().is_success() {
-            tracing::warn!("error response without error");
+            tracing::warn!(status = %resp.status(), "error response without error");
         }
 
         Ok(resp)
