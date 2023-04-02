@@ -114,11 +114,11 @@ impl AugmentDatapoint for crate::pb::SensorPacketHeader {
 
 impl AugmentDatapoint for crate::pb::submit_packets::Meta {
     fn augment_data_point(&self, mut builder: DataPointBuilder) -> DataPointBuilder {
-        let epoch = Duration::from_secs_f64(self.epoch);
+        let epoch = Duration::from_secs_f64(self.epoch / 1000.);
         let epoch_nanos =
             (epoch.as_secs() * Duration::SECOND.as_nanos() as u64) + epoch.subsec_nanos() as u64;
 
-        builder = builder.timestamp(epoch_nanos as i64).field("submit_epoch_sec", self.epoch);
+        builder = builder.timestamp(epoch_nanos as i64).field("submit_epoch_millis", self.epoch);
 
         if let Some(phone_id) = self.phone_uid {
             builder = builder.tag("phone_uid", phone_id.to_string());
