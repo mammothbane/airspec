@@ -132,14 +132,13 @@ impl<St: Stream> Stream for ChunksTimeout<St> {
             match self.as_mut().stream().poll_next(cx) {
                 Poll::Ready(item) => match item {
                     Some(item) => {
+                        self.as_mut().items().push(item);
+
+                        // return immediately if we're full to make room for new elements
                         if let Some(cap) = self.cap {
-                            if self.items.len() < cap {
-                                self.as_mut().items().push(item);
-                            } else {
-                                tracing::debug!("dropping item: full");
+                            if self.items.len() >= cap {
+                                return Poll::Ready(Some(self.as_mut().take()));
                             }
-                        } else {
-                            self.as_mut().items().push(item);
                         }
 
                         continue;
@@ -148,7 +147,14 @@ impl<St: Stream> Stream for ChunksTimeout<St> {
                     // Underlying stream ended.
                     None => {
                         *self.as_mut().done() = true;
-                        return Poll::Ready(Some(self.as_mut().take()));
+
+                        let ret = self.as_mut().take();
+
+                        return Poll::Ready(if !ret.is_empty() {
+                            Some(self.as_mut().take())
+                        } else {
+                            None
+                        });
                     },
                 },
 
@@ -165,6 +171,7 @@ impl<St: Stream> Stream for ChunksTimeout<St> {
                     self.as_mut().clock().as_pin_mut().unwrap().reset(dur);
                     return Poll::Ready(Some(self.as_mut().take()));
                 },
+
                 Poll::Pending => {},
             }
 
@@ -192,7 +199,29 @@ impl<St: Stream> Stream for ChunksTimeout<St> {
 }
 
 impl<St: FusedStream> FusedStream for ChunksTimeout<St> {
+    #[inline]
     fn is_terminated(&self) -> bool {
-        self.stream.is_terminated() & self.items.is_empty()
+        self.stream.is_terminated() && self.items.is_empty()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use async_std::*;
+
+    #[async_std::test]
+    async fn test() {
+        const CHUNK: usize = 4;
+
+        let results = stream::from_iter(0..1024)
+            .chunks_timeout(Some(CHUNK), Duration::SECOND * 1024)
+            .collect::<Vec<_>>()
+            .await;
+
+        let expect =
+            (0..1024).collect::<Vec<_>>().chunks(CHUNK).map(|x| x.to_vec()).collect::<Vec<_>>();
+
+        assert_eq!(expect, results);
     }
 }
