@@ -3,6 +3,7 @@
 #![feature(try_blocks)]
 #![feature(let_chains)]
 #![feature(duration_constants)]
+#![feature(int_roundings)]
 
 pub mod auth;
 pub mod db;

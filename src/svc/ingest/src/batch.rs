@@ -91,17 +91,34 @@ where
         }
     }
 
+    /// Consumes this combinator, returning the underlying stream.
+    ///
+    /// Note that this may discard intermediate state of this combinator, so care should be taken to
+    /// avoid losing resources when this is called.
+    #[inline]
+    pub fn into_inner(self) -> St {
+        self.stream.into_inner()
+    }
+
+    #[inline]
     fn take(mut self: Pin<&mut Self>) -> Vec<St::Item> {
         let cap = self.cap;
         mem::replace(self.as_mut().items(), cap.map(Vec::with_capacity).unwrap_or_else(Vec::new))
     }
 
-    /// Consumes this combinator, returning the underlying stream.
-    ///
-    /// Note that this may discard intermediate state of this combinator, so
-    /// care should be taken to avoid losing resources when this is called.
-    pub fn into_inner(self) -> St {
-        self.stream.into_inner()
+    #[inline]
+    fn clock_expired(self: &mut Pin<&mut Self>, cx: &mut Context<'_>) -> bool {
+        self.as_mut().clock().as_pin_mut().unwrap().poll(cx).is_ready()
+    }
+
+    #[inline]
+    fn reset_clock(self: &mut Pin<&mut Self>) {
+        let next_timeout = self.last_timeout.unwrap() + self.duration;
+        let dur = next_timeout - Instant::now();
+
+        *self.as_mut().last_timeout() = Some(next_timeout);
+
+        self.as_mut().clock().as_pin_mut().unwrap().reset(dur);
     }
 }
 
@@ -118,7 +135,9 @@ impl<St: Stream> Stream for ChunksTimeout<St> {
         // Only start the clock once we're polled -- we don't want to start the first timer at
         // construct-time.
         //
-        // Corollary/invariant: clock is None iff we have never been polled.
+        // Corollaries/invariants:
+        // - clock is None iff we have never been polled.
+        // - clock and last_duration are not None after this block.
         {
             let mut clock = self.as_mut().clock();
 
@@ -128,80 +147,85 @@ impl<St: Stream> Stream for ChunksTimeout<St> {
             }
         }
 
-        loop {
-            match self.as_mut().stream().poll_next(cx) {
-                Poll::Ready(item) => match item {
-                    Some(item) => {
-                        self.as_mut().items().push(item);
+        // Pull items from the underlying stream and add to our buffer until the underlying stream
+        // runs out.
+        while let Poll::Ready(item) = self.as_mut().stream().poll_next(cx) {
+            match item {
+                Some(item) => {
+                    self.as_mut().items().push(item);
 
-                        // return immediately if we're full to make room for new elements
-                        if let Some(cap) = self.cap {
-                            if self.items.len() >= cap {
-                                return Poll::Ready(Some(self.as_mut().take()));
-                            }
+                    // Return immediately if we're full to make room for new elements. We'll
+                    // continue to add items from the underlying stream the next time our
+                    // `poll_next` is called.
+                    if let Some(cap) = self.cap {
+                        if self.items.len() >= cap {
+                            return Poll::Ready(Some(self.as_mut().take()));
                         }
+                    }
 
-                        continue;
-                    },
-
-                    // Underlying stream ended.
-                    None => {
-                        *self.as_mut().done() = true;
-
-                        let ret = self.as_mut().take();
-
-                        return Poll::Ready(if !ret.is_empty() {
-                            Some(self.as_mut().take())
-                        } else {
-                            None
-                        });
-                    },
+                    continue;
                 },
 
-                Poll::Pending => {},
-            }
+                // Underlying stream terminated permanently.
+                None => {
+                    *self.as_mut().done() = true;
 
-            match self.as_mut().clock().as_pin_mut().unwrap().poll(cx) {
-                Poll::Ready(()) => {
-                    let next_timeout = self.last_timeout.unwrap() + dur;
-                    let dur = next_timeout - Instant::now();
+                    let ret = self.as_mut().take();
 
-                    *self.as_mut().last_timeout() = Some(next_timeout);
-
-                    self.as_mut().clock().as_pin_mut().unwrap().reset(dur);
-                    return Poll::Ready(Some(self.as_mut().take()));
+                    return Poll::Ready(if !ret.is_empty() {
+                        Some(self.as_mut().take())
+                    } else {
+                        None
+                    });
                 },
-
-                Poll::Pending => {},
             }
-
-            return Poll::Pending;
         }
+
+        if self.clock_expired(cx) {
+            self.reset_clock();
+
+            return Poll::Ready(Some(self.as_mut().take()));
+        }
+
+        Poll::Pending
     }
 
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let chunk_len = if self.items.is_empty() {
-            0
-        } else {
-            1
+        if self.done {
+            return (0, Some(0));
+        }
+
+        // The upper limit on our number of items is unbounded per the contract of Stream -- we
+        // produce empty vectors indefinitely as long as we're not `done` (checked previously).
+        let (lower, _upper) = self.stream.size_hint();
+
+        let pending_items = lower + self.items.len();
+
+        let lower = match self.cap {
+            // `pending_items` elements can be at minimum dispatched in n chunks of `cap` size.
+            Some(cap) => pending_items.div_ceil(cap),
+
+            // Iff `pending_items` is nonzero, then it will take us _at least_ one poll to dispatch
+            // all of the elements (we could submit them all on the next call to `poll_next`).
+            // Otherwise we *could* be done now.
+            None => {
+                if pending_items > 0 {
+                    1
+                } else {
+                    0
+                }
+            },
         };
 
-        let (lower, upper) = self.stream.size_hint();
-
-        let lower = lower.saturating_add(chunk_len);
-        let upper = match upper {
-            Some(x) => x.checked_add(chunk_len),
-            None => None,
-        };
-
-        (lower, upper)
+        (lower, None)
     }
 }
 
 impl<St: FusedStream> FusedStream for ChunksTimeout<St> {
     #[inline]
     fn is_terminated(&self) -> bool {
-        self.stream.is_terminated() && self.items.is_empty()
+        self.done
     }
 }
 
