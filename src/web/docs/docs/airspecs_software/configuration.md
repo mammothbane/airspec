@@ -82,10 +82,12 @@ Datasheet: [BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloa
 #### Color Sensor (Spectrometer)
 Datasheet: [AS7341](https://media.digikey.com/pdf/Data%20Sheets/Austriamicrosystems%20PDFs/AS7341_DS.pdf)
 
+As per the datasheet, the total integration time will be: (integration_time + 1) * (integration_step + 1) * 2.78µS. Reference datasheet for recommended settings.
+
 | Configurable Parameters | Type |Description | 
 | ------ | ------ | ------ | 
 | sample_period_ms | uint32_t | sample period (milliseconds) |
-| integration_time | uint32_t | intergation time |
+| integration_time | uint32_t | integration time |
 | integration_step | uint32_t | integration step |
 | gain | [Spec_gain](https://github.com/pchwalek/env_glasses/blob/main/protobuf/message.proto#L91) | gain of sensor |
 
@@ -119,7 +121,7 @@ Datasheet: [ICS-43434](https://invensense.tdk.com/wp-content/uploads/2016/02/DS-
 | Configurable Parameters | Type |Description | 
 | ------ | ------ | ------ | 
 | sample_period_ms | uint32_t | sample period (milliseconds) |
-| mic_sample_freq | uint32_t | sample frequency (hz) |
+| mic_sample_freq | uint32_t | sample frequency (hz) _note: use standard values as defined by the [SAI peripheral](https://github.com/pchwalek/env_glasses/blob/89688b90a4ca7f50423246389a315f1f96c61270/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_sai.h#L356) with a maximum of 48000 and minimum of 8000|
 
 #### Ambient Temperature/Humidity Sensor 
 Datasheet: [SHT45](https://sensirion.com/media/documents/33FD6951/63E1087C/Datasheet_SHT4x_1.pdf)
