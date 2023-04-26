@@ -17,9 +17,13 @@ plugins:
 
 nav:
   - home: index.md
-  - software:
-    - api: software/api.md
-    - auth: software/auth.md
-    - protobuf: software/proto.md
-    - nix: software/nix.md
-    - mkDocs: software/docs.md
+  - airspecs software:
+      - configuration: airspecs_software/configuration.md 
+  - server software:
+    - api: server_software/api.md
+    - auth: server_software/auth.md
+    - protobuf: server_software/proto.md
+    - nix: server_software/nix.md
+    - mkDocs: server_software/docs.md
+
+theme: readthedocs
