@@ -2,17 +2,51 @@
 Each sensor channel on AirSpecs can be configured to suite specific applications. Below, we define what can be configured for each sensor channel and how. 
 
 ## Packet Structure
-Our system uses Protocol Buffers to send data to and from the glasses. To update the system state, we use the systemState protobuf message structure as shown below.
+Our system uses Protocol Buffers to send data to and from the glasses. To update the system state, we use the AirSpecConfigPacket protobuf message structure as shown below.
 
+- **LightControlPacket** is used if wanting to manipulate the lights on the glasses
 - **SensorControl** is used to activate/deactivate sensor channels and to synchronize windowed sensor channels (i.e., IMU and blink sensing). 
 - **SensorConfig** is used to define settings for specific sensor subsystems. 
+- **DFU_Mode** is used to put the system into Direct Firmware Update mode where you will be able to connect to the glasses via a USB cable and using [STM32CubeProg](https://www.st.com/en/development-tools/stm32cubeprog.html) programming software to flash new firmware
+- _note: additional modes may be added for specific applications_
 
-_note: The "firmware_version" cannot be updated since it is only defined when flashing new firmware onto AirSpecs so it can be left unset._
 ```
-message systemState {
-    uint32 firmware_version = 1;
-    SensorControl control = 2;
-    SensorConfig  config = 3;
+message AirSpecConfigHeader{
+    uint64 timestamp_unix = 1;
+}
+
+message AirSpecConfigPacket {
+    AirSpecConfigHeader header = 1;
+
+    oneof payload {
+        LightControlPacket ctrl_indiv_led = 2;
+        SensorControl sensor_control = 3;
+        SensorConfig sensor_config = 4;
+        DFU_Mode    dfu_mode = 5;
+        BlueGreenTransition blueGreenTransition = 6;
+        RedFlashTask redFlashTask = 7;
+	BlinkCalibration blinkCalibration = 8;
+    }
+}
+```
+### Light Control Packet
+A **LightControlPacket** can be sent to change the color of any of the LEDs. Valid values are in the range 0 to 255 where 255 is the maximum intensity of any given color (i.e., red, green, and blue). If the glasses disconnect from Bluetooth, the LEDs will reset. 
+```
+message AirSpecColors{
+    uint32 red = 1;
+    uint32 green = 2;
+    uint32 blue = 3;
+}
+
+message AirSpecColorPosition{
+    AirSpecColors forward = 1;
+    AirSpecColors eye = 2;
+    AirSpecColors top = 3;
+}
+
+message LightControlPacket {
+    AirSpecColorPosition left = 1;
+    AirSpecColorPosition right = 2;
 }
 ```
 
@@ -82,12 +116,10 @@ Datasheet: [BME688](https://www.bosch-sensortec.com/media/boschsensortec/downloa
 #### Color Sensor (Spectrometer)
 Datasheet: [AS7341](https://media.digikey.com/pdf/Data%20Sheets/Austriamicrosystems%20PDFs/AS7341_DS.pdf)
 
-As per the datasheet, the total integration time will be: (integration_time + 1) * (integration_step + 1) * 2.78µS. Reference datasheet for recommended settings.
-
 | Configurable Parameters | Type |Description | 
 | ------ | ------ | ------ | 
 | sample_period_ms | uint32_t | sample period (milliseconds) |
-| integration_time | uint32_t | integration time |
+| integration_time | uint32_t | intergation time |
 | integration_step | uint32_t | integration step |
 | gain | [Spec_gain](https://github.com/pchwalek/env_glasses/blob/main/protobuf/message.proto#L91) | gain of sensor |
 
@@ -121,7 +153,7 @@ Datasheet: [ICS-43434](https://invensense.tdk.com/wp-content/uploads/2016/02/DS-
 | Configurable Parameters | Type |Description | 
 | ------ | ------ | ------ | 
 | sample_period_ms | uint32_t | sample period (milliseconds) |
-| mic_sample_freq | uint32_t | sample frequency (hz) _note: use standard values as defined by the [SAI peripheral](https://github.com/pchwalek/env_glasses/blob/89688b90a4ca7f50423246389a315f1f96c61270/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_sai.h#L356) with a maximum of 48000 and minimum of 8000|
+| mic_sample_freq | uint32_t | sample frequency (hz) |
 
 #### Ambient Temperature/Humidity Sensor 
 Datasheet: [SHT45](https://sensirion.com/media/documents/33FD6951/63E1087C/Datasheet_SHT4x_1.pdf)
@@ -143,3 +175,11 @@ Datasheet: [ICM-20948](https://invensense.tdk.com/download-pdf/icm-20948-datashe
 | enable_windowing_sync | not used | not used |
 | window_size_ms | uint32_t | sample window size (milliseconds) |
 | window_period_ms | uint32_t | sample window period (milliseconds) |
+
+### DFU Mode
+DFU mode can be enabled by sending a **AirSpecConfigPacket** with **DFU_mode** defined and **enable** set to true.
+```
+message DFU_Mode{
+    bool enable = 1;
+}
+```
