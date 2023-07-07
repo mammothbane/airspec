@@ -1,6 +1,6 @@
 site_name: Airspecs
 site_url: https://airspecs.resenv.org
-theme: material
+theme: readthedocs
 repo_url: https://github.com/pchwalek/env_glasses
 edit_uri: https://github.com/mammothbane/airspec/edit/master/src/web/docs/docs
 strict: true
@@ -18,12 +18,10 @@ plugins:
 nav:
   - home: index.md
   - airspecs software:
-      - configuration: airspecs_software/configuration.md 
+      - configuration: airspecs_software/configuration.md
   - server software:
     - api: server_software/api.md
     - auth: server_software/auth.md
     - protobuf: server_software/proto.md
     - nix: server_software/nix.md
     - mkDocs: server_software/docs.md
-
-theme: readthedocs
