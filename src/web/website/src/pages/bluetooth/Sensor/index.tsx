@@ -12,13 +12,61 @@ type Props = {
   enabled: boolean,
   setEnabled: (enabled: boolean) => void,
 };
+
+type PlotProps ={
+  sensor_type: SensorType,
+};
+
+/**
+ * Separated component to keep rerenders minimal for redux updates.
+ */
+const PlotWrap = ({
+  sensor_type,
+}: PlotProps) => {
+  const sensor_data = useAirspecsSelector(selectSensorData(to_packet_type(sensor_type))) ?? [];
+
+  return <>
+    {sensor_data.map((data, i) => <Plot
+      key={`${sensor_type}_${i}`}
+      layout={{
+        yaxis: {
+          rangemode: 'tozero',
+          showticklabels: false,
+          showgrid: false,
+          showline: false,
+          visible: false,
+        },
+        xaxis: {
+          showgrid: false,
+          showticklabels: false,
+          visible: false,
+        },
+        autosize: true,
+        margin: {
+          l: 8,
+          r: 8,
+          b: 8,
+          t: 8,
+          pad: 0,
+        },
+        modebar: {},
+        annotations: [],
+        height: 240,
+      }}
+      data={data}
+      config={{
+        displayModeBar: false,
+        displaylogo: false,
+      }}
+    />)
+    }
+  </>
+}
 export const Sensor = ({
                          type,
                          enabled,
                          setEnabled,
                        }: Props) => {
-  const sensor_data = useAirspecsSelector(selectSensorData(to_packet_type(type))) ?? [];
-
   return <Box sx={{
     p: 2,
     background: '#fff',
@@ -56,43 +104,6 @@ export const Sensor = ({
       })}
     />
 
-    {
-      sensor_data.map((data, i) => {
-        return <Plot
-          key={`${type}_${i}`}
-          layout={{
-            yaxis: {
-              rangemode: 'tozero',
-              showticklabels: false,
-              showgrid: false,
-              showline: false,
-              visible: false,
-            },
-            xaxis: {
-              showgrid: false,
-              showticklabels: false,
-              visible: false,
-            },
-            autosize: true,
-            margin: {
-              l: 8,
-              r: 8,
-              b: 8,
-              t: 8,
-              pad: 0,
-            },
-            modebar: {},
-            annotations: [],
-            height: 240,
-          }}
-          data={data!}
-          config={{
-            displayModeBar: false,
-            displaylogo: false,
-          }}
-        />;
-      })
-    }
-
+    <PlotWrap sensor_type={type}/>
   </Box>;
 };

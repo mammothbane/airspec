@@ -30,6 +30,29 @@ const SEEN_GLASSES_LOCALSTORAGE_KEY = 'SEEN_GLASSES';
 
 const throttle_submit = _.throttle(submit_packets, 5000);
 
+type WrapParams = {
+  apiKey: string,
+  shouldStream: boolean,
+}
+
+/**
+ * Separate component to handle only queueing update packets, to avoid rerendering the whole tree.
+ */
+const WrapUpdatePackets = ({
+                           shouldStream,
+                             apiKey,
+                           }: WrapParams) => {
+  const queued_packets = useAirspecsSelector(selectQueuedPackets);
+
+  const dispatch = useAirspecsDispatch();
+
+  useEffect(() => {
+    throttle_submit(queued_packets, apiKey, shouldStream, () => dispatch(clear_queue()));
+  }, [queued_packets, apiKey, shouldStream]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return <></>;
+};
+
 export const BluetoothControl = () => {
   const [seenGlassesStr, setSeenGlassesStr] = useState<string>('');
   const [ledEnabled, setLedEnabled] = useState(false);
@@ -42,18 +65,12 @@ export const BluetoothControl = () => {
   let seenGlasses: string[] = [];
   if (seenGlassesStr !== '') seenGlasses = JSON.parse(seenGlassesStr);
 
+  const dispatch = useAirspecsDispatch();
+
   useEffect(() => {
     const seen = localStorage.getItem(SEEN_GLASSES_LOCALSTORAGE_KEY) ?? '';
     setSeenGlassesStr(seen);
   }, []);
-
-  const queued_packets = useAirspecsSelector(selectQueuedPackets);
-
-  const dispatch = useAirspecsDispatch();
-
-  useEffect(() => {
-    throttle_submit(queued_packets, apiKey, shouldStream, () => dispatch(clear_queue()));
-  }, [queued_packets, apiKey, shouldStream]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     selectDevice,
@@ -99,7 +116,7 @@ export const BluetoothControl = () => {
       sensorControl: payload,
     });
 
-    console.debug({ enableMsg: msg });
+    console.debug({enableMsg: msg});
 
     await sendMessage(msg);
   };
@@ -119,6 +136,8 @@ export const BluetoothControl = () => {
     flexDirection: 'column',
     my: 2,
   }}>
+    <WrapUpdatePackets apiKey={apiKey} shouldStream={shouldStream}/>
+
     <Box sx={{
       alignItems: 'baseline',
       display: 'flex',

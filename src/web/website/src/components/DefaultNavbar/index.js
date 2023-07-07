@@ -457,7 +457,7 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
         my={relative ? 0 : 2}
         mx={relative ? 0 : 3}
         width={relative ? "100%" : "calc(100% - 48px)"}
-        borderRadius="xl"
+        borderRadius={4}
         shadow={transparent ? "none" : "md"}
         color={light ? "white" : "dark"}
         position={relative ? "relative" : "absolute"}
@@ -535,10 +535,12 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
           </Box>
         </Box>
         <Box
-          bgColor={transparent ? "white" : "transparent"}
           shadow={transparent ? "lg" : "none"}
-          borderRadius="xl"
           px={transparent ? 2 : 0}
+          sx={{
+            backgroundColor: transparent ? "white" : "transparent",
+            borderRadius: 4
+          }}
         >
           {mobileView && <DefaultNavbarMobile routes={routes} open={mobileNavbar} />}
         </Box>

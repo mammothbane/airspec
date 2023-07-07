@@ -41,7 +41,6 @@ function Counters() {
           {/* @ts-ignore */}
           <DefaultCounterCard
             count={18}
-            // suffix="+"
             title="LEDs"
             description="For inward and outward actuation, including subtle notification to the wearer"
           />
