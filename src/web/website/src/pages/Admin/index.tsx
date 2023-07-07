@@ -3,7 +3,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, List, TextField, Typography } from '@mui/material';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
-import DefaultNavbar from '../../examples/Navbars/DefaultNavbar';
+import DefaultNavbar from '../../components/DefaultNavbar';
 import routes from '../../routes';
 import { ConfirmDelete } from './ConfirmDelete';
 

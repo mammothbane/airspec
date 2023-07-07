@@ -4,7 +4,7 @@ import {
   isPlain,
 } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import { reducer as bluetoothReducer } from './bluetooth/buttons/slice';
+import { reducer as bluetoothReducer } from './pages/bluetooth/slice';
 
 export const store = configureStore({
   reducer: {
