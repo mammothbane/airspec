@@ -25,6 +25,7 @@ const ForkTsCheckerWebpackPlugin =
     : require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
+const glob = require('glob');
 
 const createEnvironmentHash = require('./webpack/persistentCache/createEnvironmentHash');
 
@@ -182,6 +183,8 @@ module.exports = function (webpackEnv) {
     return loaders;
   };
 
+  const protopath = `${process.cwd()}/../../../proto`;
+
   return {
     target: ['browserslist'],
     // Webpack noise constrained to errors and warnings
@@ -317,19 +320,6 @@ module.exports = function (webpackEnv) {
         ...(modules.webpackAliases || {}),
       },
       plugins: [
-        // Prevents users from importing files from outside of src/ (or node_modules/).
-        // This often causes confusion because we only process files within src/ with babel.
-        // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
-        // please link the files into your node_modules/ and let module-resolution kick in.
-        // Make sure your source files are compiled, as they will not be processed in any way.
-        new ModuleScopePlugin(paths.appSrc, [
-          paths.appPackageJson,
-          reactRefreshRuntimeEntry,
-          reactRefreshWebpackPluginRuntimeEntry,
-          babelRuntimeEntry,
-          babelRuntimeEntryHelpers,
-          babelRuntimeRegenerator,
-        ]),
       ],
     },
     module: {
@@ -352,7 +342,10 @@ module.exports = function (webpackEnv) {
               use: {
                 loader: require.resolve('protobufjs-loader'),
                 options: {
-                  pbts: true,
+                  paths: [protopath],
+                  pbts: {
+                    args: [],
+                  },
                   target: 'static-module',
                 }
               }
