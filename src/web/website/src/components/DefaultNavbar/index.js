@@ -30,9 +30,9 @@ import Grow from "@mui/material/Grow";
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 import MuiLink from "@mui/material/Link";
+import Box from "@mui/material/Box";
 
 // Material Kit 2 React components
-import MKBox from "components/MKBox";
 import MKTypography from "components/MKTypography";
 import MKButton from "components/MKButton";
 
@@ -248,7 +248,7 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
             }}
           >
             {item.description ? (
-              <MKBox>
+              <Box>
                 {item.name}
                 <MKTypography
                   display="block"
@@ -259,7 +259,7 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
                 >
                   {item.description}
                 </MKTypography>
-              </MKBox>
+              </Box>
             ) : (
               item.name
             )}
@@ -313,16 +313,16 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
             background: ({ palette: { white } }) => white.main,
           }}
         >
-          <MKBox borderRadius="lg">
+          <Box borderRadius="lg">
             <MKTypography variant="h1" color="white">
               <Icon ref={setArrowRef} sx={{ mt: -3 }}>
                 arrow_drop_up
               </Icon>
             </MKTypography>
-            <MKBox shadow="lg" borderRadius="lg" p={2} mt={2}>
+            <Box shadow="lg" borderRadius="lg" p={2} mt={2}>
               {renderRoutes}
-            </MKBox>
-          </MKBox>
+            </Box>
+          </Box>
         </Grow>
       )}
     </Popper>
@@ -380,7 +380,7 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
                     })}
                   >
                     {item.description ? (
-                      <MKBox>
+                      <Box>
                         {item.name}
                         <MKTypography
                           display="block"
@@ -391,7 +391,7 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
                         >
                           {item.description}
                         </MKTypography>
-                      </MKBox>
+                      </Box>
                     ) : (
                       item.name
                     )}
@@ -439,11 +439,11 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
             background: ({ palette: { white } }) => white.main,
           }}
         >
-          <MKBox ml={2.5} mt={-2.5} borderRadius="lg">
-            <MKBox shadow="lg" borderRadius="lg" py={1.5} px={1} mt={2}>
+          <Box ml={2.5} mt={-2.5} borderRadius="lg">
+            <Box shadow="lg" borderRadius="lg" py={1.5} px={1} mt={2}>
               {renderNestedRoutes}
-            </MKBox>
-          </MKBox>
+            </Box>
+          </Box>
         </Grow>
       )}
     </Popper>
@@ -451,7 +451,7 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
 
   return (
     <Container sx={sticky ? { position: "sticky", top: 0, zIndex: 10 } : null}>
-      <MKBox
+      <Box
         py={1}
         px={{ xs: 4, sm: transparent ? 2 : 3, lg: transparent ? 0 : 2 }}
         my={relative ? 0 : 2}
@@ -468,8 +468,8 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
           backdropFilter: transparent ? "none" : `saturate(200%) blur(30px)`,
         })}
       >
-        <MKBox display="flex" justifyContent="space-between" alignItems="center">
-          <MKBox
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
             component={Link}
             to="/"
             lineHeight={1}
@@ -479,16 +479,16 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
             <MKTypography variant="button" fontWeight="bold" color={light ? "white" : "dark"}>
               {brand}
             </MKTypography>
-          </MKBox>
-          <MKBox
+          </Box>
+          <Box
             color="inherit"
             display={{ xs: "none", lg: "flex" }}
             ml="auto"
             mr={center ? "auto" : 0}
           >
             {renderNavbarItems}
-          </MKBox>
-          <MKBox ml={{ xs: "auto", lg: 0 }}>
+          </Box>
+          <Box ml={{ xs: "auto", lg: 0 }}>
             {action &&
               (action.type === "internal" ? (
                 <MKButton
@@ -521,8 +521,8 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
                   {action.label}
                 </MKButton>
               ))}
-          </MKBox>
-          <MKBox
+          </Box>
+          <Box
             display={{ xs: "inline-block", lg: "none" }}
             lineHeight={0}
             py={1.5}
@@ -532,17 +532,17 @@ function DefaultNavbar({ brand, routes, transparent, light, action, sticky, rela
             onClick={openMobileNavbar}
           >
             <Icon fontSize="default">{mobileNavbar ? "close" : "menu"}</Icon>
-          </MKBox>
-        </MKBox>
-        <MKBox
+          </Box>
+        </Box>
+        <Box
           bgColor={transparent ? "white" : "transparent"}
           shadow={transparent ? "lg" : "none"}
           borderRadius="xl"
           px={transparent ? 2 : 0}
         >
           {mobileView && <DefaultNavbarMobile routes={routes} open={mobileNavbar} />}
-        </MKBox>
-      </MKBox>
+        </Box>
+      </Box>
       {dropdownMenu}
       {nestedDropdownMenu}
     </Container>

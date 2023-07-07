@@ -24,9 +24,9 @@ import PropTypes from "prop-types";
 // @mui material components
 import Collapse from "@mui/material/Collapse";
 import MuiLink from "@mui/material/Link";
+import Box from "@mui/material/Box";
 
 // Material Kit 2 React components
-import MKBox from "components/MKBox";
 import MKTypography from "components/MKTypography";
 
 // Material Kit 2 React example components
@@ -49,10 +49,10 @@ function DefaultNavbarMobile({ routes, open }) {
         route={route}
         collapse={Boolean(routeCollapses)}
       >
-        <MKBox sx={{ height: "15rem", maxHeight: "15rem", overflowY: "scroll" }}>
+        <Box sx={{ height: "15rem", maxHeight: "15rem", overflowY: "scroll" }}>
           {routeCollapses &&
             routeCollapses.map((item) => (
-              <MKBox key={item.name} px={2}>
+              <Box key={item.name} px={2}>
                 {item.collapse ? (
                   <>
                     <MKTypography
@@ -97,7 +97,7 @@ function DefaultNavbarMobile({ routes, open }) {
                     ))}
                   </>
                 ) : (
-                  <MKBox
+                  <Box
                     key={item.key}
                     display="block"
                     component={item.route ? Link : MuiLink}
@@ -139,20 +139,20 @@ function DefaultNavbarMobile({ routes, open }) {
                     >
                       {item.description}
                     </MKTypography>
-                  </MKBox>
+                  </Box>
                 )}
-              </MKBox>
+              </Box>
             ))}
-        </MKBox>
+        </Box>
       </DefaultNavbarDropdown>
     )
   );
 
   return (
     <Collapse in={Boolean(open)} timeout="auto" unmountOnExit>
-      <MKBox width="calc(100% + 1.625rem)" my={2} ml={-2}>
+      <Box width="calc(100% + 1.625rem)" my={2} ml={-2}>
         {renderNavbarItems}
-      </MKBox>
+      </Box>
     </Collapse>
   );
 }

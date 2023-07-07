@@ -1,19 +1,17 @@
 import AddIcon from '@mui/icons-material/Add';
 
+
 import { Box, Button, List, TextField, Typography } from '@mui/material';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import DefaultNavbar from '../../components/DefaultNavbar';
 import routes from '../../routes';
+import { BACKEND } from '../../util';
 import { ConfirmDelete } from './ConfirmDelete';
 
 import { CopyPaste } from './CopyPaste';
 import { NewToken } from './NewToken';
 import { TokenRow } from './TokenRow';
-
-export const BACKEND = window.location.href.startsWith('https://')
-  ? 'https://api.airspecs.resenv.org'
-  : 'http://localhost:8080';
 
 enum Success {
   Yes,
@@ -69,7 +67,7 @@ const doFetch = async (adminKey: string, setKeys: (keys: UserInfo[]) => void, se
 };
 
 const debouncedFetchKeys: _.DebouncedFunc<typeof doFetch> = _.debounce((...params: Parameters<typeof doFetch>) => {
-  const _ = doFetch(...params);
+  doFetch(...params).catch(err => console.error({ err }));
 }, 400) as any;
 
 const createTokenThrottled = _.throttle((f: () => void) => f(), 2500);

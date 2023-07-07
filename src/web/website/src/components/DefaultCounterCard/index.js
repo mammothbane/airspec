@@ -20,26 +20,26 @@ import PropTypes from "prop-types";
 import CountUp from "react-countup";
 
 // Material Kit 2 React components
-import MKBox from "components/MKBox";
 import MKTypography from "components/MKTypography";
+import {Box, Typography} from "@mui/material";
 
 function DefaultCounterCard({ color, count, title, description, ...rest }) {
   return (
-    <MKBox p={2} textAlign="center" lineHeight={1}>
+    <Box p={2} textAlign="center" lineHeight={1}>
       <MKTypography variant="h1" color={color} textGradient>
         <CountUp end={count} duration={1} {...rest} />
       </MKTypography>
       {title && (
-        <MKTypography variant="h5" mt={2} mb={1}>
+        <Typography variant="h5" mt={2} mb={1}>
           {title}
-        </MKTypography>
+        </Typography>
       )}
       {description && (
-        <MKTypography variant="body2" color="text">
+        <Typography variant="body2" color="text">
           {description}
-        </MKTypography>
+        </Typography>
       )}
-    </MKBox>
+    </Box>
   );
 }
 

@@ -16,8 +16,8 @@ Coded by www.creative-tim.com
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
+import Box from "@mui/material/Box";
 
-import MKBox from "components/MKBox";
 import MKTypography from "components/MKTypography";
 import DefaultNavbar from "components/DefaultNavbar";
 import DefaultFooter from "components/DefaultFooter";
@@ -26,8 +26,6 @@ import Counters from "./Counters";
 
 import routes from "routes";
 import footerRoutes from "footer.routes";
-
-import 'assets/airspec.css';
 
 import bgImage from "assets/images/pexels-barnabas2.jpg"
 
@@ -38,7 +36,7 @@ export const Main = () => <>
   />
 
   {/* @ts-ignore */}
-  <MKBox
+  <Box
     minHeight="75vh"
     width="100%"
     sx={{
@@ -47,6 +45,7 @@ export const Main = () => <>
       backgroundPosition: "top",
       display: "grid",
       placeItems: "center",
+      mt: '-1px',
     }}
   >
     <Container>
@@ -79,7 +78,7 @@ export const Main = () => <>
         </MKTypography>
       </Grid>
     </Container>
-  </MKBox>
+  </Box>
   <Card
     sx={{
       p: 2,
@@ -94,7 +93,7 @@ export const Main = () => <>
     <Counters />
 
     {/* @ts-ignore */}
-    <MKBox pt={2} pb={6}>
+    <Box pt={2} pb={6}>
       <Container>
         <Grid container spacing={3}>
           <Grid item xs={12} lg={6} ml="auto" sx={{ textAlign: { xs: "center", lg: "left" } }}>
@@ -133,11 +132,11 @@ export const Main = () => <>
           </Grid>
         </Grid>
       </Container>
-    </MKBox>
+    </Box>
   </Card>
 
   {/* @ts-ignore */}
-  <MKBox px={1}>
+  <Box px={1}>
     <DefaultFooter content={footerRoutes} />
-  </MKBox>
+  </Box>
 </>;

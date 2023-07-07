@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import DefaultNavbar from '../../components/DefaultNavbar';
 
-import { BluetoothControl } from './config';
+import { BluetoothControl } from './BluetoothControl';
 import routes from '../../routes';
 
 export const BluetoothConfig = () => {

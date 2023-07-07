@@ -19,15 +19,13 @@ import PropTypes from "prop-types";
 // @mui material components
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
-
-// Material Kit 2 React components
-import MKBox from "components/MKBox";
+import Box from "@mui/material/Box";
 
 function DefaultFooter({ content }) {
   const { copyright } = content;
 
   return (
-    <MKBox component="footer">
+    <Box component="footer">
       <Container>
         <Grid container spacing={3}>
           <Grid item xs={12} sx={{ textAlign: "center", mb: 3 }}>
@@ -35,7 +33,7 @@ function DefaultFooter({ content }) {
           </Grid>
         </Grid>
       </Container>
-    </MKBox>
+    </Box>
   );
 }
 

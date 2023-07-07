@@ -22,9 +22,9 @@ import { Link } from "react-router-dom";
 // @mui material components
 import Collapse from "@mui/material/Collapse";
 import Icon from "@mui/material/Icon";
+import Box from "@mui/material/Box";
 
 // Material Kit 2 React components
-import MKBox from "components/MKBox";
 import MKTypography from "components/MKTypography";
 
 function DefaultNavbarDropdown({
@@ -52,7 +52,7 @@ function DefaultNavbarDropdown({
 
   return (
     <>
-      <MKBox
+      <Box
         {...rest}
         mx={1}
         p={1}
@@ -86,7 +86,7 @@ function DefaultNavbarDropdown({
             {collapse && "keyboard_arrow_down"}
           </Icon>
         </MKTypography>
-      </MKBox>
+      </Box>
       {children && (
         <Collapse in={Boolean(collapseStatus)} timeout={400} unmountOnExit>
           {children}
