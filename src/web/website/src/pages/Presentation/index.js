@@ -32,15 +32,6 @@ import FilledInfoCard from "examples/Cards/InfoCards/FilledInfoCard";
 
 // Presentation page sections
 import Counters from "pages/Presentation/sections/Counters";
-import Information from "pages/Presentation/sections/Information";
-import DesignBlocks from "pages/Presentation/sections/DesignBlocks";
-import Pages from "pages/Presentation/sections/Pages";
-import Testimonials from "pages/Presentation/sections/Testimonials";
-import Download from "pages/Presentation/sections/Download";
-
-// Presentation page components
-import BuiltByDevelopers from "pages/Presentation/components/BuiltByDevelopers";
-
 
 // Routes
 import routes from "routes";
@@ -49,10 +40,7 @@ import footerRoutes from "footer.routes";
 import 'assets/airspec.css';
 
 // Images
-// import bgImage from "assets/images/bg-presentation.jpg";
 import bgImage from "assets/images/pexels-barnabas2.jpg"
-import cloudImage from "assets/images/clouds.png";
-import fogLow from "assets/images/fog-low.png";
 
 function Presentation() {
   return (
