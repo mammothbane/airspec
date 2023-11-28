@@ -1,4 +1,4 @@
-import { Box, Button, Switch, TextField, Typography } from '@mui/material';
+import {Alert, Box, Button, Snackbar, Switch, TextField, Typography} from '@mui/material';
 import { useEffect, useState } from 'react';
 import _ from 'lodash';
 
@@ -10,14 +10,16 @@ import {
 
 import { useAirspecsDispatch, useAirspecsSelector } from '../../store';
 import { debug_led } from './debug';
-import {
-  get_status,
-  request_dfu_device,
-} from './dfu';
 
 import { Sensor } from './Sensor';
 import { extractData } from './Sensor/util';
-import { clear_queue, record_packets, record_sensor_data, selectQueuedPackets } from './slice';
+import {
+  clear_queue,
+  record_packets,
+  record_sensor_data,
+  selectOldPacketAgeMillis,
+  selectQueuedPackets
+} from './slice';
 import {
   ALL_SENSOR_TYPES,
   DEFAULT_ENABLED,
@@ -27,6 +29,8 @@ import {
 import { submit_packets } from './util';
 
 const SEEN_GLASSES_LOCALSTORAGE_KEY = 'SEEN_GLASSES';
+
+const DISPLAY_PERIOD = 500;
 
 const throttle_submit = _.throttle(submit_packets, 5000);
 
@@ -64,6 +68,9 @@ export const BluetoothControl = () => {
 
   let seenGlasses: string[] = [];
   if (seenGlassesStr !== '') seenGlasses = JSON.parse(seenGlassesStr);
+
+  const oldPacketAge = useAirspecsSelector(selectOldPacketAgeMillis);
+  const shouldShowWarning = oldPacketAge != null && oldPacketAge < DISPLAY_PERIOD;
 
   const dispatch = useAirspecsDispatch();
 
@@ -136,6 +143,12 @@ export const BluetoothControl = () => {
     flexDirection: 'column',
     my: 2,
   }}>
+    <Snackbar open={shouldShowWarning}>
+      <Alert severity={"warning"}>
+        Glasses time is desynced
+      </Alert>
+    </Snackbar>
+
     <WrapUpdatePackets apiKey={apiKey} shouldStream={shouldStream}/>
 
     <Box sx={{
@@ -233,13 +246,6 @@ export const BluetoothControl = () => {
                 },
               }));
             }
-
-            await new Promise(r => setTimeout(r, 1000));
-
-            const device = await request_dfu_device();
-            const status = await get_status(device);
-
-            console.debug({status});
           }
         }
         variant="contained"
@@ -248,7 +254,7 @@ export const BluetoothControl = () => {
           mx: 1,
         }}
       >
-        DFU
+        Enter DFU Mode
       </Button>
     </Box>
 
