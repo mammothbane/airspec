@@ -1,9 +1,9 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
 
     flake-utils = {
-      url = "github:numtide/flake-utils/master";
+      url = "github:numtide/flake-utils/main";
     };
 
     rust-overlay = {
@@ -53,31 +53,6 @@
             cargo = local_rust;
             rustc = local_rust;
           };
-        })
-
-        (final: prev: let
-          overrides = {
-            packageOverrides = pyfinal: pyprev: {
-              #pip = pyprev.pip.overrideAttrs (finalAttrs: prevAttrs: {
-                #postPatch = (prevAttrs.postPatch or "") + ''
-## noop
-                #'';
-              #});
-
-              bootstrapped-pip = pyprev.bootstrapped-pip.overrideAttrs {
-                postPatch = ''
-                  mkdir -p $out/bin
-                '';
-              };
-            };
-          };
-
-        in {
-          python38 = prev.python38.override overrides;
-          python39 = prev.python39.override overrides;
-          python310 = prev.python310.override overrides;
-          python311 = prev.python311.override overrides;
-          python312 = prev.python312.override overrides;
         })
       ];
     } // args;
@@ -152,8 +127,6 @@
             ssh-to-pgp
             sops
           ] ++ (pkgs.lib.optionals pkgs.hostPlatform.isLinux [
-            swift
-            swift_protobuf
           ]);
 
           NANOPB_PROTO = nanopb_proto;

@@ -5,6 +5,7 @@
 
   python3Packages,
   coreutils,
+  sd,
 
   writeShellApplication,
 }: let
@@ -20,8 +21,13 @@
     mkdir -p $out
 
     cp ${src}/flaskWebsite/*.py $out
-  '';
 
+    ${sd}/bin/sd -F 'from langchain.agents.agent_toolkits import create_python_agent' 'from langchain_experimental.agents.agent_toolkits import create_python_agent' $out/{agent,gpt}.py
+
+    ${sd}/bin/sd -F 'from langchain.tools.python.tool import PythonREPLTool' 'from langchain_experimental.tools.python.tool import PythonREPLTool' $out/{agent,gpt}.py
+
+    ${sd}/bin/sd "^app\.run\(.*\)$" "" $out/app.py
+  '';
 
 in writeShellApplication {
   name = "physio_chain";
@@ -33,16 +39,29 @@ in writeShellApplication {
       gunicorn
       openai
       langchain
-      langchain_experimental
       flask
+      flask-cors
       pandas
       pytz
+      python-dotenv
+
+      (langchain.overridePythonAttrs (prevAttrs: {
+        name = "langchain-experimental";
+
+        sourceRoot = "${prevAttrs.src.name}/libs/experimental";
+
+        pythonImportsCheck = [
+          "langchain_experimental"
+        ];
+
+        doCheck = false;
+      }))
     ]))
   ];
 
   text = ''
     set -euo pipefail
 
-    exec python3 -m gunicorn -w "$(nproc)" --pythonpath "${filteredSrc}" 'app:app'
+    exec python3 -m gunicorn "$@" --pythonpath "${filteredSrc}" 'app:app'
   '';
 }
