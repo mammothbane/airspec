@@ -4,6 +4,8 @@
   nodejs_18,
   yarn,
   fd,
+  ripgrep,
+  sd,
   ...
 }: let
   yarn' = yarn.override { nodejs = nodejs_18; };
@@ -14,11 +16,6 @@ in mkYarnPackage {
 
   packageJSON = ./package.json;
   yarnLock = ./yarn.lock;
-
-  postUnpack = ''
-    cp -R ${../../../proto} /build/proto
-    chmod -R a+rw /build/proto
-  '';
 
   buildPhase = ''
     # some packages are poorly-behaved and assume node_modules/.cache is writable, but
@@ -40,10 +37,21 @@ in mkYarnPackage {
 
     mkdir -p node_modules/.cache
 
+    # move proto into build to fix resolution issues
+    cp -R ${../../../proto} proto
+    chmod -R a+rw proto
+
+    ${ripgrep}/bin/rg -t ts -t js --files-with-matches '../../../proto/' . | \
+      xargs ${sd}/bin/sd '../../../proto/' 'proto/'
+
+    ${sd}/bin/sd 'const protopath = .*;$' "const protopath = '$(pwd)/proto';" config/webpack.config.js
+
     popd
 
-    ${yarn'}/bin/yarn --offline build || true # generates protobufs but fails
-    ${yarn'}/bin/yarn --offline build
+    if ! ${yarn'}/bin/yarn --offline build; then
+      echo 'yarn build failed for proto generation, retrying' >&2
+      ${yarn'}/bin/yarn --offline build
+    fi
 
     ${fd}/bin/fd -g '*.js.LICENSE.txt' deps/AirSpec/build/static | xargs rm
   '';

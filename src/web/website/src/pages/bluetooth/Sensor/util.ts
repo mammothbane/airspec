@@ -140,7 +140,7 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
       const sample_period = (1.0 / blink_sample.sampleRate) * 1000;
 
       const samples: number[] = Array.from(blink_sample.payloadByte.sample);
-      const blink_ts = samples.map((_x, i) => blink_sample.timestampUnix + sample_period * i);
+      const blink_ts = samples.map((_x, i) => (blink_sample.timestampUnix as number) + sample_period * i);
 
       return [
         {x: blink_ts, y: samples},
@@ -152,7 +152,7 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
       const elems = IMUPayload.parse(imu_packet.payload!.sample!);
 
       const imu_samples = (elems.samples as IMUBinaryPacket_t[]).map((pkt, i) => ({
-        ts: imu_packet.timestampUnix + imu_packet.samplingFrequency * i,
+        ts: (imu_packet.timestampUnix as number) + imu_packet.samplingFrequency * i,
         ...pkt,
       }));
 
@@ -228,7 +228,7 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
       });
 
     case 'lux':
-      const lux_ts = sample.payload.map((payload: LuxPacket.Payload) => payload.timestampUnix);
+      const lux_ts = sample.payload.map((payload: LuxPacket.Payload) => payload.timestampUnix as number);
       const lux = sample.payload.map((payload: LuxPacket.Payload) => payload.lux);
 
       return [
