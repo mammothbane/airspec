@@ -8,6 +8,7 @@
     ./sshguard.nix
     ./prometheus.nix
     ./aws_support.nix
+    ./physio_chain.nix
   ];
 
   system.stateVersion = "22.11";

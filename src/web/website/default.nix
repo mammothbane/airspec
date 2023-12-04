@@ -1,12 +1,12 @@
 {
   mkYarnPackage,
   lib,
-  nodejs-16_x,
+  nodejs_18,
   yarn,
   fd,
   ...
 }: let
-  yarn' = yarn.override { nodejs = nodejs-16_x; };
+  yarn' = yarn.override { nodejs = nodejs_18; };
   package_contents = lib.importJSON ./package.json;
 in mkYarnPackage {
   pname = "airspecs-website";
