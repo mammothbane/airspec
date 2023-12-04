@@ -6,5 +6,4 @@
   grpc_swift      = pkgs.callPackage ./grpc_swift.nix       {};
   firmware        = pkgs.callPackage ./firmware             { inherit self; };
   physio_chain    = pkgs.callPackage ./physio_chain.nix     {};
-  langchain       = pkgs.callPackage ./langchain.nix        {};
 }
