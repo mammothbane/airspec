@@ -67,7 +67,11 @@ in {
 
       "gptree.airspecs.resenv.org" = commonOptions // {
         locations."/" = {
-          proxyPass = "http://localhost:8123/";
+          proxyPass = "http://localhost:8234/";
+
+          extraConfig = ''
+            proxy_read_timeout 120;
+          '';
         };
       };
 

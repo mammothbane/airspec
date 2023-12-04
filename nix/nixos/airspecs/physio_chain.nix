@@ -19,6 +19,11 @@
       Type = "exec";
 
       ExecStart = "${flake.packages.${pkgs.system}.physio_chain}/bin/physio_chain -n 4 -b 0.0.0.0:8234";
+      Environment = [
+        "OPENAI_API_KEY="
+        "OPENAI_ORGANIZATION="
+        "APP_SECRET_KEY="
+      ];
 
       DynamicUser = true;
 
