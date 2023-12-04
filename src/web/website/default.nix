@@ -15,6 +15,11 @@ in mkYarnPackage {
   packageJSON = ./package.json;
   yarnLock = ./yarn.lock;
 
+  postUnpack = ''
+    cp -R ${../../../proto} /build/proto
+    chmod -R a+rw /build/proto
+  '';
+
   buildPhase = ''
     # some packages are poorly-behaved and assume node_modules/.cache is writable, but
     # the whole node_modules directory is read-only because it's provided via nix.
@@ -37,6 +42,7 @@ in mkYarnPackage {
 
     popd
 
+    ${yarn'}/bin/yarn --offline build || true # generates protobufs but fails
     ${yarn'}/bin/yarn --offline build
 
     ${fd}/bin/fd -g '*.js.LICENSE.txt' deps/AirSpec/build/static | xargs rm
