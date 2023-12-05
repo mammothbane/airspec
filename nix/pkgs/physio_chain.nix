@@ -9,7 +9,7 @@
 
   writeShellApplication,
 }: let
-  version = "3f23a6a1cb0695e9e929a317e42abd16ac2e5c37";
+  version = "ad8859fdc4f82f3976126bc955ecf48fa8a763c6";
 
   src = builtins.fetchGit {
     url = "ssh://git@github.com/cathy-mengying-fang/physio_chain";
