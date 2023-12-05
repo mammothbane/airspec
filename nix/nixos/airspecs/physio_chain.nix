@@ -1,6 +1,7 @@
 {
   pkgs,
   flake,
+  config,
   ...
 }: {
   systemd.services.physio_chain = {
@@ -18,16 +19,15 @@
     serviceConfig = {
       Type = "exec";
 
-      ExecStart = "${flake.packages.${pkgs.system}.physio_chain}/bin/physio_chain -n 4 -b 0.0.0.0:8234";
+      ExecStart = "${flake.packages.${pkgs.system}.physio_chain}/bin/physio_chain -n 4 -b 0.0.0.0:8234 -t 240";
 
       Environment = [
-        "OPENAI_API_KEY="
-        "OPENAI_ORGANIZATION="
-        "APP_SECRET_KEY="
         "INFLUX_URL=https://influx.airspecs.resenv.org"
         "INFLUX_ORG=media-lab"
         "INFLUX_BUCKET=sensor_data_boston"
       ];
+
+      EnvironmentFile = config.sops.secrets."gptree_env".path;
 
       DynamicUser = true;
 
@@ -39,9 +39,7 @@
       KillMode = "process";
       KillSignal = "SIGINT";
 
-      CacheDirectory = "inadyn";
-
-      TimeoutStopSec = "500ms";
+      TimeoutStopSec = "5s";
 
       ProtectSystem = "strict";
       ProtectProc = "noaccess";

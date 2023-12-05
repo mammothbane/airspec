@@ -52,6 +52,16 @@
             rustc = local_rust;
           };
         })
+
+        (final: prev: {
+          sops = prev.sops.overrideAttrs (finalAttrs: prevAttrs: {
+            postPatch = ''
+              head -n-6 pgp/keysource.go > pgp/keysource2.go
+              echo 'func shortenFingerprint(s string) string { return s }' >> pgp/keysource2.go
+              mv pgp/keysource2.go pgp/keysource.go
+            '';
+          });
+        })
       ];
     } // args;
 

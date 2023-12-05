@@ -1,11 +1,13 @@
 keys:
-  - &mammothbane  51823FB78BDE4316BE0D32DCBEC7D5711325BB59
+  - &yubikey      0635DF1C703CC9388CC12D400A34FFA09380CEF0!
+  - &ratterlin    141D6CCB65D2F204D7BE1046F696FE1F3B938BC5!
   - &airspecs     C9D8333B793F60F03222DB3AE08F08315398769A
 
 creation_rules:
   - path_regex: nix/nixos/airspecs/.*
     key_groups:
       - pgp:
-        - *mammothbane
+        - *yubikey
+        - *ratterlin
         - *airspecs
 
