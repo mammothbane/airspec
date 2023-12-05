@@ -44,6 +44,7 @@ in writeShellApplication {
       pandas
       pytz
       python-dotenv
+      influxdb-client
 
       (langchain.overridePythonAttrs (prevAttrs: {
         name = "langchain-experimental";
