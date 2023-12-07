@@ -15,7 +15,7 @@
     import os
     import shlex
     import subprocess
-    
+
     from pathlib import Path
 
 
@@ -25,21 +25,8 @@
         'flaskWebsite',
     ]
 
-    START_CMD = 'sudo /run/current-system/sw/bin/systemctl ' + \
-      'start ${mod_name}.path'
-
     RESET_FAILED_CMD = 'sudo /run/current-system/sw/bin/systemctl ' + \
       'reset-failed ${mod_name}.service'
-
-    STOP_CMD = 'sudo /run/current-system/sw/bin/systemctl ' + \
-      'stop ${mod_name}.service ${mod_name}.path'
-
-    print('stopping running service')
-
-    subprocess.run(
-      shlex.split(STOP_CMD),
-      check=True,
-    )
 
     b = io.BytesIO(sys.stdin.buffer.read())
     f = tarfile.open(fileobj=b)
@@ -88,15 +75,8 @@
 
                 shutil.move(fpath, target)
 
-    print('starting service')
-
     subprocess.run(
       shlex.split(RESET_FAILED_CMD),
-      check=True,
-    )
-
-    subprocess.run(
-      shlex.split(START_CMD),
       check=True,
     )
   '';
@@ -163,8 +143,8 @@ in {
 
       wantedBy = [ "multi-user.target" ];
 
-      after = [ 
-        "network-online.target" 
+      after = [
+        "network-online.target"
         "physio_chain.service"
       ];
 
