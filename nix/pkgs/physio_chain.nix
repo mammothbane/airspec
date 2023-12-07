@@ -12,7 +12,7 @@
 
   src = builtins.fetchGit {
     url = "ssh://git@github.com/cathy-mengying-fang/physio_chain";
-    ref = "mqdc";
+    ref = "npry.gptree";
     rev = version;
   };
 
@@ -22,38 +22,46 @@
     cp ${src}/flaskWebsite/*.py $out
   '';
 
-in writeShellApplication {
-  name = "physio_chain";
+  pythonRuntime = python3Packages.python.withPackages (pypkgs: with pypkgs; [
+    gunicorn
+    openai
+    langchain
+    flask
+    flask-cors
+    pandas
+    pytz
+    python-dotenv
+    influxdb-client
 
-  runtimeInputs = [
-    (python3Packages.python.withPackages (pypkgs: with pypkgs; [
-      gunicorn
-      openai
-      langchain
-      flask
-      flask-cors
-      pandas
-      pytz
-      python-dotenv
-      influxdb-client
+    (langchain.overridePythonAttrs (prevAttrs: {
+      name = "langchain-experimental";
 
-      (langchain.overridePythonAttrs (prevAttrs: {
-        name = "langchain-experimental";
+      sourceRoot = "${prevAttrs.src.name}/libs/experimental";
 
-        sourceRoot = "${prevAttrs.src.name}/libs/experimental";
+      pythonImportsCheck = [
+        "langchain_experimental"
+      ];
 
-        pythonImportsCheck = [
-          "langchain_experimental"
-        ];
+      doCheck = false;
+    }))
+  ]);
 
-        doCheck = false;
-      }))
-    ]))
-  ];
+  app = writeShellApplication {
+    name = "physio_chain";
 
-  text = ''
-    set -euo pipefail
+    runtimeInputs = [
+      pythonRuntime
+    ];
 
-    exec python3 -m gunicorn "$@" --pythonpath "${filteredSrc}" 'app:app'
-  '';
-}
+    text = ''
+      set -euo pipefail
+
+      exec python3 -m gunicorn "$@" --pythonpath "${filteredSrc}" 'app:app'
+    '';
+  };
+
+in app.overrideAttrs (finalAttrs: prevAttrs: {
+  passthru = {
+    inherit pythonRuntime;
+  };
+})
