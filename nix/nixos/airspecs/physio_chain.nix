@@ -16,15 +16,15 @@
       StartLimitBurst = 5;
     };
 
+    environment = {
+      INFLUX_URL = "https://influx.airspecs.resenv.org";
+      INFLUX_ORG = "media-lab";
+      INFLUX_BUCKET = "sensor_data_boston";
+    };
+
     serviceConfig = {
       Type = "exec";
       ExecStart = "${flake.packages.${pkgs.system}.physio_chain}/bin/physio_chain -n 4 -b 0.0.0.0:8234 -t 240";
-
-      Environment = [
-        "INFLUX_URL=https://influx.airspecs.resenv.org"
-        "INFLUX_ORG=media-lab"
-        "INFLUX_BUCKET=sensor_data_boston"
-      ];
 
       EnvironmentFile = config.sops.secrets."gptree_env".path;
 

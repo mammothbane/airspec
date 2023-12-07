@@ -15,7 +15,7 @@
     "cdrom"
     "plugdev"
   ]
-  ++ (lib.optional config.services.physio_chain_override.enable "physio_chain_override")
+  ++ (lib.optional config.services.physio_chain_override.enable "physio_shared")
   ++ adminGroups
   ;
 
