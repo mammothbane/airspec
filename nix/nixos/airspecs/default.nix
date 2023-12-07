@@ -21,9 +21,11 @@
 
     openssh = {
       enable = true;
-
-      permitRootLogin = lib.mkForce "no";
       openFirewall = true;
+
+      settings = {
+        PermitRootLogin = lib.mkForce "no";
+      };
 
       extraConfig = ''
         AllowAgentForwarding  yes
