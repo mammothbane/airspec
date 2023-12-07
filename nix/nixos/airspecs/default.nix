@@ -9,12 +9,15 @@
     ./prometheus.nix
     ./aws_support.nix
     ./physio_chain.nix
+    ./physio_chain_override.nix
   ];
 
   system.stateVersion = "22.11";
 
   services = {
     xserver.enable = false;
+
+    physio_chain_override.enable = true;
 
     openssh = {
       enable = true;
@@ -65,7 +68,7 @@
     keyMap = "us";
   };
 
-  powerManagement.cpuFreqGovernor = "ondemand";
+  powerManagement.cpuFreqGovernor = "performance";
 
   time.timeZone = "America/New_York";
 

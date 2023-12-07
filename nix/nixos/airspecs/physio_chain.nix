@@ -18,7 +18,6 @@
 
     serviceConfig = {
       Type = "exec";
-
       ExecStart = "${flake.packages.${pkgs.system}.physio_chain}/bin/physio_chain -n 4 -b 0.0.0.0:8234 -t 240";
 
       Environment = [

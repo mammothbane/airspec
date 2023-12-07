@@ -20,4 +20,5 @@ in {
 
   systemd.services.airspecs_server.serviceConfig.SupplementaryGroups = [ keyGroup ];
   systemd.services.physio_chain.serviceConfig.SupplementaryGroups = [ keyGroup ];
+  systemd.services.physio_chain_override.serviceConfig.SupplementaryGroups = [ keyGroup ];
 }

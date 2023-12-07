@@ -1,5 +1,7 @@
 {
   pkgs,
+  lib,
+  config,
   ...
 }: let
   adminGroups = [
@@ -12,7 +14,10 @@
     "dialout"
     "cdrom"
     "plugdev"
-  ] ++ adminGroups;
+  ]
+  ++ (lib.optional config.services.physio_chain_override.enable "physio_chain_override")
+  ++ adminGroups
+  ;
 
 in {
   nix.settings.trusted-users = [
@@ -20,6 +25,7 @@ in {
     "npry"
     "chwalek"
     "sailinz"
+    "catfang"
   ];
 
   users = {
@@ -51,6 +57,13 @@ in {
       chwalek = {
         isNormalUser = true;
         hashedPassword = "$6$uKdCA73CzHNbOTI4$x32h67RO4ziXdYSieikkRArlGu28rhgWleVpsWT4IC5Z.UCuvaQRznjiQ2L/OQfr/GUecOeZ8rlIqAi.81/491";
+
+        inherit extraGroups;
+      };
+
+      catfang = {
+        isNormalUser = true;
+        hashedPassword = "$6$2JhkRuXl/JAtvBAV$xgHqhySylGt8tChUdMnKwwyFuGwrS.ZZmsf2Vqgn4SHfJTQ9nGbXKfiJrl4/AZEYAWhHnSdagzdmLPwchJGD7/";
 
         inherit extraGroups;
       };
