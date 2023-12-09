@@ -29,6 +29,16 @@ export type BluetoothState = {
   sensor_config: BluetoothRemoteGATTCharacteristic,
 };
 
+const rtcUpdatePacket = () => new AirSpecConfigPacket({
+  header: {
+    timestampUnix: Date.now(),
+  },
+  payload: 'rtcPacket',
+  rtcPacket: {
+    set: true,
+  }
+});
+
 export const useAirSpecInterface = ({
                                       onDisconnect = _.noop,
                                       idRecency = [],
@@ -102,7 +112,7 @@ export const useAirSpecInterface = ({
 
     const value = await sensorConfigChar.readValue();
     const state = systemState.decode(new Uint8Array(value.buffer))
-    console.debug({ state }, 'init system state');
+    console.debug({ state, buffer: new Uint8Array(value.buffer) }, 'init system state');
 
     onState(state);
 
@@ -125,10 +135,15 @@ export const useAirSpecInterface = ({
       const bytes = new Uint8Array(target.value!.buffer);
 
       const state = systemState.decode(bytes);
-      console.debug({state}, 'decoded new system state');
+      console.debug({state, bytes}, 'decoded new system state');
 
       onState(state);
     });
+
+    const data = AirSpecConfigPacket.encode(rtcUpdatePacket()).finish();
+    await txChar.writeValue(data);
+
+    console.debug('sent rtc update');
 
     await rxChar.startNotifications();
     await sensorConfigChar.startNotifications();
@@ -219,6 +234,11 @@ export const useAirSpecInterface = ({
 
     const data = AirSpecConfigPacket.encode(message).finish();
     await btState.tx.writeValue(data);
+
+    console.debug({
+      data,
+      message,
+    }, 'wrote message');
   };
 
   return {
