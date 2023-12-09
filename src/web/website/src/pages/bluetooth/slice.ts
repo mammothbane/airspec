@@ -1,8 +1,8 @@
-import { createSlice, Draft, PayloadAction } from '@reduxjs/toolkit';
+import {createSelector, createSlice, Draft, PayloadAction} from '@reduxjs/toolkit';
 import { Datum, PlotData } from 'plotly.js';
 import _ from 'lodash';
 
-import { RootState } from '../../store';
+import {RootState} from '../../store';
 import {DEFAULT_ENABLED, SensorPacket_Payload, SensorType} from './types';
 import {holes} from "../../util";
 
@@ -213,7 +213,18 @@ export const reducer = slice.reducer;
 
 const EMPTY: Partial<PlotData>[] = [];
 
-export const selectSensorData = (sensor: SensorPacket_Payload[]) => (state: RootState) => sensor.map(ty => state.bluetooth.sensor_data[ty] ?? EMPTY);
+
+export const selectAllSensorData = (state: RootState) => state.bluetooth.sensor_data;
+
+export const selectSensorData = createSelector([
+    selectAllSensorData,
+    (state: RootState, sensor: SensorPacket_Payload[]) => sensor,
+  ],
+  (data, sensor) => {
+    return sensor.map(ty => data[ty] ?? EMPTY);
+  },
+);
+
 export const selectQueuedPackets = (state: RootState) => state.bluetooth.submit_queue;
 
 export const selectOldPacketAgeMillis = (state: RootState): number | null => {
@@ -222,3 +233,6 @@ export const selectOldPacketAgeMillis = (state: RootState): number | null => {
   if (x == null) return null;
   return Date.now() - x;
 }
+
+export const selectStreaming = (state: RootState) => state.bluetooth.streaming;
+export const selectApiKey = (state: RootState) => state.bluetooth.api_key;

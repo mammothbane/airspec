@@ -1,13 +1,10 @@
 import {useAirspecsDispatch, useAirspecsSelector} from "../../store";
 import {Box, Switch, TextField, Typography} from "@mui/material";
-import {set_api_key, set_streaming} from "./slice";
+import {selectApiKey, selectStreaming, set_api_key, set_streaming} from "./slice";
 
 export const ApiKeyEntry = () => {
-  const [streaming, apiKey] = useAirspecsSelector(state => {
-    const bt = state.bluetooth;
-
-    return [bt.streaming, bt.api_key];
-  });
+  const streaming = useAirspecsSelector(selectStreaming);
+  const apiKey = useAirspecsSelector(selectApiKey);
 
   const dispatch = useAirspecsDispatch();
 

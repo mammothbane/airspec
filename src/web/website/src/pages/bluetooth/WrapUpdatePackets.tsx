@@ -13,11 +13,9 @@ const throttle_submit = _.throttle(submit_packets, 5000);
  */
 export const WrapUpdatePackets = () => {
   const queued_packets = useAirspecsSelector(selectQueuedPackets);
-  const [streaming, apiKey] = useAirspecsSelector(state => {
-    const bt = state.bluetooth;
 
-    return [bt.streaming, bt.api_key];
-  });
+  const streaming = useAirspecsSelector(state => state.bluetooth.streaming);
+  const apiKey = useAirspecsSelector(state => state.bluetooth.api_key);
 
   const dispatch = useAirspecsDispatch();
 

@@ -3,28 +3,27 @@ import _ from 'lodash';
 import { Datum, PlotData } from 'plotly.js';
 
 import {
-  BlinkPacket, BlinkSensorConfig,
-  BME680_signal_id, BME_Sensor_Config,
-  BMEPacket, HumiditySensorConfig,
+  BlinkPacket,
+  BME680_signal_id,
+  BMEPacket,
   IMU_accel_cutoff,
   IMU_accel_range,
   IMU_gyro_cutoff,
-  IMU_gyro_range, IMU_SensorConfig,
+  IMU_gyro_range,
   IMUPacket,
-  LuxPacket, LuxSensorConfig,
-  MicLevelPacket, MicPacket, MicSensorConfig, SGP_Sensor_Config,
+  LuxPacket,
+  MicLevelPacket, MicPacket,
   SGPPacket,
   Sht45_heater,
   Sht45_precision,
   Spec_gain,
   SpecPacket,
-  Thermopile_location, ThermopileSensorConfig,
+  Thermopile_location,
   ThermPacket,
   Tsl2591Gain,
   Tsl2591IntegrationTime,
 } from '../../../../../../../proto/message.proto';
 import { SensorPacket_Payload, SensorType } from '../types';
-import {Constructor, Message, Reader, Type, Writer} from "protobufjs";
 
 type Enum = Record<string, any>;
 export const enum_kv = (enum_: Enum) => Object.entries(enum_).filter(([k, _v]) => isNaN(Number(k)));
@@ -267,14 +266,12 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
         .map('ts')
         .value();
 
-      const result = _.chain(IMU_KEYS).map(key => ({
+      return _.chain(IMU_KEYS).map(key => ({
         x: ts,
         y: _.map(imu_samples, key) as number[],
         name: key,
         mode: 'markers' as 'markers'
       })).value();
-
-      return result;
 
     case 'bme':
       const bme_packet = sample as BMEPacket;
@@ -299,6 +296,7 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
             name: freq.toFixed(0).toString(),
             x: [micPacket.timestampUnix as number],
             y: [sample],
+            mode: 'markers' as 'markers'
           }
         })
         .value();

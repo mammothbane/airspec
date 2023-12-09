@@ -5,7 +5,6 @@ import { BoolProp, NumberProp, StringProp } from '../property';
 import {SensorType, to_config} from '../types';
 import {CONFIG, ENUM_MAPPING} from './util';
 import {useAirspecsSelector} from "../../../store";
-import {Spec_gain} from "../../../../../../../proto/message.proto";
 
 export type Props = {
   type: SensorType,
@@ -34,7 +33,7 @@ export const Config = ({
     const val = (vals as unknown as any)[k];
 
     if (enum_type !== undefined) {
-      const [fwd, rev] = enum_type;
+      const [fwd] = enum_type;
 
       return <Box key={k} sx={{
         display: 'flex'

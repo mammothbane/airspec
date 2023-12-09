@@ -16,13 +16,15 @@ type PlotProps ={
   sensor_type: SensorType,
 };
 
+
 /**
  * Separated component to keep rerenders minimal for redux updates.
  */
 const PlotWrap = ({
   sensor_type,
 }: PlotProps) => {
-  const sensor_data = useAirspecsSelector(selectSensorData(to_packet_type(sensor_type))) ?? [];
+  const packet_types = to_packet_type(sensor_type);
+  const sensor_data = useAirspecsSelector(state => selectSensorData(state, packet_types));
 
   return <>
     {sensor_data.map((data, i) => <Plot
