@@ -57,8 +57,6 @@ const WrapUpdatePackets = ({
   return <></>;
 };
 
-let imuStorage: ReturnType<typeof extractData> = [];
-
 const OldPacketWarning = () => {
   const oldPacketAge = useAirspecsSelector(selectOldPacketAgeMillis);
   const shouldShowWarning = oldPacketAge != null && oldPacketAge < DISPLAY_PERIOD;
@@ -87,21 +85,6 @@ export const BluetoothControl = () => {
     setSeenGlassesStr(seen);
   }, []);
 
-  useEffect(() => {
-    const cancel = setInterval(() => {
-      if (imuStorage.length === 0) return;
-
-      store.dispatch(record_sensor_data({
-        data: imuStorage.slice(),
-        sensor: 'imuPacket',
-      }));
-
-      imuStorage.splice(0);
-    }, 1000);
-
-    return () => clearInterval(cancel);
-  });
-
   const {
     selectDevice,
     sendMessage,
@@ -122,24 +105,6 @@ export const BluetoothControl = () => {
         data,
         sensor: pkt.payload,
       }));
-      return;
-
-      // if (pkt.payload === 'imuPacket') {
-      //   if (imuStorage.length === 0) {
-      //     imuStorage.push(...data);
-      //   } else {
-      //     data.forEach((data, i) => {
-      //       const target = imuStorage[i];
-      //
-      //       mergePlotData(data, target);
-      //     });
-      //   }
-      // } else {
-      //   dispatch(record_sensor_data({
-      //     data,
-      //     sensor: pkt.payload,
-      //   }))
-      // }
     },
     onDisconnect: () => {
     },
