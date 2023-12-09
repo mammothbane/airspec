@@ -5,6 +5,7 @@ import { BoolProp, NumberProp, StringProp } from '../property';
 import {SensorType, to_config} from '../types';
 import {CONFIG, ENUM_MAPPING} from './util';
 import {useAirspecsSelector} from "../../../store";
+import {Spec_gain} from "../../../../../../../proto/message.proto";
 
 export type Props = {
   type: SensorType,
@@ -23,48 +24,60 @@ export const Config = ({
 
   const additional = CONFIG[type];
 
-  const kv = flatten(config);
+  const vals = flatten(config);
+  const kv = flatten(additional);
 
   const props = Object.entries(kv as {}).map(([k, v]) => {
-    const address: [SensorType, string] = [type, k];
-    const enum_type = ENUM_MAPPING.get(address);
+    k = k.replace(/\.children/g, '');
+
+    const enum_type = ENUM_MAPPING.get(`${type}|${k}`);
+    const val = (vals as unknown as any)[k];
 
     if (enum_type !== undefined) {
-      const [fwd] = enum_type;
+      const [fwd, rev] = enum_type;
 
-      return <Box key={k}>
-        <Typography>
+      return <Box key={k} sx={{
+        display: 'flex'
+      }}>
+        <Typography sx={{
+          fontSize: '0.8rem',
+          mx: 2,
+        }}>
           {k}
         </Typography>
 
-        <Select>
+        <Box sx={{
+          flexGrow: 1,
+        }}/>
+
+        <Select value={val == null ? '' : fwd.get(val)} onChange={(evt) => evt.target.value as string}>
           {
             Array.from(fwd.entries()).map(([k, v]) => {
-              return <MenuItem value={v}>{k}</MenuItem>;
+              return <MenuItem key={`${v}-${k}`} value={v}>{k}</MenuItem>;
             })
           }
         </Select>
       </Box>;
     }
 
-    switch (typeof (v)) {
+    switch (v) {
       case 'number':
-        return <NumberProp name={k} key={k} value={v as number} onChange={async (n) => {
+        return <NumberProp name={k} key={k} value={(val as number | undefined) ?? 0} onChange={async (n) => {
           await onChange(k, n);
         }}/>;
 
       case 'string':
-        return <StringProp name={k} key={k} value={v as string} onChange={async (s) => {
+        return <StringProp name={k} key={k} value={(val as string | undefined) ?? ''} onChange={async (s) => {
           await onChange(k, s);
         }}/>;
 
       case 'boolean':
-        return <BoolProp name={k} key={k} value={v as boolean} onChange={async (b) => {
+        return <BoolProp name={k} key={k} value={(val as boolean | undefined) ?? false} onChange={async (b) => {
           await onChange(k, b);
         }}/>;
 
       default:
-        console.warn({k, v}, 'unhandled prop type');
+        console.warn({k, v, val}, 'unhandled prop type');
         return null;
     }
   });

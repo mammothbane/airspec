@@ -63,16 +63,16 @@ export const IMUPayload = new Parser()
     type: IMUBinaryPacket,
   });
 
-export const ENUM_MAPPING: Map<[SensorType, string], [Map<string, number>, Map<number, string>]> = new Map([
-  [['imu', 'accelSettings.cutoff'], enum_entry(IMU_accel_cutoff)],
-  [['imu', 'accelSettings.range'], enum_entry(IMU_accel_range)],
-  [['imu', 'gyroSettings.cutoff'], enum_entry(IMU_gyro_cutoff)],
-  [['imu', 'gyroSettings.range'], enum_entry(IMU_gyro_range)],
-  [['sht', 'precisionLevel'], enum_entry(Sht45_precision)],
-  [['sht', 'heaterSettings'], enum_entry(Sht45_heater)],
-  [['spec', 'gain'], enum_entry(Spec_gain)],
-  [['lux', 'gain'], enum_entry(Tsl2591Gain)],
-  [['lux', 'integrationTime'], enum_entry(Tsl2591IntegrationTime)],
+export const ENUM_MAPPING: Map<string, [Map<string, number>, Map<number, string>]> = new Map([
+  ['imu|accelSettings.cutoff', enum_entry(IMU_accel_cutoff)],
+  ['imu|accelSettings.range', enum_entry(IMU_accel_range)],
+  ['imu|gyroSettings.cutoff', enum_entry(IMU_gyro_cutoff)],
+  ['imu|gyroSettings.range', enum_entry(IMU_gyro_range)],
+  ['sht|precisionLevel', enum_entry(Sht45_precision)],
+  ['sht|heaterSettings', enum_entry(Sht45_heater)],
+  ['spec|gain', enum_entry(Spec_gain)],
+  ['lux|gain', enum_entry(Tsl2591Gain)],
+  ['lux|integrationTime', enum_entry(Tsl2591IntegrationTime)],
 ]);
 
 export const SPEC_BANDS = [
@@ -159,13 +159,15 @@ export const CONFIG: Record<SensorType, Config> = {
 
   lux: {
     samplePeriodMs: 'number',
+    gain: 'number',
+    integrationTime: 'number',
   },
 
   spec: {
     samplePeriodMs: 'number',
     integrationTime: 'number',
     integrationStep: 'number',
-    specGain: 'number',
+    gain: 'number',
   }
 };
 
@@ -287,8 +289,6 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
 
 
     case 'mic':
-      console.debug('ignoring mic packet');
-
       const micPacket = sample as MicPacket;
 
       return _.chain(micPacket.payload?.sample ?? [])
@@ -299,7 +299,6 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
             name: freq.toFixed(0).toString(),
             x: [micPacket.timestampUnix as number],
             y: [sample],
-            mode: 'markers' as 'markers'
           }
         })
         .value();

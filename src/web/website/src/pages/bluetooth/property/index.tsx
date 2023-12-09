@@ -1,17 +1,18 @@
 import { Switch, TextField } from '@mui/material';
 import { GenericProp } from './GenericProp';
-import { useState } from "react";
+import {useEffect, useState} from "react";
 
 export type ScalarProps<T> = {
   name: string,
-  value: T,
+  value: T | undefined,
   onChange: (n: T) => Promise<void>,
 };
 
 const FIELD_WIDTH = 128;
 
 export const NumberProp = ({name, value, onChange}: ScalarProps<number>) => {
-  const [val, setVal] = useState(value.toString());
+  const [val, setVal] = useState(value?.toString() ?? (-1).toString());
+  useEffect(() => setVal(value?.toString() ?? (-2).toString()), [value]);
 
   return <GenericProp
     name={name}
@@ -36,7 +37,8 @@ export const NumberProp = ({name, value, onChange}: ScalarProps<number>) => {
 };
 
 export const StringProp = ({name, value, onChange}: ScalarProps<string>) => {
-  const [val, setVal] = useState(value);
+  const [val, setVal] = useState(value ?? '[no value]');
+  useEffect(() => setVal(value ?? '[no value]'), [value]);
 
   return <GenericProp
     name={name}
@@ -57,6 +59,7 @@ export const StringProp = ({name, value, onChange}: ScalarProps<string>) => {
 
 export const BoolProp = ({name, value, onChange}: ScalarProps<boolean>) => {
   const [val, setVal] = useState(value);
+  useEffect(() => setVal(value ?? false), [value]);
 
   return <GenericProp
     name={name}
