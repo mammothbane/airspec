@@ -256,7 +256,7 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
             .value();
 
           return {
-            ts: imu_packet.timestampUnix + pkt_step_millis * i,
+            ts: (imu_packet.timestampUnix as number) + pkt_step_millis * i,
             ...meanObj
           };
         })
