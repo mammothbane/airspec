@@ -12,7 +12,7 @@ import {
   IMU_gyro_range,
   IMUPacket,
   LuxPacket,
-  MicLevelPacket,
+  MicLevelPacket, MicPacket,
   SGPPacket,
   Sht45_heater,
   Sht45_precision,
@@ -89,6 +89,12 @@ export const SPEC_BANDS = [
   '_380',
 ];
 
+const IMU_DOWNSAMPLE = 4;
+
+const IMU_KEYS = _.chain(['gyro', 'accel'])
+  .flatMap(key => _.map(['x', 'y', 'z'], dim => `${key}.${dim}`))
+  .value();
+
 export const extractData = (sample: Record<string, any>, type: SensorPacket_Payload): Partial<PlotData>[] => {
   switch (type.replace(/Packet$/, '')) {
     case 'spec':
@@ -102,6 +108,7 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
         x: spec_ts,
         y: band,
         name: SPEC_BANDS[i].replace(/^_/, ''),
+        mode: 'markers',
       }));
 
 
@@ -117,6 +124,7 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
           name,
           x: [],
           y: [],
+          mode: 'markers',
         };
 
         (vals[name].x as Datum[]).push(therm.timestampUnix! as number);
@@ -143,26 +151,46 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
       const blink_ts = samples.map((_x, i) => (blink_sample.timestampUnix as number) + sample_period * i);
 
       return [
-        {x: blink_ts, y: samples},
+        {x: blink_ts, y: samples, mode: 'markers'},
       ];
 
     case 'imu':
       const imu_packet = sample as IMUPacket;
 
       const elems = IMUPayload.parse(imu_packet.payload!.sample!);
+      const pkt_step = 1 / imu_packet.samplingFrequency * IMU_DOWNSAMPLE;
+      const pkt_step_millis = pkt_step * 1000;
 
-      const imu_samples = (elems.samples as IMUBinaryPacket_t[]).map((pkt, i) => ({
-        ts: (imu_packet.timestampUnix as number) + imu_packet.samplingFrequency * i,
-        ...pkt,
-      }));
+      const imu_samples = _.chain(elems.samples as IMUBinaryPacket_t[])
+        .chunk(IMU_DOWNSAMPLE)
+        .map((pkts, i) => {
+          const meanObj = _.chain(IMU_KEYS)
+            .map(k => [k, _.chain(pkts).flatMap(k).mean().value()])
+            .reduce((acc, [k, v]) => {
+              _.set(acc, k, v);
+              return acc;
+            }, {})
+            .value();
 
-      const ts = _.map(imu_samples, 'ts') as number[];
+          return {
+            ts: imu_packet.timestampUnix + pkt_step_millis * i,
+            ...meanObj
+          };
+        })
+        .value();
 
-      return ['gyro', 'accel'].flatMap(key => ['x', 'y', 'z'].map(dim => ({
+      const ts = _.chain(imu_samples)
+        .map('ts')
+        .value();
+
+      const result = _.chain(IMU_KEYS).map(key => ({
         x: ts,
-        y: _.map(imu_samples, `${key}.${dim}`) as number[],
-        name: `${key}.${dim}`,
-      })));
+        y: _.map(imu_samples, key) as number[],
+        name: key,
+        mode: 'markers' as 'markers'
+      })).value();
+
+      return result;
 
     case 'bme':
       const bme_packet = sample as BMEPacket;
@@ -177,7 +205,9 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
 
 
     case 'mic':
-      // const micPacket = sample as MicPacket;
+      console.debug('ignoring mic packet');
+
+      const micPacket = sample as MicPacket;
 
       // return [{
       //   x: [new Array(micPacket.samplesPerFft).map((_, i) => micPacket.startFrequency + i * micPacket.frequencySpacing)],
@@ -232,7 +262,7 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
       const lux = sample.payload.map((payload: LuxPacket.Payload) => payload.lux);
 
       return [
-        {x: lux_ts, y: lux},
+        {x: lux_ts, y: lux, mode: 'markers'},
       ];
   }
 

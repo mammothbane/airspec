@@ -8,9 +8,8 @@ import { selectSensorData } from '../slice';
 import { SensorType, to_packet_type } from '../types';
 
 type Props = {
-  type: SensorType
-  enabled: boolean,
-  setEnabled: (enabled: boolean) => void,
+  type: SensorType,
+  onEnable: (st: SensorType, enable: boolean, enablement: SensorType[]) => Promise<void>,
 };
 
 type PlotProps ={
@@ -36,11 +35,13 @@ const PlotWrap = ({
           showline: false,
           visible: false,
         },
+
         xaxis: {
           showgrid: false,
           showticklabels: false,
           visible: false,
         },
+
         autosize: true,
         margin: {
           l: 8,
@@ -62,10 +63,20 @@ const PlotWrap = ({
     }
   </>
 }
+
+const EnableSwitch = ({ type, onEnable }: Props) => {
+  const enablement = useAirspecsSelector(state => state.bluetooth.system_enablement);
+  const enabled = enablement.includes(type);
+
+  return <Switch
+    checked={enabled}
+    onChange={async (_evt, value) => await onEnable(type, value, enablement)}
+  />;
+}
+
 export const Sensor = ({
                          type,
-                         enabled,
-                         setEnabled,
+                         onEnable,
                        }: Props) => {
   return <Box sx={{
     p: 2,
@@ -90,10 +101,7 @@ export const Sensor = ({
         flexGrow: 1,
       }}/>
 
-      <Switch
-        checked={enabled}
-        onChange={(_evt, value) => setEnabled(value)}
-      />
+      <EnableSwitch type={type} onEnable={onEnable}/>
     </Box>
 
     <Config

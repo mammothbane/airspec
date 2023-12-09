@@ -8,7 +8,7 @@ import {
   AirSpecConfigPacket,
 } from '../../../../../../proto/message.proto';
 
-import { useAirspecsDispatch, useAirspecsSelector } from '../../store';
+import {store, useAirspecsDispatch, useAirspecsSelector} from '../../store';
 import { debug_led } from './debug';
 
 import { Sensor } from './Sensor';
@@ -18,7 +18,7 @@ import {
   record_packets,
   record_sensor_data,
   selectOldPacketAgeMillis,
-  selectQueuedPackets
+  selectQueuedPackets, set_complete_system_enablement, set_system_enablement
 } from './slice';
 import {
   ALL_SENSOR_TYPES,
@@ -57,6 +57,19 @@ const WrapUpdatePackets = ({
   return <></>;
 };
 
+let imuStorage: ReturnType<typeof extractData> = [];
+
+const OldPacketWarning = () => {
+  const oldPacketAge = useAirspecsSelector(selectOldPacketAgeMillis);
+  const shouldShowWarning = oldPacketAge != null && oldPacketAge < DISPLAY_PERIOD;
+
+  return <Snackbar open={shouldShowWarning}>
+    <Alert severity={"warning"}>
+      Glasses time is desynced
+    </Alert>
+  </Snackbar>;
+};
+
 export const BluetoothControl = () => {
   const [seenGlassesStr, setSeenGlassesStr] = useState<string>('');
   const [ledEnabled, setLedEnabled] = useState(false);
@@ -64,13 +77,8 @@ export const BluetoothControl = () => {
 
   const [apiKey, setApiKey] = useState('');
 
-  const [systemEnablement, setSystemEnablement] = useState(new Set(DEFAULT_ENABLED));
-
   let seenGlasses: string[] = [];
   if (seenGlassesStr !== '') seenGlasses = JSON.parse(seenGlassesStr);
-
-  const oldPacketAge = useAirspecsSelector(selectOldPacketAgeMillis);
-  const shouldShowWarning = oldPacketAge != null && oldPacketAge < DISPLAY_PERIOD;
 
   const dispatch = useAirspecsDispatch();
 
@@ -78,6 +86,21 @@ export const BluetoothControl = () => {
     const seen = localStorage.getItem(SEEN_GLASSES_LOCALSTORAGE_KEY) ?? '';
     setSeenGlassesStr(seen);
   }, []);
+
+  useEffect(() => {
+    const cancel = setInterval(() => {
+      if (imuStorage.length === 0) return;
+
+      store.dispatch(record_sensor_data({
+        data: imuStorage,
+        sensor: 'imuPacket',
+      }));
+
+      imuStorage = [];
+    }, 1000);
+
+    return () => clearInterval(cancel);
+  });
 
   const {
     selectDevice,
@@ -88,21 +111,31 @@ export const BluetoothControl = () => {
   } = useAirSpecInterface({
     onData: (pkt) => {
       if (pkt.payload == null) throw new Error('packet missing type');
+      dispatch(record_packets([pkt.toJSON()]));
 
       const payload = pkt[pkt.payload];
       if (payload == null) throw new Error('missing expected payload type');
 
-      dispatch(record_sensor_data({
-        sensor: pkt.payload,
-        data: extractData(payload, pkt.payload),
-      }));
+      const data = extractData(payload, pkt.payload);
 
-      dispatch(record_packets([pkt.toJSON()]));
+      if (pkt.payload === 'imuPacket') {
+        imuStorage = imuStorage.concat(data);
+      } else {
+        dispatch(record_sensor_data({
+          data: imuStorage.slice(),
+          sensor: pkt.payload,
+        }))
+
+        imuStorage.splice(0);
+      }
     },
     onDisconnect: () => {
     },
     idRecency: seenGlasses,
     onState: (state) => {
+      const st = _.chain(Array.from(ALL_SENSOR_TYPES)).filter(t => state?.control[to_enable(t)] as boolean).value();
+
+      dispatch(set_complete_system_enablement(st));
     },
   });
 
@@ -143,11 +176,7 @@ export const BluetoothControl = () => {
     flexDirection: 'column',
     my: 2,
   }}>
-    <Snackbar open={shouldShowWarning}>
-      <Alert severity={"warning"}>
-        Glasses time is desynced
-      </Alert>
-    </Snackbar>
+    <OldPacketWarning/>
 
     <WrapUpdatePackets apiKey={apiKey} shouldStream={shouldStream}/>
 
@@ -187,7 +216,6 @@ export const BluetoothControl = () => {
         onClick={
           async () => {
             await sendEnable(ALL_SENSOR_TYPES);
-            setSystemEnablement(ALL_SENSOR_TYPES);
           }
         }
         variant="contained"
@@ -203,7 +231,6 @@ export const BluetoothControl = () => {
         onClick={
           async () => {
             await sendEnable(new Set());
-            setSystemEnablement(new Set());
           }
         }
         variant="contained"
@@ -294,16 +321,13 @@ export const BluetoothControl = () => {
             return <Sensor
               type={sensor}
               key={sensor}
-              enabled={systemEnablement.has(sensor)}
-              setEnabled={async (enabled) => {
-                const new_enablement = new Set(systemEnablement);
+              onEnable={async (typ, enable, enablement) => {
+                let new_enablement;
 
-                if (enabled) new_enablement.add(sensor);
-                else new_enablement.delete(sensor);
+                if (enable) new_enablement = _.union(enablement, [typ]);
+                else new_enablement = _.difference(enablement, [typ]);
 
-                await sendEnable(new_enablement);
-
-                setSystemEnablement(new_enablement);
+                await sendEnable(new Set(new_enablement));
               }}
             />;
           })
