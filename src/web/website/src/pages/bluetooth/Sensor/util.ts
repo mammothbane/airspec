@@ -211,13 +211,18 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
 
       const micPacket = sample as MicPacket;
 
-      // return [{
-      //   x: [new Array(micPacket.samplesPerFft).map((_, i) => micPacket.startFrequency + i * micPacket.frequencySpacing)],
-      //   y: [micPacket.timestampUnix],
-      //   z: []
-      // }];
+      return _.chain(micPacket.payload?.sample ?? [])
+        .map((sample, i) => {
+          const freq = micPacket.startFrequency + i * micPacket.frequencySpacing;
 
-      return [];
+          return {
+            name: freq.toFixed(0).toString(),
+            x: [micPacket.timestampUnix as number],
+            y: [sample],
+            mode: 'markers' as 'markers'
+          }
+        })
+        .value();
 
     case 'micLevel':
       const micLevelPacket = sample as MicLevelPacket;
