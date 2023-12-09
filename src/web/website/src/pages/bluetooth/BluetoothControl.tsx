@@ -1,119 +1,59 @@
-import {Alert, Box, Button, Snackbar, Switch, TextField, Typography} from '@mui/material';
-import { useEffect, useState } from 'react';
+import {Alert, Box} from '@mui/material';
+import {useEffect} from 'react';
 import _ from 'lodash';
 
-import { useAirSpecInterface } from './hooks';
+import {useAirSpecInterface} from './hooks';
 
+import {useAirspecsDispatch, useAirspecsSelector} from '../../store';
+
+import {Sensor} from './Sensor';
+import {extractData} from './Sensor/util';
 import {
-  AirSpecConfigPacket,
-} from '../../../../../../proto/message.proto';
-
-import {store, useAirspecsDispatch, useAirspecsSelector} from '../../store';
-import { debug_led } from './debug';
-
-import { Sensor } from './Sensor';
-import { extractData } from './Sensor/util';
-import {
-  clear_queue, mergePlotData, push_requested_state_changes,
+  push_requested_state_changes,
   record_packets,
   record_sensor_data,
-  selectOldPacketAgeMillis,
-  selectQueuedPackets, set_complete_system_enablement, set_config, set_system_enablement
+  set_complete_system_enablement,
+  set_config
 } from './slice';
-import {
-  ALL_SENSOR_TYPES,
-  DEFAULT_ENABLED,
-  SensorType, to_config,
-  to_enable,
-} from './types';
-import { submit_packets } from './util';
+import {ALL_SENSOR_TYPES, to_config, to_enable,} from './types';
+import {sendEnable} from './util';
+import {ButtonBar} from "./ButtonBar";
+import {OldPacketWarning} from "./OldPacketWarning";
+import {WriteConfigButton} from "./WriteConfigButton";
+import {ApiKeyEntry} from "./ApiKeyEntry";
+import {WrapUpdatePackets} from "./WrapUpdatePackets";
 
-const SEEN_GLASSES_LOCALSTORAGE_KEY = 'SEEN_GLASSES';
 
-const DISPLAY_PERIOD = 500;
 
-const throttle_submit = _.throttle(submit_packets, 5000);
-
-type WrapParams = {
-  apiKey: string,
-  shouldStream: boolean,
-}
+type DevSelProps = {
+  bt: ReturnType<typeof useAirSpecInterface>
+};
 
 /**
- * Separate component to handle only queueing update packets, to avoid rerendering the whole tree.
+ * BluetoothControl is pathological -- may cause expensive rerenders of plot data if any deps
+ * change, so trying to separate all hooks. This functionality is just for the side-effect, so
+ * we can pull it out past the render boundary.
  */
-const WrapUpdatePackets = ({
-                           shouldStream,
-                             apiKey,
-                           }: WrapParams) => {
-  const queued_packets = useAirspecsSelector(selectQueuedPackets);
-
-  const dispatch = useAirspecsDispatch();
+const DeviceSelector = ({ bt }: DevSelProps) => {
+  const seenGlasses = useAirspecsSelector(state => state.bluetooth.seen_glasses);
+  const { selectHistoricalDevice, deselect } = bt;
 
   useEffect(() => {
-    throttle_submit(queued_packets, apiKey, shouldStream, () => dispatch(clear_queue()));
-  }, [queued_packets, apiKey, shouldStream]); // eslint-disable-line react-hooks/exhaustive-deps
+    selectHistoricalDevice().catch(err => console.error(err));
+
+    return () => {
+      deselect().catch(err => console.error(err));
+    };
+  }, [seenGlasses]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <></>;
 };
 
-const OldPacketWarning = () => {
-  const oldPacketAge = useAirspecsSelector(selectOldPacketAgeMillis);
-  const shouldShowWarning = oldPacketAge != null && oldPacketAge < DISPLAY_PERIOD;
-
-  return <Snackbar open={shouldShowWarning}>
-    <Alert severity={"warning"}>
-      Glasses time is desynced
-    </Alert>
-  </Snackbar>;
-};
-
-const UpdateButton = ({
-  sendMessage
-                      }: { sendMessage: (pkt: AirSpecConfigPacket) => Promise<void> }) => {
-  const targetNewConfig = useAirspecsSelector(state =>
-    _.merge({}, state.bluetooth.config ?? {}, state.bluetooth.requested_state_changes)
-  );
-
-  return <Button onClick={async () => {
-    console.debug('sending new config', { targetNewConfig });
-
-    await sendMessage(new AirSpecConfigPacket({
-      header: {
-        timestampUnix: Date.now(),
-      },
-      payload: 'sensorConfig',
-      sensorConfig: targetNewConfig,
-    }));
-  }}>
-    Write Config
-  </Button>
-};
-
 export const BluetoothControl = () => {
-  const [seenGlassesStr, setSeenGlassesStr] = useState<string>('');
-  const [ledEnabled, setLedEnabled] = useState(false);
-  const [shouldStream, setShouldStream] = useState(false);
-
-  const [apiKey, setApiKey] = useState('');
-
-  let seenGlasses: string[] = [];
-  if (seenGlassesStr !== '') seenGlasses = JSON.parse(seenGlassesStr);
-
   const dispatch = useAirspecsDispatch();
+  const seenGlasses = useAirspecsSelector(state => state.bluetooth.seen_glasses);
 
-  useEffect(() => {
-    const seen = localStorage.getItem(SEEN_GLASSES_LOCALSTORAGE_KEY) ?? '';
-    setSeenGlassesStr(seen);
-  }, []);
-
-  const {
-    selectDevice,
-    sendMessage,
-    deselect,
-    selectHistoricalDevice,
-    gatt,
-  } = useAirSpecInterface({
+  const bt = useAirSpecInterface({
     onData: (pkt) => {
       if (pkt.payload == null) throw new Error('packet missing type');
       dispatch(record_packets([pkt.toJSON()]));
@@ -139,35 +79,10 @@ export const BluetoothControl = () => {
     },
   });
 
-  const sendEnable = async (enableState: Set<SensorType>) => {
-    const payload: any = {
-      synchronizeWindows: false,
-    };
-
-    ALL_SENSOR_TYPES.forEach(sensor_type => {
-      payload[to_enable(sensor_type)] = enableState.has(sensor_type);
-    });
-
-    const msg = new AirSpecConfigPacket({
-      header: {
-        timestampUnix: Date.now(),
-      },
-      payload: 'sensorControl',
-      sensorControl: payload,
-    });
-
-    console.debug({enableMsg: msg});
-
-    await sendMessage(msg);
-  };
-
-  useEffect(() => {
-    selectHistoricalDevice().catch(err => console.error(err));
-
-    return () => {
-      deselect().catch(err => console.error(err));
-    };
-  }, [seenGlassesStr]); // eslint-disable-line react-hooks/exhaustive-deps
+  const {
+    sendMessage,
+    gatt,
+  } = bt;
 
   return <Box sx={{
     alignItems: 'center',
@@ -176,133 +91,12 @@ export const BluetoothControl = () => {
     flexDirection: 'column',
     my: 2,
   }}>
+    <WrapUpdatePackets/>
+    <DeviceSelector bt={bt}/>
+
     <OldPacketWarning/>
-
-    <WrapUpdatePackets apiKey={apiKey} shouldStream={shouldStream}/>
-
-    <Box sx={{
-      alignItems: 'baseline',
-      display: 'flex',
-    }}>
-      {gatt?.connected ?
-        <Box>
-          <Typography variant={'body2'}>
-            {gatt.device.name?.replace(/^AirSpec_/, '') ?? 'no name'}
-          </Typography>
-        </Box>
-        : undefined}
-
-      <Button
-        onClick={
-          async () => {
-            if (gatt?.connected ?? false) await deselect();
-            else {
-              const id = await selectDevice();
-              seenGlasses.unshift(id);
-              localStorage.setItem(SEEN_GLASSES_LOCALSTORAGE_KEY, JSON.stringify(seenGlasses));
-            }
-          }
-        }
-        variant="contained"
-        color="primary"
-        sx={{
-          mx: 1,
-        }}
-      >
-        {(gatt?.connected ?? false) ? 'Disconnect' : 'Connect'}
-      </Button>
-
-      <Button
-        onClick={
-          async () => {
-            await sendEnable(ALL_SENSOR_TYPES);
-          }
-        }
-        variant="contained"
-        color="primary"
-        sx={{
-          mx: 1,
-        }}
-      >
-        Enable All
-      </Button>
-
-      <Button
-        onClick={
-          async () => {
-            await sendEnable(new Set());
-          }
-        }
-        variant="contained"
-        color="primary"
-        sx={{
-          mx: 1,
-          color: 'white',
-        }}
-      >
-        Disable All
-      </Button>
-
-      <Button
-        onClick={
-          async () => {
-            await sendMessage(debug_led(ledEnabled));
-            setLedEnabled(!ledEnabled);
-          }
-        }
-        variant="contained"
-        color="primary"
-        sx={{
-          mx: 1,
-        }}
-      >
-        LED Test
-      </Button>
-
-      <Button
-        onClick={
-          async () => {
-            if (gatt?.connected ?? false) {
-              await sendMessage(new AirSpecConfigPacket({
-                header: {
-                  timestampUnix: Date.now(),
-                },
-                payload: 'dfuMode',
-                dfuMode: {
-                  enable: true,
-                },
-              }));
-            }
-          }
-        }
-        variant="contained"
-        color="primary"
-        sx={{
-          mx: 1,
-        }}
-      >
-        Enter DFU Mode
-      </Button>
-    </Box>
-
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'row',
-      mt: 2,
-    }}>
-      <Typography variant={'subtitle1'}>
-        Stream to server
-      </Typography>
-
-      <Switch checked={shouldStream} onChange={(_evt, value) => setShouldStream(value)}/>
-
-      <TextField
-        value={apiKey}
-        placeholder={'api key'}
-        type={'password'}
-        onChange={(evt) => setApiKey(evt.currentTarget.value)}
-      />
-    </Box>
+    <ButtonBar bt={bt}/>
+    <ApiKeyEntry/>
 
     {gatt?.connected ?
       <>
@@ -310,7 +104,7 @@ export const BluetoothControl = () => {
           mt: 1,
         }}>Configuration and sensor enablement state are reset on device reboot.</Alert>
 
-        <UpdateButton sendMessage={sendMessage}/>
+        <WriteConfigButton sendMessage={sendMessage}/>
 
         <Box
           display={'flex'}
@@ -334,7 +128,7 @@ export const BluetoothControl = () => {
                   if (enable) new_enablement = _.union(enablement, [typ]);
                   else new_enablement = _.difference(enablement, [typ]);
 
-                  await sendEnable(new Set(new_enablement));
+                  await sendEnable(new Set(new_enablement), sendMessage);
                 }}
 
                 onPropChange={async (st, k, v) => {

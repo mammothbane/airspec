@@ -1,5 +1,7 @@
-import { SubmitPackets } from '../../../../../../proto/svc.proto';
-import { BACKEND } from '../../util';
+import {SubmitPackets} from '../../../../../../proto/svc.proto';
+import {BACKEND} from '../../util';
+import {ALL_SENSOR_TYPES, SensorType, to_enable} from "./types";
+import {AirSpecConfigPacket} from "../../../../../../proto/message.proto";
 
 export const submit_packets = (
   packet_data: Record<string, any>[],
@@ -38,4 +40,25 @@ export const submit_packets = (
       clear();
     })
     .catch(err => console.error({err}, 'api request failed'));
+};
+export const sendEnable = async (enableState: Set<SensorType>, sendMessage: (pkt: AirSpecConfigPacket) => Promise<void>) => {
+    const payload: any = {
+        synchronizeWindows: false,
+    };
+
+    ALL_SENSOR_TYPES.forEach(sensor_type => {
+        payload[to_enable(sensor_type)] = enableState.has(sensor_type);
+    });
+
+    const msg = new AirSpecConfigPacket({
+        header: {
+            timestampUnix: Date.now(),
+        },
+        payload: 'sensorControl',
+        sensorControl: payload,
+    });
+
+    console.debug({enableMsg: msg});
+
+    await sendMessage(msg);
 };

@@ -5,7 +5,6 @@ import _ from 'lodash';
 import { RootState } from '../../store';
 import {DEFAULT_ENABLED, SensorPacket_Payload, SensorType} from './types';
 import {holes} from "../../util";
-import {SensorConfig} from "../../../../../../proto/message.proto";
 
 export type SensorData = {
   sensor: SensorPacket_Payload,
@@ -18,14 +17,24 @@ export type State = {
   last_old_data_ts?: number,
   system_enablement: SensorType[],
   api_key?: string,
+  streaming: boolean,
   config?: { [key: string]: any },
   requested_state_changes: { [key: string ]: any },
+  seen_glasses: string[],
 }
 
-const MAX_PTS = 5000;
+const MAX_PTS = 300;
 const MAX_AGE = 1000 * 60 * 60 * 24 * 30 * 6;
 
 const DEBUG_AGE = false;
+
+export const SEEN_GLASSES_LOCALSTORAGE_KEY = 'SEEN_GLASSES';
+const seen_glasses_init_str = localStorage.getItem(SEEN_GLASSES_LOCALSTORAGE_KEY) ?? '';
+
+let seen_glasses_init = [];
+if (seen_glasses_init_str !== '') {
+  seen_glasses_init = JSON.parse(seen_glasses_init_str);
+}
 
 function removeTooOld(
   dates: Date[],
@@ -108,6 +117,8 @@ export const slice = createSlice({
     submit_queue: [],
     system_enablement: Array.from(DEFAULT_ENABLED),
     requested_state_changes: {},
+    streaming: false,
+    seen_glasses: seen_glasses_init ?? [],
   } as State,
   reducers: {
     record_sensor_data: (state: Draft<State>, action: PayloadAction<SensorData>) => {
@@ -170,6 +181,19 @@ export const slice = createSlice({
     push_requested_state_changes: (state: Draft<State>, action: PayloadAction<{ [key: string]: any }>) => {
       _.merge(state.requested_state_changes, action.payload);
     },
+
+    register_glasses_id: (state: Draft<State>, action: PayloadAction<string>) => {
+      state.seen_glasses.unshift(action.payload);
+      state.seen_glasses = _.uniq(state.seen_glasses);
+    },
+
+    set_api_key: (state: Draft<State>, action: PayloadAction<string>) => {
+      state.api_key = action.payload;
+    },
+
+    set_streaming: (state: Draft<State>, action: PayloadAction<boolean>) => {
+      state.streaming = action.payload;
+    },
   }
 });
 
@@ -181,6 +205,9 @@ export const {
   set_system_enablement,
   set_config,
   push_requested_state_changes,
+  register_glasses_id,
+  set_api_key,
+  set_streaming,
 } = slice.actions;
 export const reducer = slice.reducer;
 

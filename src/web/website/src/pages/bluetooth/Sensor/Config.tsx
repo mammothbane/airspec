@@ -3,7 +3,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { flatten } from 'flat';
 import { BoolProp, NumberProp, StringProp } from '../property';
 import {SensorType, to_config} from '../types';
-import { ENUM_MAPPING } from './util';
+import {CONFIG, ENUM_MAPPING} from './util';
 import {useAirspecsSelector} from "../../../store";
 
 export type Props = {
@@ -20,6 +20,8 @@ export const Config = ({
 
     return state.bluetooth.config[to_config(type)];
   }) ?? {};
+
+  const additional = CONFIG[type];
 
   const kv = flatten(config);
 

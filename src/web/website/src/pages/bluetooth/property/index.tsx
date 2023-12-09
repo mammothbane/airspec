@@ -1,6 +1,6 @@
 import { Switch, TextField } from '@mui/material';
 import { GenericProp } from './GenericProp';
-import {useEffect, useState} from "react";
+import { useState } from "react";
 
 export type ScalarProps<T> = {
   name: string,
