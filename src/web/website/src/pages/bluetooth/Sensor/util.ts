@@ -90,6 +90,7 @@ export const SPEC_BANDS = [
 ];
 
 const IMU_DOWNSAMPLE = 4;
+const BLINK_DOWNSAMPLE = 8;
 
 const IMU_KEYS = _.chain(['gyro', 'accel'])
   .flatMap(key => _.map(['x', 'y', 'z'], dim => `${key}.${dim}`))
@@ -146,9 +147,10 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
     case 'blink':
       const blink_sample = sample as BlinkPacket;
       const sample_period = (1.0 / blink_sample.sampleRate) * 1000;
+      const chunk_sample_period = sample_period * BLINK_DOWNSAMPLE;
 
-      const samples: number[] = Array.from(blink_sample.payloadByte.sample);
-      const blink_ts = samples.map((_x, i) => (blink_sample.timestampUnix as number) + sample_period * i);
+      const samples = _.chain(blink_sample.payloadByte.sample).chunk(BLINK_DOWNSAMPLE).map(samples => _.mean(samples)).value();
+      const blink_ts = _.chain(0).range(samples.length).map(i => (blink_sample.timestampUnix as number) +  chunk_sample_period * i).value();
 
       return [
         {x: blink_ts, y: samples, mode: 'markers'},
