@@ -1,10 +1,12 @@
 import { Box, Switch, Typography } from '@mui/material';
 import Plot from 'react-plotly.js';
 import { useAirspecsSelector } from '../../../store';
+import {LineChart, XAxis, YAxis, Line, Tooltip } from 'recharts';
 
 import { Config } from './Config';
 import { selectSensorData } from '../slice';
 import { SensorType, to_packet_type } from '../types';
+import {PlotData} from "plotly.js";
 
 type Props = {
   type: SensorType,
@@ -25,6 +27,49 @@ const PlotWrap = ({
 }: PlotProps) => {
   const packet_types = to_packet_type(sensor_type);
   const sensor_data = useAirspecsSelector(state => selectSensorData(state, packet_types));
+
+  let x: PlotData;
+
+  if (sensor_data.length === 0) return <></>;
+
+  const data = sensor_data[0];
+
+  if (data.length === 0) return <></>;
+
+  // @ts-ignore
+  const dat = data[0].x.map((x: any, i: any) => ({x, y: data[0].y[i] }));
+
+  //@ts-ignore
+  return <LineChart height={240} width={300} data={dat}>
+    <XAxis dataKey="x" axisLine={false} tick={false}/>
+    <YAxis axisLine={false} tick={{
+      fontSize: '0.75rem'
+    }}/>
+
+    <Tooltip contentStyle={{
+      fontSize: '0.75rem'
+    }} formatter={(value) => (value as any).toFixed(2).toString()}/>
+
+    <Line type="monotone" dataKey={'y'} dot={false}/>
+  </LineChart>;
+
+  return <>
+    {sensor_data.map((data) => {
+      if (data.length === 0) return undefined;
+
+      // @ts-ignore
+      const dat = data[0].x.map((x: any, i: any) => ({x, y: data[0].y[i] }));
+
+      // @ts-ignore
+      return <LineChart width={300} height={240} data={dat}>
+        <XAxis dataKey="x" hide={true}/>
+        <YAxis hide={true}/>
+
+
+        <Line type="monotone" dataKey={'y'} dot={false}/>
+      </LineChart>;
+    })}
+  </>;
 
   return <>
     {sensor_data.map((data, i) => <Plot
