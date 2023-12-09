@@ -82,26 +82,19 @@ export const mergePlotData = (
     removeTooOld(dates, ys, zs, max_age, report_old);
   }
 
-  target.x = (target.x as Datum[]).concat(dates);
-  target.y = (target.y as Datum[]).concat(ys);
-
-  if (clamp_length != null) {
-    target.x = target.x.slice(Math.max(0, target.x.length - clamp_length));
-    target.y = target.y.slice(Math.max(0, target.y.length - clamp_length));
-  }
-
+  const pairs: [keyof PlotData, Datum[]][] = [['x', dates], ['y', ys]];
   if (data.z) {
-    target.z = ((target.z ?? []) as Datum[]).concat(zs);
-
-    if (clamp_length != null) {
-      target.z = (target.z as Datum[]).slice(Math.max(0, target.z!.length - clamp_length)) ?? null;
-    }
+    pairs.push(['z', zs]);
   }
-};
 
-export const mergePlotDatas = (old: Partial<PlotData>[], nu: Partial<PlotData>[]) => {
-  nu.forEach((data, i) => {
-    mergePlotData(old[i], data);
+  pairs.forEach(([key, data]) => {
+    // @ts-ignore
+    if (!(key in target)) target[key] = [];
+    const targetData = target[key] as Datum[];
+
+    targetData.push(...(data as Datum[]));
+
+    if (clamp_length != null) targetData.splice(0,targetData.length - clamp_length);
   });
 };
 
@@ -135,54 +128,18 @@ export const slice = createSlice({
       }
 
       action.payload.data.forEach((data, i) => {
-        let dates = (data.x as number[]).map(n => new Date(n));
-        let ys = Array.from(data.y as Datum[]);
-        let zs = Array.from((data.z ?? []) as Datum[]);
-
-        const inRangeIndices = dates.map((d, i) => Number(d) >= oldest ? i : -1).filter(i => i >= 0);
-
-        if (inRangeIndices.length !== dates.length) {
-          console.warn('dropping data for being too old', {
-            nElements: dates.length - inRangeIndices.length,
-            droppedDates: dates.filter((_, i) => !(inRangeIndices.includes(i))),
-          });
-
-          state.last_old_data_ts = Date.now();
-        }
-
-        const dateHoles = holes(inRangeIndices, dates.length);
-
-        if (DEBUG_AGE) console.debug({dateHoles, dates: Array.from(dates), ys: Array.from(ys), zs: Array.from(zs)});
-
-        for (const [start, size] of dateHoles.reverse()) {
-          dates.splice(start, size);
-          ys.splice(start, size);
-          zs.splice(start, size);
-        }
-
-        if (DEBUG_AGE) console.debug({dateHoles, dates: Array.from(dates), ys: Array.from(ys), zs: Array.from(zs)});
-
         const target = current_record[i];
 
-        target.x = (target.x as Datum[]).concat(dates);
-        target.y = (target.y as Datum[]).concat(ys);
-
-        target.x = target.x.slice(Math.max(0, target.x.length - working_max));
-        target.y = target.y.slice(Math.max(0, target.y.length - working_max));
-
-        if (data.z) {
-          target.z = ((target.z ?? []) as Datum[]).concat(zs);
-          target.z = (target.z as Datum[]).slice(Math.max(0, target.z!.length - working_max)) ?? null;
-        }
-      })
+        mergePlotData(target as Partial<PlotData>, data, working_max, oldest, () => state.last_old_data_ts = Date.now());
+      });
     },
 
     record_packets: (state: Draft<State>, action: PayloadAction<Record<string, any>[]>) => {
-      state.submit_queue = state.submit_queue.concat(action.payload);
+      state.submit_queue.push(...action.payload);
     },
 
     clear_queue: (state: Draft<State>) => {
-      state.submit_queue = [];
+      state.submit_queue.splice(0);
     },
 
     set_complete_system_enablement: (state: Draft<State>, action: PayloadAction<SensorType[]>) => {

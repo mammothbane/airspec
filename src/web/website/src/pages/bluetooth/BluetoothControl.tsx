@@ -14,7 +14,7 @@ import { debug_led } from './debug';
 import { Sensor } from './Sensor';
 import { extractData } from './Sensor/util';
 import {
-  clear_queue,
+  clear_queue, mergePlotData,
   record_packets,
   record_sensor_data,
   selectOldPacketAgeMillis,
@@ -92,11 +92,11 @@ export const BluetoothControl = () => {
       if (imuStorage.length === 0) return;
 
       store.dispatch(record_sensor_data({
-        data: imuStorage,
+        data: imuStorage.slice(),
         sensor: 'imuPacket',
       }));
 
-      imuStorage = [];
+      imuStorage.splice(0);
     }, 1000);
 
     return () => clearInterval(cancel);
@@ -118,16 +118,28 @@ export const BluetoothControl = () => {
 
       const data = extractData(payload, pkt.payload);
 
-      if (pkt.payload === 'imuPacket') {
-        imuStorage = imuStorage.concat(data);
-      } else {
-        dispatch(record_sensor_data({
-          data: imuStorage.slice(),
-          sensor: pkt.payload,
-        }))
+      dispatch(record_sensor_data({
+        data,
+        sensor: pkt.payload,
+      }));
+      return;
 
-        imuStorage.splice(0);
-      }
+      // if (pkt.payload === 'imuPacket') {
+      //   if (imuStorage.length === 0) {
+      //     imuStorage.push(...data);
+      //   } else {
+      //     data.forEach((data, i) => {
+      //       const target = imuStorage[i];
+      //
+      //       mergePlotData(data, target);
+      //     });
+      //   }
+      // } else {
+      //   dispatch(record_sensor_data({
+      //     data,
+      //     sensor: pkt.payload,
+      //   }))
+      // }
     },
     onDisconnect: () => {
     },
@@ -305,34 +317,40 @@ export const BluetoothControl = () => {
     </Box>
 
     {gatt?.connected ?
-      <Box
-        display={'flex'}
-        gap={2}
-        alignItems="center"
-        justifyContent={'center'}
-        sx={{
-          m: 2,
-          flexWrap: 'wrap',
-          flexDirection: 'row',
-        }}
-      >
-        {
-          Array.from(ALL_SENSOR_TYPES).map(sensor => {
-            return <Sensor
-              type={sensor}
-              key={sensor}
-              onEnable={async (typ, enable, enablement) => {
-                let new_enablement;
+      <>
+        <Alert severity={"warning"} sx={{
+          mt: 1,
+        }}>Configuration and sensor enablement state are reset on device reboot.</Alert>
 
-                if (enable) new_enablement = _.union(enablement, [typ]);
-                else new_enablement = _.difference(enablement, [typ]);
+        <Box
+          display={'flex'}
+          gap={2}
+          alignItems="center"
+          justifyContent={'center'}
+          sx={{
+            m: 2,
+            flexWrap: 'wrap',
+            flexDirection: 'row',
+          }}
+        >
+          {
+            Array.from(ALL_SENSOR_TYPES).map(sensor => {
+              return <Sensor
+                type={sensor}
+                key={sensor}
+                onEnable={async (typ, enable, enablement) => {
+                  let new_enablement;
 
-                await sendEnable(new Set(new_enablement));
-              }}
-            />;
-          })
-        }
-      </Box>
+                  if (enable) new_enablement = _.union(enablement, [typ]);
+                  else new_enablement = _.difference(enablement, [typ]);
+
+                  await sendEnable(new Set(new_enablement));
+                }}
+              />;
+            })
+          }
+        </Box>
+      </>
       : null
     }
   </Box>;
