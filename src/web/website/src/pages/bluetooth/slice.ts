@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { RootState } from '../../store';
 import {DEFAULT_ENABLED, SensorPacket_Payload, SensorType} from './types';
 import {holes} from "../../util";
+import {SensorConfig} from "../../../../../../proto/message.proto";
 
 export type SensorData = {
   sensor: SensorPacket_Payload,
@@ -17,6 +18,8 @@ export type State = {
   last_old_data_ts?: number,
   system_enablement: SensorType[],
   api_key?: string,
+  config?: { [key: string]: any },
+  requested_state_changes: { [key: string ]: any },
 }
 
 const MAX_PTS = 5000;
@@ -104,6 +107,7 @@ export const slice = createSlice({
     sensor_data: {},
     submit_queue: [],
     system_enablement: Array.from(DEFAULT_ENABLED),
+    requested_state_changes: {},
   } as State,
   reducers: {
     record_sensor_data: (state: Draft<State>, action: PayloadAction<SensorData>) => {
@@ -157,6 +161,15 @@ export const slice = createSlice({
       if (enable) state.system_enablement = _.union(types);
       else state.system_enablement = _.intersection(types);
     },
+
+    set_config: (state: Draft<State>, action: PayloadAction<{ [key: string]: any }>) => {
+      state.config = action.payload;
+      state.requested_state_changes = {};
+    },
+
+    push_requested_state_changes: (state: Draft<State>, action: PayloadAction<{ [key: string]: any }>) => {
+      _.merge(state.requested_state_changes, action.payload);
+    },
   }
 });
 
@@ -166,6 +179,8 @@ export const {
   clear_queue,
   set_complete_system_enablement,
   set_system_enablement,
+  set_config,
+  push_requested_state_changes,
 } = slice.actions;
 export const reducer = slice.reducer;
 

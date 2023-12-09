@@ -1,6 +1,5 @@
 import { Box, Switch, Typography } from '@mui/material';
 import Plot from 'react-plotly.js';
-import { MicSensorConfig } from '../../../../../../../proto/message.proto';
 import { useAirspecsSelector } from '../../../store';
 
 import { Config } from './Config';
@@ -10,6 +9,7 @@ import { SensorType, to_packet_type } from '../types';
 type Props = {
   type: SensorType,
   onEnable: (st: SensorType, enable: boolean, enablement: SensorType[]) => Promise<void>,
+  onPropChange: (st: SensorType, key: string, value: any) => Promise<void>,
 };
 
 type PlotProps ={
@@ -64,7 +64,7 @@ const PlotWrap = ({
   </>
 }
 
-const EnableSwitch = ({ type, onEnable }: Props) => {
+const EnableSwitch = ({ type, onEnable }: Omit<Props, 'onPropChange'>) => {
   const enablement = useAirspecsSelector(state => state.bluetooth.system_enablement);
   const enabled = enablement.includes(type);
 
@@ -77,21 +77,19 @@ const EnableSwitch = ({ type, onEnable }: Props) => {
 export const Sensor = ({
                          type,
                          onEnable,
+                         onPropChange,
                        }: Props) => {
   return <Box sx={{
     p: 2,
-    background: '#fff',
+    background: '#f8f8f8',
     width: 400,
-    display: 'grid',
+    display: 'flex',
+    flexDirection: 'column',
     gap: 2,
-    gridTemplateAreas: `
-      'header'
-    `,
   }}>
     <Box sx={{
       display: 'flex',
       alignItems: 'baseline',
-      gridArea: 'header',
     }}>
       <Typography variant={'h2'}>
         {type?.replace(/Packet$/, '')}
@@ -106,10 +104,7 @@ export const Sensor = ({
 
     <Config
       type={type}
-      config={new MicSensorConfig({
-        samplePeriodMs: 4,
-        micSampleFreq: 4,
-      })}
+      onChange={async (k, v) => await onPropChange(type, k, v)}
     />
 
     <PlotWrap sensor_type={type}/>

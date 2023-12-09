@@ -2,18 +2,25 @@ import { Box, Select, Typography } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
 import { flatten } from 'flat';
 import { BoolProp, NumberProp, StringProp } from '../property';
-import { SensorType } from '../types';
+import {SensorType, to_config} from '../types';
 import { ENUM_MAPPING } from './util';
+import {useAirspecsSelector} from "../../../store";
 
 export type Props = {
-  config: Record<string, any>,
   type: SensorType,
+  onChange: (path: string, value: any) => Promise<void>,
 }
 
 export const Config = ({
-                         config,
                          type,
+                         onChange,
                        }: Props) => {
+  const config = useAirspecsSelector(state => {
+    if (state.bluetooth.config == null) return null;
+
+    return state.bluetooth.config[to_config(type)];
+  }) ?? {};
+
   const kv = flatten(config);
 
   const props = Object.entries(kv as {}).map(([k, v]) => {
@@ -40,19 +47,22 @@ export const Config = ({
 
     switch (typeof (v)) {
       case 'number':
-        return <NumberProp name={k} key={k} value={v as number} onChange={() => {
+        return <NumberProp name={k} key={k} value={v as number} onChange={async (n) => {
+          await onChange(k, n);
         }}/>;
 
       case 'string':
-        return <StringProp name={k} key={k} value={v as string} onChange={() => {
+        return <StringProp name={k} key={k} value={v as string} onChange={async (s) => {
+          await onChange(k, s);
         }}/>;
 
       case 'boolean':
-        return <BoolProp name={k} key={k} value={v as boolean} onChange={() => {
+        return <BoolProp name={k} key={k} value={v as boolean} onChange={async (b) => {
+          await onChange(k, b);
         }}/>;
 
       default:
-        console.warn({k, v}, 'unhandled type');
+        console.warn({k, v}, 'unhandled prop type');
         return null;
     }
   });

@@ -14,16 +14,16 @@ import { debug_led } from './debug';
 import { Sensor } from './Sensor';
 import { extractData } from './Sensor/util';
 import {
-  clear_queue, mergePlotData,
+  clear_queue, mergePlotData, push_requested_state_changes,
   record_packets,
   record_sensor_data,
   selectOldPacketAgeMillis,
-  selectQueuedPackets, set_complete_system_enablement, set_system_enablement
+  selectQueuedPackets, set_complete_system_enablement, set_config, set_system_enablement
 } from './slice';
 import {
   ALL_SENSOR_TYPES,
   DEFAULT_ENABLED,
-  SensorType,
+  SensorType, to_config,
   to_enable,
 } from './types';
 import { submit_packets } from './util';
@@ -66,6 +66,28 @@ const OldPacketWarning = () => {
       Glasses time is desynced
     </Alert>
   </Snackbar>;
+};
+
+const UpdateButton = ({
+  sendMessage
+                      }: { sendMessage: (pkt: AirSpecConfigPacket) => Promise<void> }) => {
+  const targetNewConfig = useAirspecsSelector(state =>
+    _.merge({}, state.bluetooth.config ?? {}, state.bluetooth.requested_state_changes)
+  );
+
+  return <Button onClick={async () => {
+    console.debug('sending new config', { targetNewConfig });
+
+    await sendMessage(new AirSpecConfigPacket({
+      header: {
+        timestampUnix: Date.now(),
+      },
+      payload: 'sensorConfig',
+      sensorConfig: targetNewConfig,
+    }));
+  }}>
+    Write Config
+  </Button>
 };
 
 export const BluetoothControl = () => {
@@ -113,6 +135,7 @@ export const BluetoothControl = () => {
       const st = _.chain(Array.from(ALL_SENSOR_TYPES)).filter(t => state?.control[to_enable(t)] as boolean).value();
 
       dispatch(set_complete_system_enablement(st));
+      if (state.config != null) dispatch(set_config(state.config!.toJSON()));
     },
   });
 
@@ -287,6 +310,8 @@ export const BluetoothControl = () => {
           mt: 1,
         }}>Configuration and sensor enablement state are reset on device reboot.</Alert>
 
+        <UpdateButton sendMessage={sendMessage}/>
+
         <Box
           display={'flex'}
           gap={2}
@@ -310,6 +335,16 @@ export const BluetoothControl = () => {
                   else new_enablement = _.difference(enablement, [typ]);
 
                   await sendEnable(new Set(new_enablement));
+                }}
+
+                onPropChange={async (st, k, v) => {
+                  const config_k = to_config(st);
+
+                  dispatch(push_requested_state_changes({
+                    [config_k]: {
+                      [k]: v,
+                    }
+                  }));
                 }}
               />;
             })

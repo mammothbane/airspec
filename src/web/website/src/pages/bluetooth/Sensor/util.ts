@@ -3,27 +3,28 @@ import _ from 'lodash';
 import { Datum, PlotData } from 'plotly.js';
 
 import {
-  BlinkPacket,
-  BME680_signal_id,
-  BMEPacket,
+  BlinkPacket, BlinkSensorConfig,
+  BME680_signal_id, BME_Sensor_Config,
+  BMEPacket, HumiditySensorConfig,
   IMU_accel_cutoff,
   IMU_accel_range,
   IMU_gyro_cutoff,
-  IMU_gyro_range,
+  IMU_gyro_range, IMU_SensorConfig,
   IMUPacket,
-  LuxPacket,
-  MicLevelPacket, MicPacket,
+  LuxPacket, LuxSensorConfig,
+  MicLevelPacket, MicPacket, MicSensorConfig, SGP_Sensor_Config,
   SGPPacket,
   Sht45_heater,
   Sht45_precision,
   Spec_gain,
   SpecPacket,
-  Thermopile_location,
+  Thermopile_location, ThermopileSensorConfig,
   ThermPacket,
   Tsl2591Gain,
   Tsl2591IntegrationTime,
 } from '../../../../../../../proto/message.proto';
 import { SensorPacket_Payload, SensorType } from '../types';
+import {Constructor, Message, Reader, Type, Writer} from "protobufjs";
 
 type Enum = Record<string, any>;
 export const enum_kv = (enum_: Enum) => Object.entries(enum_).filter(([k, _v]) => isNaN(Number(k)));
@@ -88,6 +89,85 @@ export const SPEC_BANDS = [
   '_630',
   '_380',
 ];
+
+
+export type FieldType = 'number' | 'string' | 'boolean' | { children: Record<string, FieldType> };
+export type Config = Record<string, FieldType>;
+
+export const CONFIG: Record<SensorType, Config> = {
+  imu: {
+    samplePeriodMs: 'number',
+    enableWindowing: 'number',
+    enableWindowingSync: 'number',
+    windowSizeMs: 'number',
+    windowPeriodMs: 'number',
+
+    accelSettings: {
+      children: {
+        cutoff: 'number',
+        range: 'number',
+        sampleRateDivisor: 'number',
+      }
+    },
+    gyroSettings: {
+      children: {
+        cutoff: 'number',
+        range: 'number',
+        sampleRateDivisor: 'number',
+      }
+    }
+  },
+
+  sht: {
+    samplePeriodMs: 'number',
+    precisionLevel: 'number',
+    heaterSettings: 'number',
+  },
+
+  mic: {
+    samplePeriodMs: 'number',
+    micSampleFreq: 'number',
+  },
+
+  blink: {
+    sampleFrequency: 'number',
+    enableDaylightCompensation: 'boolean',
+    daylightCompensationUpperThresh: 'number',
+    daylightCompensationLowerThresh: 'number',
+    enableWindowing: 'number',
+    enableWindowingSync: 'number',
+    windowSizeMs: 'number',
+    windowPeriodMs: 'number',
+  },
+
+  therm: {
+    samplePeriodMs: 'number',
+    enableTopOfNose: 'boolean',
+    enableNoseBridge: 'boolean',
+    enableFrontTemple: 'boolean',
+    enableMidTemple: 'boolean',
+    enableRearTemple: 'boolean',
+  },
+
+  bme: {
+    samplePeriodMs: 'number',
+  },
+
+  sgp: {
+    samplePeriodMs: 'number',
+  },
+
+  lux: {
+    samplePeriodMs: 'number',
+  },
+
+  spec: {
+    samplePeriodMs: 'number',
+    integrationTime: 'number',
+    integrationStep: 'number',
+    specGain: 'number',
+  }
+};
 
 const IMU_DOWNSAMPLE = 4;
 const BLINK_DOWNSAMPLE = 8;

@@ -9,8 +9,11 @@ export const GenericProp = <T, >({
   my: 1,
   display: 'flex',
   flexDirection: 'row',
+  alignItems: 'baseline',
 }}>
-  <Typography variant={'subtitle1'}>
+  <Typography variant={'body1'} sx={{
+    fontSize: '0.8rem'
+  }}>
     {name}
   </Typography>
 
