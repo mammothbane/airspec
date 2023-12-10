@@ -1,4 +1,4 @@
-import { Box, Select, Typography } from '@mui/material';
+import { Box, Select } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
 import { flatten } from 'flat';
 import { BoolProp, NumberProp, StringProp } from '../property';

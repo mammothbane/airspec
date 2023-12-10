@@ -1,13 +1,18 @@
-import {useAirSpecInterface} from "./hooks";
-import {useAirspecsDispatch, useAirspecsSelector} from "../../store";
 import {useState} from "react";
-import {Box, Button, FormControlLabel, Typography} from "@mui/material";
+
+import {Box, Button, Typography} from "@mui/material";
+import Switch from "@mui/material/Switch";
+
+import {useAirSpecInterface} from "./hooks";
 import {register_glasses_id, set_show_graphs} from "./slice";
+import {useAirspecsDispatch, useAirspecsSelector} from "../../store";
+
 import {ALL_SENSOR_TYPES} from "./types";
 import {debug_led} from "./debug";
-import {AirSpecConfigPacket} from "../../../../../../proto/message.proto";
 import {sendEnable} from "./util";
-import Switch from "@mui/material/Switch";
+
+import {AirSpecConfigPacket} from "../../../../../../proto/message.proto";
+
 
 type ButtonBarProps = {
   bt: ReturnType<typeof useAirSpecInterface>,

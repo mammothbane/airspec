@@ -82,7 +82,7 @@ const PlotWrap = ({
     maxWait: max_wait,
   }), [update_rate_ms, max_wait]);
 
-  useEffect(() => throttledUpdate(sensor_data), [sensor_data])
+  useEffect(() => throttledUpdate(sensor_data), [sensor_data, throttledUpdate])
 
   useEffect(() => {
     const plots = dat.map(subtype => {
@@ -118,14 +118,14 @@ const PlotWrap = ({
         color: {legend: subtype.length > 0 && show_legend, scheme: 'tableau10'},
         marks,
       });
-    }, [show_legend, range]);
+    });
 
     plots.forEach(plot => {
       ref.current?.append(plot);
     });
 
     return () => plots.forEach(plot => plot.remove());
-  } ,[dat, show_legend]);
+  } ,[dat, show_legend, range]);
 
   return <div ref={ref}/>;
 }
