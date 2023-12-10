@@ -1,7 +1,5 @@
 import _ from 'lodash';
 import * as Plot from '@observablehq/plot';
-import * as d3 from 'd3';
-
 
 import { Box, Switch, Typography } from '@mui/material';
 
@@ -21,6 +19,7 @@ type Props = {
 
 type PlotProps ={
   sensor_type: SensorType,
+  update_rate_ms?: number,
 };
 
 /**
@@ -28,6 +27,7 @@ type PlotProps ={
  */
 const PlotWrap = ({
   sensor_type,
+  update_rate_ms = 100
 }: PlotProps) => {
   const packet_types = to_packet_type(sensor_type);
   const sensor_data = useAirspecsSelector(state => selectSensorData(state, packet_types));
@@ -36,16 +36,20 @@ const PlotWrap = ({
 
   const [dat, setDat] = useState([] as any[]);
 
-  const throttledUpdate = useMemo(() => _.throttle((sensor_data: any) => {
+  const throttledUpdate = useMemo(() => _.debounce((sensor_data: any) => {
     if (sensor_data.length === 0 || sensor_data[0].length === 0) {
       setDat([]);
     } else {
       // @ts-ignore
       setDat(sensor_data[0][0].x.map((x: any, i: any) => ({x, y: sensor_data[0][0].y[i] })));
     }
-  }, 100), []);
+  },  update_rate_ms, {
+    leading: true,
+    trailing: true,
+    maxWait: update_rate_ms * 2,
+  }), [update_rate_ms]);
 
-  useEffect(() => throttledUpdate(sensor_data), [sensor_data])
+  useEffect(() => throttledUpdate(sensor_data), [sensor_data, throttledUpdate])
 
   useEffect(() => {
     const plot = Plot.plot({
