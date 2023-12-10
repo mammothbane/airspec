@@ -20,6 +20,7 @@ type Props = {
 type PlotProps ={
   sensor_type: SensorType,
   update_rate_ms?: number,
+  max_wait?: number,
 };
 
 /**
@@ -27,7 +28,8 @@ type PlotProps ={
  */
 const PlotWrap = ({
   sensor_type,
-  update_rate_ms = 100
+  update_rate_ms = 1000 * 2 / 60,
+  max_wait = update_rate_ms * 4
 }: PlotProps) => {
   const packet_types = to_packet_type(sensor_type);
   const sensor_data = useAirspecsSelector(state => selectSensorData(state, packet_types));
@@ -46,8 +48,8 @@ const PlotWrap = ({
   },  update_rate_ms, {
     leading: true,
     trailing: true,
-    maxWait: update_rate_ms * 2,
-  }), [update_rate_ms]);
+    maxWait: max_wait,
+  }), [update_rate_ms, max_wait]);
 
   useEffect(() => throttledUpdate(sensor_data), [sensor_data, throttledUpdate])
 
@@ -59,7 +61,7 @@ const PlotWrap = ({
       marks: [
         Plot.axisX({ticks: 0, label: null}),
         Plot.axisY({ticks: 0, label: null}),
-        Plot.line(dat, {x: 'x', y: 'y', sort: 'x'}),
+        Plot.line(dat, {x: 'x', y: 'y', sort: 'x', curve: 'monotone-x'}),
         Plot.crosshair(dat, {x: 'x', y: 'y', sort: 'x'}),
       ],
     });
