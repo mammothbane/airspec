@@ -27,7 +27,7 @@ export const submit_packets = (
 
   const body = SubmitPackets.encode(submit).finish();
 
-  fetch(`${BACKEND}`, {
+  fetch(BACKEND, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,

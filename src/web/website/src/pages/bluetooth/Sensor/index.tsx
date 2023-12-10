@@ -1,12 +1,17 @@
+import _ from 'lodash';
+import * as Plot from '@observablehq/plot';
+import * as d3 from 'd3';
+
+
 import { Box, Switch, Typography } from '@mui/material';
-import Plot from 'react-plotly.js';
+
 import { useAirspecsSelector } from '../../../store';
-import {LineChart, XAxis, YAxis, Line, Tooltip } from 'recharts';
 
 import { Config } from './Config';
 import { selectSensorData } from '../slice';
 import { SensorType, to_packet_type } from '../types';
-import {PlotData} from "plotly.js";
+import {useEffect, useMemo, useRef, useState} from "react";
+
 
 type Props = {
   type: SensorType,
@@ -18,7 +23,6 @@ type PlotProps ={
   sensor_type: SensorType,
 };
 
-
 /**
  * Separated component to keep rerenders minimal for redux updates.
  */
@@ -28,87 +32,40 @@ const PlotWrap = ({
   const packet_types = to_packet_type(sensor_type);
   const sensor_data = useAirspecsSelector(state => selectSensorData(state, packet_types));
 
-  let x: PlotData;
+  const ref = useRef<null | HTMLDivElement>(null);
 
-  if (sensor_data.length === 0) return <></>;
+  const [dat, setDat] = useState([] as any[]);
 
-  const data = sensor_data[0];
-
-  if (data.length === 0) return <></>;
-
-  // @ts-ignore
-  const dat = data[0].x.map((x: any, i: any) => ({x, y: data[0].y[i] }));
-
-  //@ts-ignore
-  return <LineChart height={240} width={300} data={dat}>
-    <XAxis dataKey="x" axisLine={false} tick={false}/>
-    <YAxis axisLine={false} tick={{
-      fontSize: '0.75rem'
-    }}/>
-
-    <Tooltip contentStyle={{
-      fontSize: '0.75rem'
-    }} formatter={(value) => (value as any).toFixed(2).toString()}/>
-
-    <Line type="monotone" dataKey={'y'} dot={false}/>
-  </LineChart>;
-
-  return <>
-    {sensor_data.map((data) => {
-      if (data.length === 0) return undefined;
-
+  const throttledUpdate = useMemo(() => _.throttle((sensor_data: any) => {
+    if (sensor_data.length === 0 || sensor_data[0].length === 0) {
+      setDat([]);
+    } else {
       // @ts-ignore
-      const dat = data[0].x.map((x: any, i: any) => ({x, y: data[0].y[i] }));
-
-      // @ts-ignore
-      return <LineChart width={300} height={240} data={dat}>
-        <XAxis dataKey="x" hide={true}/>
-        <YAxis hide={true}/>
-
-
-        <Line type="monotone" dataKey={'y'} dot={false}/>
-      </LineChart>;
-    })}
-  </>;
-
-  return <>
-    {sensor_data.map((data, i) => <Plot
-      key={`${sensor_type}_${i}`}
-      layout={{
-        yaxis: {
-          rangemode: 'tozero',
-          showticklabels: false,
-          showgrid: false,
-          showline: false,
-          visible: false,
-        },
-
-        xaxis: {
-          showgrid: false,
-          showticklabels: false,
-          visible: false,
-        },
-
-        autosize: true,
-        margin: {
-          l: 8,
-          r: 8,
-          b: 8,
-          t: 8,
-          pad: 0,
-        },
-        modebar: {},
-        annotations: [],
-        height: 240,
-      }}
-      data={data}
-      config={{
-        displayModeBar: false,
-        displaylogo: false,
-      }}
-    />)
+      setDat(sensor_data[0][0].x.map((x: any, i: any) => ({x, y: sensor_data[0][0].y[i] })));
     }
-  </>
+  }, 100), []);
+
+  useEffect(() => throttledUpdate(sensor_data), [sensor_data])
+
+  useEffect(() => {
+    const plot = Plot.plot({
+      x: {},
+      y: {},
+      color: {scheme: 'burd'},
+      marks: [
+        Plot.axisX({ticks: 0, label: null}),
+        Plot.axisY({ticks: 0, label: null}),
+        Plot.line(dat, {x: 'x', y: 'y', sort: 'x'}),
+        Plot.crosshair(dat, {x: 'x', y: 'y', sort: 'x'}),
+      ],
+    });
+
+    ref.current?.append(plot);
+
+    return () => plot.remove();
+  } ,[dat]);
+
+  return <div ref={ref}/>;
 }
 
 const EnableSwitch = ({ type, onEnable }: Omit<Props, 'onPropChange'>) => {
