@@ -10,14 +10,18 @@ export const GenericProp = <T, >({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'baseline',
+  overflowX: 'clip',
 }}>
   <Typography variant={'body1'} sx={{
-    fontSize: '0.8rem'
+    fontSize: '0.8rem',
   }}>
     {name}
   </Typography>
 
-  <Box sx={{flexGrow: 1}}/>
+  <Box sx={{
+    flexGrow: 1,
+    minWidth: '16px',
+  }}/>
 
   {children}
 </Box>;

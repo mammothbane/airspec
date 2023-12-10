@@ -1,12 +1,13 @@
 import {useAirSpecInterface} from "./hooks";
-import {useAirspecsDispatch} from "../../store";
+import {useAirspecsDispatch, useAirspecsSelector} from "../../store";
 import {useState} from "react";
-import {Box, Button, Typography} from "@mui/material";
-import {register_glasses_id} from "./slice";
+import {Box, Button, FormControlLabel, Typography} from "@mui/material";
+import {register_glasses_id, set_show_graphs} from "./slice";
 import {ALL_SENSOR_TYPES} from "./types";
 import {debug_led} from "./debug";
 import {AirSpecConfigPacket} from "../../../../../../proto/message.proto";
 import {sendEnable} from "./util";
+import Switch from "@mui/material/Switch";
 
 type ButtonBarProps = {
   bt: ReturnType<typeof useAirSpecInterface>,
@@ -23,6 +24,7 @@ export const ButtonBar = (
     deselect,
   } = bt;
   const dispatch = useAirspecsDispatch();
+  const show_graphs = useAirspecsSelector(state => state.bluetooth.show_graphs);
 
   const [ledEnabled, setLedEnabled] = useState(false);
 
@@ -128,5 +130,14 @@ export const ButtonBar = (
     >
       Enter DFU Mode
     </Button>
+
+    <Typography variant={'body1'} noWrap sx={{
+      fontSize: '1rem',
+      ml: 2,
+    }}>
+      Show graphs
+    </Typography>
+
+    <Switch onChange={(_evt, checked) => dispatch(set_show_graphs(checked))} checked={show_graphs}/>
   </Box>
 };

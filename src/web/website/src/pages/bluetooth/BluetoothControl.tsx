@@ -1,5 +1,5 @@
-import {Alert, Box} from '@mui/material';
-import {useEffect} from 'react';
+import {Alert, Box, FormControlLabel} from '@mui/material';
+import {useEffect, useState} from 'react';
 import _ from 'lodash';
 
 import {useAirSpecInterface} from './hooks';
@@ -22,6 +22,7 @@ import {OldPacketWarning} from "./OldPacketWarning";
 import {WriteConfigButton} from "./WriteConfigButton";
 import {ApiKeyEntry} from "./ApiKeyEntry";
 import {WrapUpdatePackets} from "./WrapUpdatePackets";
+import Switch from "@mui/material/Switch";
 
 
 
@@ -97,6 +98,7 @@ export const BluetoothControl = () => {
     <OldPacketWarning/>
     <ButtonBar bt={bt}/>
     <ApiKeyEntry/>
+
 
     {gatt?.connected ?
       <>

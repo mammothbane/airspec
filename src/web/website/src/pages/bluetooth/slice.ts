@@ -21,6 +21,7 @@ export type State = {
   config?: { [key: string]: any },
   requested_state_changes: { [key: string ]: any },
   seen_glasses: string[],
+  show_graphs: boolean,
 }
 
 const MAX_PTS = 300;
@@ -119,6 +120,7 @@ export const slice = createSlice({
     requested_state_changes: {},
     streaming: false,
     seen_glasses: seen_glasses_init ?? [],
+    show_graphs: true,
   } as State,
   reducers: {
     record_sensor_data: (state: Draft<State>, action: PayloadAction<SensorData>) => {
@@ -194,6 +196,10 @@ export const slice = createSlice({
     set_streaming: (state: Draft<State>, action: PayloadAction<boolean>) => {
       state.streaming = action.payload;
     },
+
+    set_show_graphs: (state: Draft<State>, action: PayloadAction<boolean>) => {
+      state.show_graphs = action.payload;
+    },
   }
 });
 
@@ -208,6 +214,7 @@ export const {
   register_glasses_id,
   set_api_key,
   set_streaming,
+  set_show_graphs,
 } = slice.actions;
 export const reducer = slice.reducer;
 

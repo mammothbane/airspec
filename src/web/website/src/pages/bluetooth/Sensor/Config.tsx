@@ -5,6 +5,7 @@ import { BoolProp, NumberProp, StringProp } from '../property';
 import {SensorType, to_config} from '../types';
 import {CONFIG, ENUM_MAPPING} from './util';
 import {useAirspecsSelector} from "../../../store";
+import {GenericProp} from "../property/GenericProp";
 
 export type Props = {
   type: SensorType,
@@ -35,20 +36,7 @@ export const Config = ({
     if (enum_type !== undefined) {
       const [fwd] = enum_type;
 
-      return <Box key={k} sx={{
-        display: 'flex'
-      }}>
-        <Typography sx={{
-          fontSize: '0.8rem',
-          mx: 2,
-        }}>
-          {k}
-        </Typography>
-
-        <Box sx={{
-          flexGrow: 1,
-        }}/>
-
+      return <GenericProp name={k}>
         <Select value={val == null ? '' : fwd.get(val)} onChange={(evt) => evt.target.value as string}>
           {
             Array.from(fwd.entries()).map(([k, v]) => {
@@ -56,7 +44,7 @@ export const Config = ({
             })
           }
         </Select>
-      </Box>;
+      </GenericProp>;
     }
 
     switch (v) {
@@ -81,7 +69,14 @@ export const Config = ({
     }
   });
 
-  return <Box>
+  return <Box sx={{
+    backgroundColor: '#e8e8e8',
+    p: 2,
+  }}>
+    <Typography variant={'h5'}>
+      Config
+    </Typography>
+
     {props}
   </Box>;
 };
