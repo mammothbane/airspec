@@ -170,6 +170,18 @@ export const CONFIG: Record<SensorType, Config> = {
   }
 };
 
+export const SENSOR_RANGES: Partial<Record<SensorType, [number, number]>> = {
+  imu: [-8000, 8000],
+  lux: [0, 1000],
+  bme: [0, 2000],
+  blink: [0, 500],
+  spec: [0, 10000],
+  sht: [-30, 100],
+  sgp: [0, 525],
+  therm: [-30, 50],
+};
+
+
 const IMU_DOWNSAMPLE = 4;
 const BLINK_DOWNSAMPLE = 8;
 
@@ -234,7 +246,7 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
       const blink_ts = _.chain(0).range(samples.length).map(i => (blink_sample.timestampUnix as number) +  chunk_sample_period * i).value();
 
       return [
-        {x: blink_ts, y: samples, mode: 'markers'},
+        {x: blink_ts, y: samples, name: 'blink', mode: 'markers'},
       ];
 
     case 'imu':
@@ -346,7 +358,7 @@ export const extractData = (sample: Record<string, any>, type: SensorPacket_Payl
       const lux = sample.payload.map((payload: LuxPacket.Payload) => payload.lux);
 
       return [
-        {x: lux_ts, y: lux, mode: 'markers'},
+        {x: lux_ts, y: lux, name: 'lux', mode: 'markers'},
       ];
   }
 
