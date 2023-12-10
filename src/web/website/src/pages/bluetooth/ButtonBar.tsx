@@ -135,7 +135,7 @@ export const ButtonBar = (
       fontSize: '1rem',
       ml: 2,
     }}>
-      Show graphs
+      show live graphs (cpu-intensive)
     </Typography>
 
     <Switch onChange={(_evt, checked) => dispatch(set_show_graphs(checked))} checked={show_graphs}/>

@@ -73,10 +73,6 @@ export const Config = ({
     backgroundColor: '#e8e8e8',
     p: 2,
   }}>
-    <Typography variant={'h5'}>
-      Config
-    </Typography>
-
     {props}
   </Box>;
 };

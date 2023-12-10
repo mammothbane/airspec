@@ -65,6 +65,7 @@ export default {
 
   primary: {
     backgroundColor: info.main,
+    color: white.main,
 
     "&:hover": {
       backgroundColor: info.main,
