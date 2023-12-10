@@ -9,6 +9,7 @@ import { Config } from './Config';
 import { selectSensorData } from '../slice';
 import { SensorType, to_packet_type } from '../types';
 import {useEffect, useMemo, useRef, useState} from "react";
+import type {Datum, PlotData} from "plotly.js";
 
 
 type Props = {
@@ -23,6 +24,17 @@ type PlotProps ={
   max_wait?: number,
 };
 
+type Point = {
+  x: Datum,
+  y: Datum,
+  name?: string,
+};
+
+type Series = {
+  name: string,
+  data: Point[],
+};
+
 /**
  * Separated component to keep rerenders minimal for redux updates.
  */
@@ -32,19 +44,38 @@ const PlotWrap = ({
   max_wait = update_rate_ms * 4
 }: PlotProps) => {
   const packet_types = to_packet_type(sensor_type);
-  const sensor_data = useAirspecsSelector(state => selectSensorData(state, packet_types));
+
+  const sensor_data: Partial<PlotData>[][] = useAirspecsSelector(state => selectSensorData(state, packet_types));
 
   const ref = useRef<null | HTMLDivElement>(null);
 
-  const [dat, setDat] = useState([] as any[]);
+  const [dat, setDat] = useState([] as Series[][]);
 
   const throttledUpdate = useMemo(() => _.debounce((sensor_data: any) => {
-    if (sensor_data.length === 0 || sensor_data[0].length === 0) {
+    if (sensor_data.length === 0) {
       setDat([]);
-    } else {
-      // @ts-ignore
-      setDat(sensor_data[0][0].x.map((x: any, i: any) => ({x, y: sensor_data[0][0].y[i] })));
+      return;
     }
+
+    const datas = sensor_data.map(
+      (sensor_type_data: Partial<PlotData>[]) => sensor_type_data.map(
+        ({x: xs, y: ys, name}) => {
+          const data = (xs as Datum[]).map(
+            (x, i) => ({
+              x,
+              y: (ys as Datum[])[i],
+              name,
+            }));
+
+          return {
+            name,
+            data
+          };
+        }
+      )
+    );
+
+    setDat(datas);
   },  update_rate_ms, {
     leading: true,
     trailing: true,
@@ -54,21 +85,37 @@ const PlotWrap = ({
   useEffect(() => throttledUpdate(sensor_data), [sensor_data, throttledUpdate])
 
   useEffect(() => {
-    const plot = Plot.plot({
-      x: {},
-      y: {},
-      color: {scheme: 'burd'},
-      marks: [
+    const plots = dat.flatMap(subtype => {
+      if (subtype.length === 0) return [];
+
+      const marks = [
+        Plot.ruleY([0], {}),
+
         Plot.axisX({ticks: 0, label: null}),
         Plot.axisY({ticks: 0, label: null}),
-        Plot.line(dat, {x: 'x', y: 'y', sort: 'x', curve: 'monotone-x'}),
-        Plot.crosshair(dat, {x: 'x', y: 'y', sort: 'x'}),
-      ],
+
+        // Plot.crosshair(series.data, {x: 'x', y: 'y', sort: 'x', stroke: 'name'}),
+      ];
+
+      const extraMarks = subtype.flatMap(series => [
+        Plot.line(series.data, {x: 'x', y: 'y', sort: 'x', curve: 'monotone-x', stroke: 'name'}),
+      ]);
+
+      marks.push(...extraMarks);
+
+      return [Plot.plot({
+        x: {},
+        y: {legend: 'ramp'},
+        // color: {scheme: 'burd'},
+        marks,
+      })];
     });
 
-    ref.current?.append(plot);
+    plots.forEach(plot => {
+      ref.current?.append(plot);
+    });
 
-    return () => plot.remove();
+    return () => plots.forEach(plot => plot.remove());
   } ,[dat]);
 
   return <div ref={ref}/>;
