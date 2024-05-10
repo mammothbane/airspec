@@ -4,6 +4,6 @@
   swift_protobuf  = pkgs.callPackage ./swift_protobuf.nix   {};
   ingest          = pkgs.callPackage ../../src/svc/ingest   {};
   grpc_swift      = pkgs.callPackage ./grpc_swift.nix       {};
-  firmware        = pkgs.callPackage ./firmware             { inherit self; };
+  # firmware        = pkgs.callPackage ./firmware             { inherit self; };
   physio_chain    = pkgs.callPackage ./physio_chain.nix     {};
 }
