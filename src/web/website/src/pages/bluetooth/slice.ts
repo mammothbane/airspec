@@ -13,7 +13,7 @@ export type SensorData = {
 
 export type State = {
   sensor_data: Partial<Record<SensorPacket_Payload, Partial<PlotData>[]>>,
-  submit_queue: Record<string, any>[],
+  submit_queue: number[][],
   last_old_data_ts?: number,
   system_enablement: SensorType[],
   api_key?: string,
@@ -151,7 +151,7 @@ export const slice = createSlice({
       });
     },
 
-    record_packets: (state: Draft<State>, action: PayloadAction<Record<string, any>[]>) => {
+    record_packets: (state: Draft<State>, action: PayloadAction<number[][]>) => {
       state.submit_queue.push(...action.payload);
     },
 

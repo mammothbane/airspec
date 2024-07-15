@@ -53,9 +53,9 @@ export const BluetoothControl = () => {
   const seenGlasses = useAirspecsSelector(state => state.bluetooth.seen_glasses);
 
   const bt = useAirSpecInterface({
-    onData: (pkt) => {
+    onData: ([pkt, bytes]) => {
       if (pkt.payload == null) throw new Error('packet missing type');
-      dispatch(record_packets([pkt.toJSON()]));
+      dispatch(record_packets([bytes]));
 
       const payload = pkt[pkt.payload];
       if (payload == null) throw new Error('missing expected payload type');

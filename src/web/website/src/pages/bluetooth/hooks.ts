@@ -47,7 +47,7 @@ export const useAirSpecInterface = ({
                                     }: {
   onDisconnect?: () => void,
   idRecency?: string[],
-  onData?: (pkt: SensorPacket) => void,
+  onData?: (pkt: [SensorPacket, number[]]) => void,
   onState?: (cfg: systemState) => void,
 }): AirSpec => {
   const [gatt, setGatt] = React.useState<BluetoothRemoteGATTServer | null>();
@@ -121,11 +121,12 @@ export const useAirSpecInterface = ({
     rxChar.addEventListener('characteristicvaluechanged', ev => {
       const target = ev.target as BluetoothRemoteGATTCharacteristic;
       const bytes = new Uint8Array(target.value!.buffer);
+      const bytes_ary = Array.from(bytes);
 
       const packet = SensorPacket.decode(bytes);
       console.debug({packet, type: packet.payload?.replace(/Packet$/, '')}, 'decoded packet');
 
-      onData(packet);
+      onData([packet, bytes_ary]);
     });
 
     sensorConfigChar.addEventListener('characteristicvaluechanged', ev => {

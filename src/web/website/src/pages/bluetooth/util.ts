@@ -1,10 +1,10 @@
 import {SubmitPackets} from '../../../../../../proto/svc.proto';
 import {BACKEND} from '../../util';
 import {ALL_SENSOR_TYPES, SensorType, to_enable} from "./types";
-import {AirSpecConfigPacket} from "../../../../../../proto/message.proto";
+import {AirSpecConfigPacket, SensorPacket} from "../../../../../../proto/message.proto";
 
 export const submit_packets = (
-  packet_data: Record<string, any>[],
+  packet_data: number[][],
   apiKey: string,
   shouldSubmit: boolean,
   clear: () => void,
@@ -13,13 +13,19 @@ export const submit_packets = (
 
   clear();
 
+  const parsed_packets = packet_data.map((data) => {
+    const ary = new Uint8Array(data);
+
+    return SensorPacket.decode(ary);
+  });
+
   if (!shouldSubmit || apiKey === '') {
     console.debug({ data: packet_data }, 'submit disabled or missing api key, skipping upload');
     return;
   }
 
   const submit = new SubmitPackets({
-    sensorData: packet_data,
+    sensorData: parsed_packets,
     meta: {
       epoch: Date.now() / 1000,
     },
